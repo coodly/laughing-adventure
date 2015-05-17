@@ -18,12 +18,12 @@ import Foundation
 import UIKit
 import CoreData
 
-class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
+public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
     @IBOutlet var collectionView:UICollectionView!
     var fetchedController:NSFetchedResultsController?
     
     
-    override func viewWillAppear(animated: Bool) {
+    public override func viewWillAppear(animated: Bool) {
         if let controller = fetchedController {
             
         } else {
@@ -35,27 +35,27 @@ class FetchedCollectionViewController: UIViewController, UICollectionViewDelegat
         }
     }
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let sections:[NSFetchedResultsSectionInfo] = fetchedController!.sections as! [NSFetchedResultsSectionInfo]
         return sections[section].numberOfObjects
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier("FetchedCellIdentifier", forIndexPath: indexPath) as! UICollectionViewCell
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, withObject:object)
         return cell
     }
     
-    func createFetchedController() -> NSFetchedResultsController! {
+    public func createFetchedController() -> NSFetchedResultsController! {
         fatalError("Need to override \(__FUNCTION__)")
     }
     
-    func setPresentationCellNib(nib:UINib) {
+    public func setPresentationCellNib(nib:UINib) {
         collectionView.registerNib(nib, forCellWithReuseIdentifier: "FetchedCellIdentifier")
     }
     
-    func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {
+    public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {
         println("configureCell:atIndexPath:\(atIndexPath)")
     }
 }
