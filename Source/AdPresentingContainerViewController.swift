@@ -17,24 +17,24 @@
 import UIKit
 import iAd
 
-class AdPresentingContainerViewController: UIViewController, ADBannerViewDelegate {
+public class AdPresentingContainerViewController: UIViewController, ADBannerViewDelegate {
     @IBOutlet var adContainerView: UIView!
     @IBOutlet var adContainerHeightConstraint: NSLayoutConstraint!
     
     var banner: ADBannerView?
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         
         adContainerHeightConstraint.constant = 0
     }
     
-    override func didReceiveMemoryWarning() {
+    public override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    public override func viewDidAppear(animated: Bool) {
         loadAd()
     }
     
@@ -50,7 +50,7 @@ class AdPresentingContainerViewController: UIViewController, ADBannerViewDelegat
         adContainerView.addSubview(adBanner)
     }
     
-    func bannerViewDidLoadAd(banner: ADBannerView!) {
+    public func bannerViewDidLoadAd(banner: ADBannerView!) {
         banner.center = CGPointMake(CGRectGetWidth(adContainerView.frame) / 2, CGRectGetHeight(adContainerView.frame) / 2)
         UIView.animateWithDuration(0.3, animations: { () -> Void in
             self.adContainerHeightConstraint.constant = CGRectGetHeight(banner.frame)
@@ -58,7 +58,7 @@ class AdPresentingContainerViewController: UIViewController, ADBannerViewDelegat
         })
     }
     
-    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
+    public func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
         UIView.animateWithDuration(0.3, animations: { () -> Void in
             self.adContainerHeightConstraint.constant = 0
             self.view.layoutIfNeeded()
