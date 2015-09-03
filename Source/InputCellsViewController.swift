@@ -43,7 +43,7 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     }
     
     public func tappedCell(cell:UITableViewCell, atIndexPath:NSIndexPath) {
-        println("tappedCell")
+        print("tappedCell")
     }
     
     public func addSection(section: InputCellsSection) {

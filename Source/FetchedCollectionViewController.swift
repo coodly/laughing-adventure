@@ -19,9 +19,8 @@ import UIKit
 import CoreData
 
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
-    @IBOutlet var collectionView:UICollectionView!
-    var fetchedController:NSFetchedResultsController?
-    
+    @IBOutlet public var collectionView:UICollectionView!
+    private var fetchedController:NSFetchedResultsController!
     
     public override func viewWillAppear(animated: Bool) {
         if let controller = fetchedController {
@@ -36,12 +35,12 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let sections:[NSFetchedResultsSectionInfo] = fetchedController!.sections as! [NSFetchedResultsSectionInfo]
+        let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
         return sections[section].numberOfObjects
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier("FetchedCellIdentifier", forIndexPath: indexPath) as! UICollectionViewCell
+        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier("FetchedCellIdentifier", forIndexPath: indexPath) 
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, withObject:object)
         return cell
@@ -56,6 +55,6 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {
-        println("configureCell:atIndexPath:\(atIndexPath)")
+        print("configureCell:atIndexPath:\(atIndexPath)")
     }
 }

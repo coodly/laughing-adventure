@@ -46,7 +46,7 @@ public class AdPresentingContainerViewController: UIViewController, ADBannerView
         let adBanner = ADBannerView(adType: ADAdType.Banner)
         self.banner = adBanner
         adBanner.delegate = self
-        adBanner.autoresizingMask = UIViewAutoresizing.FlexibleLeftMargin | UIViewAutoresizing.FlexibleTopMargin | UIViewAutoresizing.FlexibleRightMargin | UIViewAutoresizing.FlexibleBottomMargin
+        adBanner.autoresizingMask = [UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleRightMargin, UIViewAutoresizing.FlexibleBottomMargin]
         adContainerView.addSubview(adBanner)
     }
     
