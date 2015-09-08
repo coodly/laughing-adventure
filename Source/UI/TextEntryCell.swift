@@ -16,13 +16,6 @@
 
 import UIKit
 
-extension UIView {
-    public class func viewNib() -> UINib {
-        let name = className()
-        return UINib(nibName: name, bundle: nil)
-    }
-    
-    public class func className() -> String {
-        return NSStringFromClass(self).componentsSeparatedByString(".").last!
-    }
+public class TextEntryCell: UITableViewCell {
+    @IBOutlet public var entryField: UITextField!
 }
