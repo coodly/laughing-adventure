@@ -29,9 +29,7 @@ public class ObjectModel {
         self.init(modelName: modelName, storeType: NSSQLiteStoreType)
     }
     
-    public convenience init(modelName: String, storeType: String) {
-        self.init()
-
+    public init(modelName: String, storeType: String) {
         self.modelName = modelName
         self.storeType = storeType
     }

@@ -17,12 +17,17 @@
 import Foundation
 import CoreData
 
-public extension NSManagedObject {
-    public class func entityName() -> String {
-        fatalError("Override \(__FUNCTION__) in your object")
-    }
-    
-    public class func insertInManagedObjectContext(context: NSManagedObjectContext) -> NSManagedObject {
-        return NSEntityDescription.insertNewObjectForEntityForName(self.entityName(), inManagedObjectContext: context)
+public extension ObjectModel {
+    public func fetchedControllerForEntity(entityName: String, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        let fetchRequest = self.fetchedRequestForEntity(entityName)
+        let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try fetchedController.performFetch()
+        } catch {
+            print("Fetch error: \(error)")
+        }
+        
+        return fetchedController
     }
 }

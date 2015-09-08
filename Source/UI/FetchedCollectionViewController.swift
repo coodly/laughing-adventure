@@ -18,12 +18,15 @@ import Foundation
 import UIKit
 import CoreData
 
+let collectionCellIdentifier = "FetchedCollectionCellIdentifier"
+
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
+    
     @IBOutlet public var collectionView:UICollectionView!
     private var fetchedController:NSFetchedResultsController!
     
     public override func viewWillAppear(animated: Bool) {
-        if let controller = fetchedController {
+        if let _ = fetchedController {
             
         } else {
             let fetchedController = createFetchedController()
@@ -40,18 +43,18 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier("FetchedCellIdentifier", forIndexPath: indexPath) 
+        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(collectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, withObject:object)
         return cell
     }
     
-    public func createFetchedController() -> NSFetchedResultsController! {
+    public func createFetchedController() -> NSFetchedResultsController {
         fatalError("Need to override \(__FUNCTION__)")
     }
     
     public func setPresentationCellNib(nib:UINib) {
-        collectionView.registerNib(nib, forCellWithReuseIdentifier: "FetchedCellIdentifier")
+        collectionView.registerNib(nib, forCellWithReuseIdentifier: collectionCellIdentifier)
     }
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {

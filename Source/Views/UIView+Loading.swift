@@ -14,15 +14,12 @@
 * limitations under the License.
 */
 
-import Foundation
-import CoreData
 
-public extension NSManagedObject {
-    public class func entityName() -> String {
-        fatalError("Override \(__FUNCTION__) in your object")
-    }
-    
-    public class func insertInManagedObjectContext(context: NSManagedObjectContext) -> NSManagedObject {
-        return NSEntityDescription.insertNewObjectForEntityForName(self.entityName(), inManagedObjectContext: context)
+import UIKit
+
+extension UIView {
+    public class func viewNib() -> UINib {
+        let name = NSStringFromClass(self).componentsSeparatedByString(".").last!        
+        return UINib(nibName: name, bundle: nil)
     }
 }
