@@ -39,7 +39,16 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         
         let section = sections[indexPath.section]
         let cell = section.cellAtRow(indexPath.row)
-        tappedCell(cell, atIndexPath: indexPath)
+        handleCellTap(cell, atIndexPath: indexPath)
+    }
+
+    private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) {
+        if cell.isKindOfClass(TextEntryCell) {
+            let entryCell = cell as! TextEntryCell
+            entryCell.entryField.becomeFirstResponder()
+        } else {
+            tappedCell(cell, atIndexPath: atIndexPath)
+        }
     }
     
     public func tappedCell(cell:UITableViewCell, atIndexPath:NSIndexPath) {
