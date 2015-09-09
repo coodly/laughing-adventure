@@ -16,6 +16,6 @@
 
 import UIKit
 
-public class MenuViewController: UITableViewController {
+public class MenuViewController: InputCellsViewController {
     public var container: CoodlySlideMenuViewController!
 }

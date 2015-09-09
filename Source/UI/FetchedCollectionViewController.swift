@@ -18,7 +18,7 @@ import Foundation
 import UIKit
 import CoreData
 
-let collectionCellIdentifier = "FetchedCollectionCellIdentifier"
+let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
     
@@ -26,15 +26,14 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     private var fetchedController:NSFetchedResultsController!
     
     public override func viewWillAppear(animated: Bool) {
-        if let _ = fetchedController {
-            
-        } else {
-            let fetchedController = createFetchedController()
-            fetchedController.delegate = self
-            self.fetchedController = fetchedController
-            
-            collectionView.reloadData()
+        if fetchedController != nil {
+            return
         }
+        
+        fetchedController = createFetchedController()
+        fetchedController.delegate = self
+        
+        collectionView.reloadData()
     }
     
     public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -43,7 +42,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(collectionCellIdentifier, forIndexPath: indexPath)
+        let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, withObject:object)
         return cell
@@ -54,7 +53,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func setPresentationCellNib(nib:UINib) {
-        collectionView.registerNib(nib, forCellWithReuseIdentifier: collectionCellIdentifier)
+        collectionView.registerNib(nib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
     }
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {

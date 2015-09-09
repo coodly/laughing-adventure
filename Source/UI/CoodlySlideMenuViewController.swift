@@ -41,7 +41,7 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         presentRootController(initialViewController)
     }
 
-    func presentModalController(controller: UIViewController) {
+    public func presentModalController(controller: UIViewController) {
         closeMenu()
 
         controller.modalPresentationStyle = UIModalPresentationStyle.FormSheet;
@@ -49,7 +49,7 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         presentViewController(controller, animated: true, completion: nil)
     }
     
-    func presentRootController(controller: UIViewController) {
+    public func presentRootController(controller: UIViewController) {
         closeMenu()
 
         controller.navigationItem.leftBarButtonItem = menuButton
@@ -61,7 +61,6 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         }
 
         containedNavigation.setViewControllers([controller], animated: containedNavigation.viewControllers.count > 0)
-        controller.viewWillAppear(true)
     }
 
     func openMenu() {
