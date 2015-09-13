@@ -34,7 +34,7 @@ public class ObjectModel {
         self.storeType = storeType
     }
     
-    lazy var managedObjectContext: NSManagedObjectContext = {
+    lazy public var managedObjectContext: NSManagedObjectContext = {
         let coordinator = self.persistentStoreCoordinator
         
         var isPrivateInstance = false
@@ -84,4 +84,36 @@ public class ObjectModel {
         
         return coordinator
     }()
+    
+    public func saveContext () {
+        saveContext { () -> Void in
+            
+        }
+    }
+    
+    public func saveContext(completion: () -> Void) {
+        saveContext(managedObjectContext, completion: completion)
+    }
+    
+    private func saveContext(context: NSManagedObjectContext, completion: () -> Void) {
+        context.performBlock { () -> Void in
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    let nserror = error as NSError
+                    NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
+                    abort()
+                }
+            }
+            
+            if let parent = context.parentContext {
+                self.saveContext(parent, completion: { () -> Void in
+                    
+                })
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), completion)
+        }
+    }
 }
