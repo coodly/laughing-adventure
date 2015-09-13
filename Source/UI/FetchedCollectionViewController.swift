@@ -44,7 +44,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
-        configureCell(cell, atIndexPath:indexPath, withObject:object)
+        configureCell(cell, atIndexPath:indexPath, object:object)
         return cell
     }
     
@@ -56,7 +56,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         collectionView.registerNib(nib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
     }
     
-    public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, withObject:AnyObject) {
+    public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject) {
         print("configureCell:atIndexPath:\(atIndexPath)")
     }
 }
