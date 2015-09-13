@@ -22,6 +22,18 @@ let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 public class FetchedTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
     @IBOutlet public var tableView: UITableView!
     private var fetchedController:NSFetchedResultsController!
+    private var measuringCell: UITableViewCell?
+    
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    public override func viewDidLoad() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        
+        tableView.estimatedRowHeight = 44
+        tableView.rowHeight = UITableViewAutomaticDimension
+    }
     
     public override func viewWillAppear(animated: Bool) {
         if fetchedController != nil {
@@ -82,9 +94,16 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     public func controllerDidChangeContent(controller: NSFetchedResultsController) {
         tableView.endUpdates()
     }
-    
+        
     public func setPresentationCellNib(nib:UINib) {
         tableView.registerNib(nib, forCellReuseIdentifier: FetchedTableCellIdentifier)
+        measuringCell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)
+    }
+    
+    func contentSizeChanged() {
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.tableView.reloadData()
+        }
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
