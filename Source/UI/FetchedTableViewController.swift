@@ -22,10 +22,8 @@ let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 public class FetchedTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
     @IBOutlet public var tableView: UITableView!
     private var fetchedController:NSFetchedResultsController!
-
-    override public func viewDidLoad() {
-        super.viewDidLoad()
-
+    
+    public override func viewWillAppear(animated: Bool) {
         if fetchedController != nil {
             return
         }
@@ -50,7 +48,16 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)!
+        let object = fetchedController.objectAtIndexPath(indexPath)
+        configureCell(indexPath, cell: cell, object: object)
         return cell
+    }
+    
+    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
+        let object = fetchedController.objectAtIndexPath(indexPath)
+        tappedCell(indexPath, object: object)
     }
     
     public func setPresentationCellNib(nib:UINib) {
@@ -59,5 +66,13 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     
     public func createFetchedController() -> NSFetchedResultsController {
         fatalError("Need to override \(__FUNCTION__)")
+    }
+    
+    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+        print("tappedCell(indexPath:\(atIndexPath))")
+    }
+    
+    public func configureCell(atIndexPath: NSIndexPath, cell: UITableViewCell, object: AnyObject) {
+        print("configureCell(atIndexPath:\(atIndexPath))")
     }
 }
