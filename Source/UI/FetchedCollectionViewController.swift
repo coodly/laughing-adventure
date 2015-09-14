@@ -20,10 +20,11 @@ import CoreData
 
 let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
-public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
+public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView:UICollectionView!
     private var fetchedController:NSFetchedResultsController!
+    private var measuringCell: UICollectionViewCell?
     
     public override func viewWillAppear(animated: Bool) {
         if fetchedController != nil {
@@ -48,15 +49,35 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         return cell
     }
     
+    public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        let object = fetchedController.objectAtIndexPath(indexPath)
+        configureCell(measuringCell!, atIndexPath: indexPath, object: object)
+        let height = calculateHeightForConfiguredSizingCell(measuringCell!)
+        return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
+    }
+    
     public func createFetchedController() -> NSFetchedResultsController {
         fatalError("Need to override \(__FUNCTION__)")
     }
     
     public func setPresentationCellNib(nib:UINib) {
         collectionView.registerNib(nib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
+        measuringCell = nib.loadInstance() as? UICollectionViewCell
     }
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject) {
-        print("configureCell:atIndexPath:\(atIndexPath)")
+        print("configureCell(atIndexPath:\(atIndexPath))")
+    }
+    
+    func calculateHeightForConfiguredSizingCell(cell: UICollectionViewCell) -> CGFloat {
+        var frame = cell.frame
+        frame.size.width = CGRectGetWidth(collectionView.frame)
+        cell.frame = frame
+        
+        cell.setNeedsLayout()
+        cell.layoutIfNeeded()
+        
+        let size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+        return size.height + 1.0
     }
 }
