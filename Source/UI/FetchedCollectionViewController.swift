@@ -26,6 +26,14 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     private var fetchedController:NSFetchedResultsController!
     private var measuringCell: UICollectionViewCell?
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    public override func viewDidLoad() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+    }
+    
     public override func viewWillAppear(animated: Bool) {
         if fetchedController != nil {
             return
@@ -54,6 +62,12 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         configureCell(measuringCell!, atIndexPath: indexPath, object: object)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
         return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
+    }
+    
+    func contentSizeChanged() {
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.collectionView.reloadData()
+        }
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
