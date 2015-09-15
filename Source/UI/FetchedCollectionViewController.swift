@@ -64,6 +64,13 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
     }
     
+    public func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+        collectionView.deselectItemAtIndexPath(indexPath, animated: true)
+        
+        let object = fetchedController.objectAtIndexPath(indexPath)
+        tappedCell(indexPath, object: object)
+    }
+        
     func contentSizeChanged() {
         dispatch_async(dispatch_get_main_queue()) { () -> Void in
             self.collectionView.reloadData()
@@ -81,6 +88,10 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject) {
         print("configureCell(atIndexPath:\(atIndexPath))")
+    }
+    
+    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+        print("tappedCell(indexPath:\(atIndexPath))")
     }
     
     func calculateHeightForConfiguredSizingCell(cell: UICollectionViewCell) -> CGFloat {
