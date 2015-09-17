@@ -19,7 +19,15 @@ import CoreData
 
 public extension ObjectModel {
     public func hasEntity(entityName: String, attribute: String, hasValue: AnyObject) -> Bool {
-        let predicate = NSPredicate(format: "%K = %@", argumentArray: [attribute, hasValue])
+        let predicate: NSPredicate
+        
+        switch(hasValue) {
+        case is String:
+            predicate = NSPredicate(format: "%K CONTAINS[c] %@", argumentArray: [attribute, hasValue])
+        default:
+            predicate = NSPredicate(format: "%K = %@", argumentArray: [attribute, hasValue])
+        }
+        
         return count(entityName, predicate: predicate) == 1
     }
     
