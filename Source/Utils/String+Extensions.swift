@@ -14,12 +14,9 @@
 * limitations under the License.
 */
 
-import Foundation
-
-public protocol SelectionSource {
-    var tableView: UITableView! { get set }
-    func numberOfSections() -> Int
-    func numberOfRowsInSection(section: Int) -> Int
-    func objectAtIndexPath(indexPath: NSIndexPath) -> AnyObject
-    func indexPathForObject(object: AnyObject) -> NSIndexPath?
+public extension String {
+    public func hasValue() -> Bool {
+        let stripped = self.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        return !stripped.isEmpty
+    }
 }

@@ -48,6 +48,10 @@ public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResults
         return fetchedController.objectAtIndexPath(indexPath)
     }
     
+    public func indexPathForObject(object: AnyObject) -> NSIndexPath? {
+        return fetchedController.indexPathForObject(object)
+    }
+    
     //TODO jaanus: copy/paste....
     public func controllerWillChangeContent(controller: NSFetchedResultsController) {
         tableView.beginUpdates()

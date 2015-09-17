@@ -20,6 +20,8 @@ let SingleSelectionTableCellIdentifier = "SingleSelectionTableCellIdentifier"
 
 public class SingleSelectionViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet var tableView: UITableView!
+    public var selectionHandler: ((selected: AnyObject?) -> Void)!
+    var selectedElement: AnyObject?
     
     public var source: SelectionSource! {
         didSet {
@@ -29,6 +31,10 @@ public class SingleSelectionViewController: UIViewController, UITableViewDataSou
     
     public override func viewWillAppear(animated: Bool) {
         tableView.reloadData()
+    }
+    
+    public override func viewWillDisappear(animated: Bool) {
+        selectionHandler(selected: selectedElement)
     }
     
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -42,8 +48,15 @@ public class SingleSelectionViewController: UIViewController, UITableViewDataSou
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(SingleSelectionTableCellIdentifier)!
         let object = source.objectAtIndexPath(indexPath)
-        configureCell(cell, withObject: object, selected:false)
+        configureCell(cell, withObject: object, selected:object.isEqual(selectedElement))
         return cell
+    }
+    
+    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
+        let selected = source.objectAtIndexPath(indexPath)
+        moveSelectionToElement(selected)
     }
     
     public func configureCell(cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
@@ -52,5 +65,25 @@ public class SingleSelectionViewController: UIViewController, UITableViewDataSou
     
     public func setPresentationCellNib(nib:UINib) {
         tableView.registerNib(nib, forCellReuseIdentifier: SingleSelectionTableCellIdentifier)
+    }
+    
+    public func markSelected(element: AnyObject) {
+        moveSelectionToElement(element)
+    }
+    
+    func moveSelectionToElement(element: AnyObject) {
+        tableView.beginUpdates()
+        
+        
+        if let previous = selectedElement, let previousIndexPath = source.indexPathForObject(previous) {
+            tableView.reloadRowsAtIndexPaths([previousIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+        }
+        
+        selectedElement = element
+        if let selectedIndexPath = source.indexPathForObject(element) {
+            tableView.reloadRowsAtIndexPaths([selectedIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+        }
+        
+        tableView.endUpdates()
     }
 }
