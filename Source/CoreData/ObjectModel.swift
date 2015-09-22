@@ -34,16 +34,27 @@ public class ObjectModel {
         self.storeType = storeType
     }
     
+    public init(parentContext: NSManagedObjectContext) {
+        writingContext = managedObjectContext
+    }
+    
+    public func spawnBackgroundInstance() -> ObjectModel {
+        return spawnBackgroundInstance(managedObjectContext)
+    }
+    
+    public func spawnBackgroundInstance(writerContext: NSManagedObjectContext) -> ObjectModel {
+        print("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
+        return ObjectModel(parentContext: writerContext)
+    }
+    
     lazy public var managedObjectContext: NSManagedObjectContext = {
-        let coordinator = self.persistentStoreCoordinator
-        
         var isPrivateInstance = false
         
         if let writing = self.writingContext {
             isPrivateInstance = true
         } else {
             let saving = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-            saving.persistentStoreCoordinator = coordinator
+            saving.persistentStoreCoordinator = self.persistentStoreCoordinator
             self.writingContext = saving
         }
         
@@ -93,6 +104,24 @@ public class ObjectModel {
     
     public func saveContext(completion: () -> Void) {
         saveContext(managedObjectContext, completion: completion)
+    }
+    
+    public func saveInBlock(handler:((model: ObjectModel) -> Void)) {
+        saveInBlock(handler, completion: { () in
+            
+        })
+    }
+
+    public func saveInBlock(handler:((model: ObjectModel) -> Void), completion: (() -> ())) {
+        let spawned = spawnBackgroundInstance()
+        spawned.performBlock { () -> () in
+            handler(model: spawned)
+            spawned.saveContext(completion)
+        }
+    }
+
+    public func performBlock(block: (() -> ())) {
+        managedObjectContext.performBlock(block)
     }
     
     private func saveContext(context: NSManagedObjectContext, completion: () -> Void) {

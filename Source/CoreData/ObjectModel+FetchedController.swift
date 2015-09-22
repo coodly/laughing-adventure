@@ -19,7 +19,11 @@ import CoreData
 
 public extension ObjectModel {
     public func fetchedControllerForEntity(entityName: String, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
-        let fetchRequest = self.fetchedRequestForEntity(entityName, sortDescriptors: sortDescriptors)
+        return fetchedControllerForEntity(entityName, predicate: nil, sortDescriptors: sortDescriptors)
+    }
+        
+    public func fetchedControllerForEntity(entityName: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        let fetchRequest = self.fetchedRequestForEntity(entityName, predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
         
         do {

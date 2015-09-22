@@ -18,4 +18,8 @@ import UIKit
 
 public class TextEntryCell: UITableViewCell {
     @IBOutlet public var entryField: UITextField!
+    
+    public func value() -> String? {
+        return entryField.text
+    }
 }
