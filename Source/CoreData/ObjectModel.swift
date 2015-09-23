@@ -97,22 +97,18 @@ public class ObjectModel {
     }()
     
     public func saveContext () {
-        saveContext { () -> Void in
-            
-        }
+        saveContext(nil)
     }
     
-    public func saveContext(completion: () -> Void) {
+    public func saveContext(completion: (() -> Void)?) {
         saveContext(managedObjectContext, completion: completion)
     }
     
     public func saveInBlock(handler:((model: ObjectModel) -> Void)) {
-        saveInBlock(handler, completion: { () in
-            
-        })
+        saveInBlock(handler, completion: nil)
     }
 
-    public func saveInBlock(handler:((model: ObjectModel) -> Void), completion: (() -> ())) {
+    public func saveInBlock(handler:((model: ObjectModel) -> Void), completion: (() -> ())?) {
         let spawned = spawnBackgroundInstance()
         spawned.performBlock { () -> () in
             handler(model: spawned)
@@ -124,7 +120,7 @@ public class ObjectModel {
         managedObjectContext.performBlock(block)
     }
     
-    private func saveContext(context: NSManagedObjectContext, completion: () -> Void) {
+    private func saveContext(context: NSManagedObjectContext, completion: (() -> Void)?) {
         context.performBlock { () -> Void in
             if context.hasChanges {
                 do {
@@ -137,12 +133,14 @@ public class ObjectModel {
             }
             
             if let parent = context.parentContext {
-                self.saveContext(parent, completion: { () -> Void in
-                    
-                })
+                self.saveContext(parent, completion: nil)
             }
             
-            dispatch_async(dispatch_get_main_queue(), completion)
+            guard let action = completion else {
+                return
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), action)
         }
     }
 }
