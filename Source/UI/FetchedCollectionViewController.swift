@@ -18,6 +18,20 @@ import Foundation
 import UIKit
 import CoreData
 
+class CollectionCoreDataChangeAction {
+    var indexPath: NSIndexPath?
+    var newIndexPath: NSIndexPath?
+    var changeType = NSFetchedResultsChangeType.Update
+    
+    static func action(atIndexPath: NSIndexPath?, changeType: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) -> CollectionCoreDataChangeAction {
+        let result = CollectionCoreDataChangeAction()
+        result.indexPath = atIndexPath
+        result.changeType = changeType
+        result.newIndexPath = newIndexPath
+        return result
+    }
+}
+
 let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
@@ -25,6 +39,9 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     @IBOutlet public var collectionView:UICollectionView!
     private var fetchedController:NSFetchedResultsController!
     private var measuringCell: UICollectionViewCell?
+    private var changeActions:[CollectionCoreDataChangeAction]!
+    
+    public var ignoreOffScreenUpdates = false
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -70,11 +87,50 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         let object = fetchedController.objectAtIndexPath(indexPath)
         tappedCell(indexPath, object: object)
     }
+    
+    public func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        changeActions = [CollectionCoreDataChangeAction]()
+    }
+    
+    public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        changeActions.append(CollectionCoreDataChangeAction.action(indexPath, changeType: type, newIndexPath: newIndexPath))
+    }
+    
+    public func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        let visible = collectionView.indexPathsForVisibleItems()
+        
+        print("Handle \(changeActions.count) change actions")
+        
+        collectionView.performBatchUpdates({ () -> Void in
+            for action in self.changeActions {
+                let type = action.changeType
+                switch(type) {
+                case NSFetchedResultsChangeType.Insert:
+                    self.collectionView.insertItemsAtIndexPaths([action.newIndexPath!])
+                case NSFetchedResultsChangeType.Delete:
+                    self.collectionView.deleteItemsAtIndexPaths([action.indexPath!])
+                case NSFetchedResultsChangeType.Move:
+                    self.collectionView.moveItemAtIndexPath(action.indexPath!, toIndexPath: action.newIndexPath!)
+                case NSFetchedResultsChangeType.Update:
+                    if (self.ignoreOffScreenUpdates && !visible.contains(action.indexPath!)) {
+                        continue
+                    }
+                    self.collectionView.reloadItemsAtIndexPaths([action.indexPath!])
+                }
+            }
+        }) { (finished) -> Void in
+            self.contentChanged()
+        }
+    }
         
     func contentSizeChanged() {
         dispatch_async(dispatch_get_main_queue()) { () -> Void in
             self.collectionView.reloadData()
         }
+    }
+    
+    public func contentChanged() {
+        print("\(__FUNCTION__)")
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
