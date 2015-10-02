@@ -129,6 +129,10 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         }
     }
     
+    public func isEmpty() -> Bool {
+        return fetchedController.fetchedObjects?.count == 0
+    }
+    
     public func contentChanged() {
         print("\(__FUNCTION__)")
     }
