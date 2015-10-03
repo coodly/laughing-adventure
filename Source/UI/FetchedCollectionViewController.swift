@@ -81,7 +81,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
     }
     
-    public func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+    public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         collectionView.deselectItemAtIndexPath(indexPath, animated: true)
         
         let object = fetchedController.objectAtIndexPath(indexPath)
