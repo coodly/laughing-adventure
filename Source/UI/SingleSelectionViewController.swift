@@ -23,13 +23,10 @@ public class SingleSelectionViewController: UIViewController, UITableViewDataSou
     public var selectionHandler: ((selected: AnyObject?) -> Void)!
     var selectedElement: AnyObject?
     
-    public var source: SelectionSource! {
-        didSet {
-            source.tableView = tableView
-        }
-    }
+    public var source: SelectionSource!
     
     public override func viewWillAppear(animated: Bool) {
+        source.tableView = tableView
         tableView.reloadData()
     }
     
