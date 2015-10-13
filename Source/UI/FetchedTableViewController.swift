@@ -61,7 +61,7 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)!
         let object = fetchedController.objectAtIndexPath(indexPath)
-        configureCell(cell, atIndexPath: indexPath, object: object)
+        configureCell(cell, atIndexPath: indexPath, object: object, forMeasuring:false)
         return cell
     }
     
@@ -114,7 +114,7 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
         print("tappedCell(indexPath:\(atIndexPath))")
     }
     
-    public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject) {
+    public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject, forMeasuring:Bool) {
         print("configureCell(atIndexPath:\(atIndexPath))")
     }
 }

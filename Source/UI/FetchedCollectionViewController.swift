@@ -70,13 +70,13 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
-        configureCell(cell, atIndexPath:indexPath, object:object)
+        configureCell(cell, atIndexPath:indexPath, object:object, forMeasuring:false)
         return cell
     }
     
     public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         let object = fetchedController.objectAtIndexPath(indexPath)
-        configureCell(measuringCell!, atIndexPath: indexPath, object: object)
+        configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
         return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
     }
@@ -146,7 +146,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         measuringCell = nib.loadInstance() as? UICollectionViewCell
     }
     
-    public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject) {
+    public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject, forMeasuring:Bool) {
         print("configureCell(atIndexPath:\(atIndexPath))")
     }
     
