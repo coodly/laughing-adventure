@@ -68,6 +68,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        print("cellForItemAtIndexPath:\(indexPath)")
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, object:object, forMeasuring:false)
@@ -75,6 +76,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        print("sizeForItemAtIndexPath:\(indexPath)")
         let object = fetchedController.objectAtIndexPath(indexPath)
         configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
