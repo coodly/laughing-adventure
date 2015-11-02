@@ -29,7 +29,7 @@ public extension ObjectModel {
         do {
             try fetchedController.performFetch()
         } catch {
-            print("Fetch error: \(error)")
+            Logging.log("Fetch error: \(error)")
         }
         
         return fetchedController

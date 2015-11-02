@@ -111,10 +111,10 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     }
     
     public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
-        print("tappedCell(indexPath:\(atIndexPath))")
+        Logging.log("tappedCell(indexPath:\(atIndexPath))")
     }
     
     public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject, forMeasuring:Bool) {
-        print("configureCell(atIndexPath:\(atIndexPath))")
+        Logging.log("configureCell(atIndexPath:\(atIndexPath))")
     }
 }

@@ -57,7 +57,7 @@ public class SingleSelectionViewController: UIViewController, UITableViewDataSou
     }
     
     public func configureCell(cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
-        print("configureCell(selected:\(selected))")
+        Logging.log("configureCell(selected:\(selected))")
     }
     
     public func setPresentationCellNib(nib:UINib) {

@@ -68,7 +68,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        print("cellForItemAtIndexPath:\(indexPath)")
+        Logging.log("cellForItemAtIndexPath:\(indexPath)")
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, object:object, forMeasuring:false)
@@ -76,7 +76,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        print("sizeForItemAtIndexPath:\(indexPath)")
+        Logging.log("sizeForItemAtIndexPath:\(indexPath)")
         let object = fetchedController.objectAtIndexPath(indexPath)
         configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
@@ -91,17 +91,20 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        Logging.log("controllerWillChangeContent")
         changeActions = [CollectionCoreDataChangeAction]()
     }
     
     public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        Logging.log("didChangeObject")
         changeActions.append(CollectionCoreDataChangeAction.action(indexPath, changeType: type, newIndexPath: newIndexPath))
     }
     
     public func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        Logging.log("controllerDidChangeContent")
         let visible = collectionView.indexPathsForVisibleItems()
         
-        print("Handle \(changeActions.count) change actions")
+        Logging.log("Handle \(changeActions.count) change actions")
         
         collectionView.performBatchUpdates({ () -> Void in
             for action in self.changeActions {
@@ -136,7 +139,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func contentChanged() {
-        print("\(__FUNCTION__)")
+        Logging.log("\(__FUNCTION__)")
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
@@ -149,11 +152,11 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func configureCell(cell:UICollectionViewCell, atIndexPath:NSIndexPath, object:AnyObject, forMeasuring:Bool) {
-        print("configureCell(atIndexPath:\(atIndexPath))")
+        Logging.log("configureCell(atIndexPath:\(atIndexPath))")
     }
     
     public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
-        print("tappedCell(indexPath:\(atIndexPath))")
+        Logging.log("tappedCell(indexPath:\(atIndexPath))")
     }
     
     func calculateHeightForConfiguredSizingCell(cell: UICollectionViewCell) -> CGFloat {

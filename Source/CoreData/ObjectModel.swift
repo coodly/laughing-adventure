@@ -43,7 +43,7 @@ public class ObjectModel {
     }
     
     public func spawnBackgroundInstance(writerContext: NSManagedObjectContext) -> ObjectModel {
-        print("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
+        Logging.log("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
         return ObjectModel(parentContext: writerContext)
     }
     
@@ -89,7 +89,7 @@ public class ObjectModel {
             
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
-            NSLog("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
+            Logging.log("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
             abort()
         }
         
@@ -127,7 +127,7 @@ public class ObjectModel {
                     try context.save()
                 } catch {
                     let nserror = error as NSError
-                    NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
+                    Logging.log("Unresolved error \(nserror), \(nserror.userInfo)")
                     abort()
                 }
             }
