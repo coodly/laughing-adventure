@@ -19,7 +19,7 @@ import CoreData
 
 public extension NSManagedObject {
     public class func entityName() -> String {
-        fatalError("Override \(__FUNCTION__) in your object")
+        return NSStringFromClass(self).componentsSeparatedByString(".").last!
     }
     
     public class func insertInManagedObjectContext(context: NSManagedObjectContext) -> NSManagedObject {

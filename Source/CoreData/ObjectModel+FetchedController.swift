@@ -18,12 +18,12 @@ import Foundation
 import CoreData
 
 public extension ObjectModel {
-    public func fetchedControllerForEntity(entityName: String, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
-        return fetchedControllerForEntity(entityName, predicate: nil, sortDescriptors: sortDescriptors)
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
     }
         
-    public func fetchedControllerForEntity(entityName: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
-        let fetchRequest = self.fetchedRequestForEntity(entityName, predicate: predicate, sortDescriptors: sortDescriptors)
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        let fetchRequest = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
         
         do {

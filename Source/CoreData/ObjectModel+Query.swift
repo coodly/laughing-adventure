@@ -18,7 +18,7 @@ import Foundation
 import CoreData
 
 public extension ObjectModel {
-    public func hasEntity(entityName: String, attribute: String, hasValue: AnyObject) -> Bool {
+    public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
         let predicate: NSPredicate
         
         switch(hasValue) {
@@ -28,11 +28,11 @@ public extension ObjectModel {
             predicate = NSPredicate(format: "%K = %@", argumentArray: [attribute, hasValue])
         }
         
-        return count(entityName, predicate: predicate) == 1
+        return count(type, predicate: predicate) == 1
     }
     
-    public func count(entityName: String, predicate: NSPredicate) -> Int {
-        let request = fetchedRequestForEntity(entityName, predicate: predicate)
+    public func count<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> Int {
+        let request = fetchedRequestForEntity(type, predicate: predicate)
         
         var error: NSError?
         let count = managedObjectContext.countForFetchRequest(request, error: &error)

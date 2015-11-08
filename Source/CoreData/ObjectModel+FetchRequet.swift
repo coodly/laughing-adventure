@@ -19,20 +19,20 @@ import CoreData
 
 public extension ObjectModel {
 
-    public func fetchedRequestForEntity(entityName: String) -> NSFetchRequest {
-        return fetchedRequestForEntity(entityName, predicate: nil, sortDescriptors: [])
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: [])
     }
 
-    public func fetchedRequestForEntity(entityName: String, predicate: NSPredicate) -> NSFetchRequest {
-        return fetchedRequestForEntity(entityName, predicate: predicate, sortDescriptors: [])
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: [])
     }
     
-    public func fetchedRequestForEntity(entityName: String, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
-        return fetchedRequestForEntity(entityName, predicate: nil, sortDescriptors: sortDescriptors)
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
     }
     
-    public func fetchedRequestForEntity(entityName: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
-        let request = NSFetchRequest(entityName: entityName)
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        let request = NSFetchRequest(entityName: type.entityName())
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
         return request
