@@ -16,14 +16,24 @@
 
 import UIKit
 
-public class TextEntryCell: DynamicFontReloadingTableViewCell {
-    @IBOutlet public var entryField: UITextField!
+public class DynamicFontReloadingTableViewCell: UITableViewCell {
+
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
     
-    public func value() -> String {
-        if let result = entryField.text {
-            return result
-        }
-        
-        return ""
+    override public func awakeFromNib() {
+        super.awakeFromNib()
+
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        setUIFont()
+    }
+    
+    @objc private func contentSizeChanged() {
+        setUIFont()
+    }
+    
+    public func setUIFont() {
+        Logging.log("Override \(__FUNCTION__) to set cell font")
     }
 }

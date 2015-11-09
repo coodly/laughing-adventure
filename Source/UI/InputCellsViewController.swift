@@ -20,6 +20,17 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     @IBOutlet public var tableView: UITableView!
     var sections:[InputCellsSection] = []
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    public override func viewDidLoad() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        
+        tableView.estimatedRowHeight = 44
+        tableView.rowHeight = UITableViewAutomaticDimension
+    }
+    
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return sections.count
     }
@@ -57,5 +68,11 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     
     public func addSection(section: InputCellsSection) {
         sections.append(section)
+    }
+    
+    @objc private func contentSizeChanged() {
+        dispatch_async(dispatch_get_main_queue()) {
+            self.tableView.reloadData()
+        }
     }
 }
