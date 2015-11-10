@@ -19,4 +19,8 @@ public extension String {
         let stripped = self.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
         return !stripped.isEmpty
     }
+    
+    public mutating func appendIssue(issue: String) {
+        self.appendContentsOf("• \(issue)\n")
+    }
 }
