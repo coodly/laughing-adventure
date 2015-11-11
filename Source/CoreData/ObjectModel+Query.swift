@@ -19,15 +19,7 @@ import CoreData
 
 public extension ObjectModel {
     public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
-        let predicate: NSPredicate
-        
-        switch(hasValue) {
-        case is String:
-            predicate = NSPredicate(format: "%K CONTAINS[c] %@", argumentArray: [attribute, hasValue])
-        default:
-            predicate = NSPredicate(format: "%K = %@", argumentArray: [attribute, hasValue])
-        }
-        
+        let predicate = predicateForAttribute(attribute, withValue: hasValue)
         return count(type, predicate: predicate) == 1
     }
     
@@ -43,4 +35,31 @@ public extension ObjectModel {
         
         return count
     }
+    
+    public func fetchEntity<T: NSManagedObject>(type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
+        let predicate = predicateForAttribute(whereAttribute, withValue: hasValue)
+        let request = fetchedRequestForEntity(type, predicate: predicate)
+        
+        do {
+            let result = try managedObjectContext.executeFetchRequest(request)
+            return result.first as? T
+        } catch {
+            Logging.log(error)
+            return nil
+        }
+    }
+    
+    public func predicateForAttribute(attributeName: String, withValue: AnyObject) -> NSPredicate {
+        let predicate: NSPredicate
+        
+        switch(withValue) {
+        case is String:
+            predicate = NSPredicate(format: "%K CONTAINS[c] %@", argumentArray: [attributeName, withValue])
+        default:
+            predicate = NSPredicate(format: "%K = %@", argumentArray: [attributeName, withValue])
+        }
+        
+        return predicate
+    }
+    
 }
