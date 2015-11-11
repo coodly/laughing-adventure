@@ -144,3 +144,92 @@ public class ObjectModel {
         }
     }
 }
+
+public extension ObjectModel /* Fetched controller */ {
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
+    }
+    
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+        let fetchRequest = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
+        let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try fetchedController.performFetch()
+        } catch {
+            Logging.log("Fetch error: \(error)")
+        }
+        
+        return fetchedController
+    }
+}
+
+public extension ObjectModel /* Fetch request */ {
+    
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: [])
+    }
+    
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: [])
+    }
+    
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
+    }
+    
+    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        let request = NSFetchRequest(entityName: type.entityName())
+        request.predicate = predicate
+        request.sortDescriptors = sortDescriptors
+        return request
+    }
+}
+
+public extension ObjectModel /* Querys */ {
+    public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
+        let predicate = predicateForAttribute(attribute, withValue: hasValue)
+        return count(type, predicate: predicate) == 1
+    }
+    
+    public func count<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> Int {
+        let request = fetchedRequestForEntity(type, predicate: predicate)
+        
+        var error: NSError?
+        let count = managedObjectContext.countForFetchRequest(request, error: &error)
+        
+        if error != nil {
+            fatalError("Count failed: \(error)")
+        }
+        
+        return count
+    }
+    
+    public func fetchEntity<T: NSManagedObject>(type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
+        let predicate = predicateForAttribute(whereAttribute, withValue: hasValue)
+        let request = fetchedRequestForEntity(type, predicate: predicate)
+        
+        do {
+            let result = try managedObjectContext.executeFetchRequest(request)
+            return result.first as? T
+        } catch {
+            Logging.log(error)
+            return nil
+        }
+    }
+}
+
+public extension ObjectModel /* Predicates */ {
+    public func predicateForAttribute(attributeName: String, withValue: AnyObject) -> NSPredicate {
+        let predicate: NSPredicate
+        
+        switch(withValue) {
+        case is String:
+            predicate = NSPredicate(format: "%K CONTAINS[c] %@", argumentArray: [attributeName, withValue])
+        default:
+            predicate = NSPredicate(format: "%K = %@", argumentArray: [attributeName, withValue])
+        }
+        
+        return predicate
+    }
+}
