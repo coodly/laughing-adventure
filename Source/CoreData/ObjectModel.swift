@@ -17,9 +17,16 @@
 import CoreData
 
 public class ObjectModel {
+    struct StackConfig {
+        var storeType: String!
+        var storeURL: NSURL!
+        var options: [NSObject: AnyObject]?
+    }
+
     private var modelName: String!
     private var storeType: String!
     private var writingContext: NSManagedObjectContext?
+    public var wipeDatabaseOnConflict = false
     
     public init() {
         fatalError("Use some other init method instead")
@@ -77,12 +84,29 @@ public class ObjectModel {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("SingleViewCoreData.sqlite")
-        var failureReason = "There was an error creating or loading the application's saved data."
+        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
+
+        Logging.log("Using DB file at \(url)")
+        
+        let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let config = StackConfig(storeType: NSSQLiteStoreType, storeURL: url, options: options)
+        
+        if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
+            Logging.log("Will delete DB")
+            try! NSFileManager.defaultManager().removeItemAtURL(url)
+            self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
+        }
+        
+        return coordinator
+    }()
+    
+    private func addPersistentStore(coordinator: NSPersistentStoreCoordinator, config: StackConfig, abortOnFailure: Bool) -> Bool {
         do {
-            try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
+            try coordinator.addPersistentStoreWithType(config.storeType, configuration: nil, URL: config.storeURL, options: config.options)
+            return true
         } catch {
             // Report any error we got.
+            let failureReason = "There was an error creating or loading the application's saved data."
             var dict = [String: AnyObject]()
             dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
             dict[NSLocalizedFailureReasonErrorKey] = failureReason
@@ -90,11 +114,14 @@ public class ObjectModel {
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
             Logging.log("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
+        }
+        
+        if abortOnFailure {
             abort()
         }
         
-        return coordinator
-    }()
+        return false
+    }
     
     public func saveContext () {
         saveContext(nil)
