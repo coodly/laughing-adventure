@@ -14,11 +14,10 @@
 * limitations under the License.
 */
 
-import Foundation
 import CoreData
 
-public extension NSManagedObject {
-    public class func entityName() -> String {
-        return NSStringFromClass(self).componentsSeparatedByString(".").last!
-    }    
+extension NSManagedObjectContext {
+    public func insertEntityOfType<T: NSManagedObject>(type: T.Type) -> T {
+        return NSEntityDescription.insertNewObjectForEntityForName(type.entityName(), inManagedObjectContext: self) as! T
+    }
 }

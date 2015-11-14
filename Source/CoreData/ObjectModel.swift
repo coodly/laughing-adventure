@@ -213,6 +213,16 @@ public extension ObjectModel /* Fetch request */ {
     }
 }
 
+public extension ObjectModel /* Delete */ {
+    public func deleteObject(object: NSManagedObject, saveAfter: Bool = true) {
+        managedObjectContext.deleteObject(object)
+        
+        if saveAfter {
+            saveContext()
+        }
+    }
+}
+
 public extension ObjectModel /* Querys */ {
     public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
         let predicate = predicateForAttribute(attribute, withValue: hasValue)
