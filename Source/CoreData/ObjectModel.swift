@@ -234,6 +234,10 @@ public extension ObjectModel /* Querys */ {
     
     public func fetchEntity<T: NSManagedObject>(type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
         let predicate = predicateForAttribute(whereAttribute, withValue: hasValue)
+        return fetchFirstEntity(type, predicate: predicate)
+    }
+    
+    public func fetchFirstEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> T? {
         let request = fetchedRequestForEntity(type, predicate: predicate)
         
         do {
