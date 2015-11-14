@@ -42,22 +42,17 @@ public class ObjectModel {
     }
     
     public init(parentContext: NSManagedObjectContext) {
-        writingContext = managedObjectContext
+        writingContext = parentContext
     }
     
     public func spawnBackgroundInstance() -> ObjectModel {
-        return spawnBackgroundInstance(managedObjectContext)
-    }
-    
-    public func spawnBackgroundInstance(writerContext: NSManagedObjectContext) -> ObjectModel {
-        Logging.log("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
-        return ObjectModel(parentContext: writerContext)
+        fatalError("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
     }
     
     lazy public var managedObjectContext: NSManagedObjectContext = {
         var isPrivateInstance = false
         
-        if let writing = self.writingContext {
+        if let _ = self.writingContext {
             isPrivateInstance = true
         } else {
             let saving = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
@@ -65,10 +60,10 @@ public class ObjectModel {
             self.writingContext = saving
         }
         
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
-        managedObjectContext.parentContext = self.writingContext
+        var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
+        managedContext.parentContext = self.writingContext
         
-        return managedObjectContext
+        return managedContext
     }()
 
     
