@@ -29,6 +29,8 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
+        
+        tableView.tableFooterView = UIView()
     }
     
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {

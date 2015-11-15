@@ -242,8 +242,8 @@ public extension ObjectModel /* Querys */ {
         return fetchFirstEntity(type, predicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> T? {
-        let request = fetchedRequestForEntity(type, predicate: predicate)
+    public func fetchFirstEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
+        let request = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
             let result = try managedObjectContext.executeFetchRequest(request)
