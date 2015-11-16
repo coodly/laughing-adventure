@@ -16,15 +16,16 @@
 
 import UIKit
 
-public class TextEntryCell: DynamicFontReloadingTableViewCell {
-    @IBOutlet public var entryField: UITextField!
-    public var inputValidation: InputValidation?
-    
-    public func value() -> String {
-        if let result = entryField.text {
-            return result
+extension UIView {
+    func findContainingCell() -> UITableViewCell? {
+        guard let sup = superview else {
+            return nil
         }
         
-        return ""
+        if let cell = sup as? UITableViewCell {
+            return cell
+        } else {
+            return sup.findContainingCell()
+        }
     }
 }

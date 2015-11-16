@@ -16,9 +16,10 @@
 
 import UIKit
 
-public class InputCellsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+public class InputCellsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     @IBOutlet public var tableView: UITableView!
     var sections:[InputCellsSection] = []
+    private var activeCellInputValidation: InputValidation?
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -70,6 +71,33 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     
     public func addSection(section: InputCellsSection) {
         sections.append(section)
+        for cell in section.cells {
+            guard let textCell = cell as? TextEntryCell else {
+                continue
+            }
+            
+            textCell.entryField.delegate = self
+        }
+    }
+    
+    public func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+        if let cell = textField.findContainingCell() as? TextEntryCell, validation = cell.inputValidation {
+            activeCellInputValidation = validation
+        }
+        
+        return true
+    }
+    
+    public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        guard let validation = activeCellInputValidation else {
+            return true
+        }
+        
+        return validation.textField(textField, shouldChangeCharactersInRange: range, replacementString: string)
+    }
+    
+    public func textFieldDidEndEditing(textField: UITextField) {
+        activeCellInputValidation = nil
     }
     
     @objc private func contentSizeChanged() {
