@@ -16,52 +16,20 @@
 
 import UIKit
 
-let SingleSelectionTableCellIdentifier = "SingleSelectionTableCellIdentifier"
-
-public class SingleSelectionViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    @IBOutlet var tableView: UITableView!
+public class SingleSelectionViewController: SelectionViewController {
     public var selectionHandler: ((selected: AnyObject?) -> Void)!
     var selectedElement: AnyObject?
-    
-    public var source: SelectionSource!
-    
-    public override func viewWillAppear(animated: Bool) {
-        source.tableView = tableView
-        tableView.reloadData()
-    }
-    
+        
     public override func viewWillDisappear(animated: Bool) {
         selectionHandler(selected: selectedElement)
     }
-    
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return source.numberOfSections()
+
+    override func isSelected(object: AnyObject) -> Bool {
+        return object.isEqual(selectedElement)
     }
     
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return source.numberOfRowsInSection(section)
-    }
-    
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(SingleSelectionTableCellIdentifier)!
-        let object = source.objectAtIndexPath(indexPath)
-        configureCell(cell, withObject: object, selected:object.isEqual(selectedElement))
-        return cell
-    }
-    
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
-        let selected = source.objectAtIndexPath(indexPath)
-        moveSelectionToElement(selected)
-    }
-    
-    public func configureCell(cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
-        Logging.log("configureCell(selected:\(selected))")
-    }
-    
-    public func setPresentationCellNib(nib:UINib) {
-        tableView.registerNib(nib, forCellReuseIdentifier: SingleSelectionTableCellIdentifier)
+    public override func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+        moveSelectionToElement(object)
     }
     
     public func markSelected(element: AnyObject) {
