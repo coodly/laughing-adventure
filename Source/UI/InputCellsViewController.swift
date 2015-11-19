@@ -100,6 +100,47 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         activeCellInputValidation = nil
     }
     
+    public func textFieldShouldReturn(textField: UITextField) -> Bool {
+        if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
+            nextCell.entryField.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
+        
+        return true
+    }
+    
+    private func indexPathForCell(cell: UITableViewCell) -> NSIndexPath? {
+        for var section = 0; section < sections.count; section++ {
+            let sec = sections[section]
+            
+            if let row = sec.cells.indexOf(cell) {
+                return NSIndexPath(forRow: row, inSection: section)
+            }
+        }
+        
+        return nil
+    }
+    
+    private func nextEntryCellAfterIndexPath(indexPath: NSIndexPath) -> TextEntryCell? {
+        var section = indexPath.section
+        var row = indexPath.row + 1
+        
+        for ; section < sections.count; section++ {
+            let sec = sections[section]
+            
+            for ; row < sec.cells.count; row++ {
+                if let cell = sec.cells[row] as? TextEntryCell {
+                    return cell
+                }
+            }
+            
+            row = 0
+        }
+        
+        return nil
+    }
+    
     @objc private func contentSizeChanged() {
         dispatch_async(dispatch_get_main_queue()) {
             self.tableView.reloadData()
