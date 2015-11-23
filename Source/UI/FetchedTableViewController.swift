@@ -72,8 +72,27 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
         tappedCell(indexPath, object: object)
     }
     
+    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
+        let dataSection = sections[section]
+        return dataSection.name
+    }
+    
     public func controllerWillChangeContent(controller: NSFetchedResultsController) {
         tableView.beginUpdates()
+    }
+    
+    public func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+        switch(type) {
+        case .Insert:
+            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+        case .Delete:
+            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+        case .Update:
+            tableView.reloadSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+        case .Move:
+            fatalError("Wut? \(sectionIndex)")
+        }
     }
     
     public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {

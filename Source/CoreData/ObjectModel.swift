@@ -168,13 +168,13 @@ public class ObjectModel {
 }
 
 public extension ObjectModel /* Fetched controller */ {
-    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
-        return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
+        return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors, sectionNameKeyPath: sectionNameKeyPath)
     }
-    
-    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchedResultsController {
+
+    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
         let fetchRequest = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
-        let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
         do {
             try fetchedController.performFetch()
