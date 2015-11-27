@@ -261,7 +261,7 @@ public extension ObjectModel /* Predicates */ {
         
         switch(withValue) {
         case is String:
-            predicate = NSPredicate(format: "%K CONTAINS[c] %@", argumentArray: [attributeName, withValue])
+            predicate = NSPredicate(format: "%K ==[c] %@", argumentArray: [attributeName, withValue])
         default:
             predicate = NSPredicate(format: "%K = %@", argumentArray: [attributeName, withValue])
         }
