@@ -216,6 +216,19 @@ public extension ObjectModel /* Delete */ {
             saveContext()
         }
     }
+    
+    public func deleteAllEntitiesOfType<T: NSManagedObject>(type: T.Type, saveAfter: Bool = true) {
+        let fetchRequest = fetchedRequestForEntity(type)
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        do {
+            try managedObjectContext.executeRequest(deleteRequest)
+            if saveAfter {
+                saveContext()
+            }
+        } catch {
+            Logging.log("Delete error: \(error)")
+        }
+    }
 }
 
 public extension ObjectModel /* Querys */ {
