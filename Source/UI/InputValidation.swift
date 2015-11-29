@@ -26,6 +26,10 @@ public class DecimalInputValidation: InputValidation {
     }
     
     public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        if string == " " {
+            return false
+        }
+        
         if string != "." && string != "," {
             return true
         }
