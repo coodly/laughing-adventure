@@ -52,16 +52,20 @@ public class ObjectModel {
     lazy public var managedObjectContext: NSManagedObjectContext = {
         var isPrivateInstance = false
         
+        let mergePolicy = NSMergePolicy(mergeType: NSMergePolicyType.MergeByPropertyObjectTrumpMergePolicyType)
+        
         if let _ = self.writingContext {
             isPrivateInstance = true
         } else {
             let saving = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
             saving.persistentStoreCoordinator = self.persistentStoreCoordinator
+            saving.mergePolicy = mergePolicy
             self.writingContext = saving
         }
         
         var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
         managedContext.parentContext = self.writingContext
+        managedContext.mergePolicy = mergePolicy
         
         return managedContext
     }()
@@ -273,10 +277,19 @@ public extension ObjectModel /* Batch updates */ {
         let request = NSBatchUpdateRequest(entityName: type.entityName())
         request.predicate = predicate
         request.propertiesToUpdate = [attributeName: value]
-        request.resultType = .UpdatedObjectsCountResultType
+        request.resultType = .UpdatedObjectIDsResultType
         do {
             let result = try managedObjectContext.executeRequest(request) as! NSBatchUpdateResult
-            Logging.log("Updated \(result.result) objects")
+            let objectIDs = result.result as! [NSManagedObjectID]
+            Logging.log("Updated \(objectIDs.count) objects")
+            for id in objectIDs {
+                let object = managedObjectContext.objectWithID(id)
+                if object.fault {
+                    continue
+                }
+                
+                managedObjectContext.refreshObject(object, mergeChanges: true)
+            }
         } catch {
             Logging.log("Update error: \(error)")
         }
