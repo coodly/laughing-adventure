@@ -268,6 +268,21 @@ public extension ObjectModel /* Querys */ {
     }
 }
 
+public extension ObjectModel /* Batch updates */ {
+    public func updateEntitiesOfType<T: NSManagedObject>(type: T.Type, attributeName: String, value: AnyObject, predicate: NSPredicate? = nil) {
+        let request = NSBatchUpdateRequest(entityName: type.entityName())
+        request.predicate = predicate
+        request.propertiesToUpdate = [attributeName: value]
+        request.resultType = .UpdatedObjectsCountResultType
+        do {
+            let result = try managedObjectContext.executeRequest(request) as! NSBatchUpdateResult
+            Logging.log("Updated \(result.result) objects")
+        } catch {
+            Logging.log("Update error: \(error)")
+        }
+    }
+}
+
 public extension ObjectModel /* Predicates */ {
     public func predicateForAttribute(attributeName: String, withValue: AnyObject) -> NSPredicate {
         let predicate: NSPredicate

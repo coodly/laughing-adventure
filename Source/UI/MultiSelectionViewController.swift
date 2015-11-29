@@ -35,9 +35,11 @@ public class MultiSelectionViewController: SelectionViewController {
     
     public override func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
         if isSelected(object), let index = selectedElements.indexOf({ $0.isEqual(object) }) {
-            selectedElements.removeAtIndex(index)
+            let removed = selectedElements.removeAtIndex(index)
+            didDeselect(removed)
         } else {
             selectedElements.append(object)
+            didSelect(object)
         }
         
         tableView.beginUpdates()
@@ -48,5 +50,13 @@ public class MultiSelectionViewController: SelectionViewController {
     public func addToSelected(object: AnyObject) {
         selectedElements.append(object)
         tableView.reloadData()
+    }
+    
+    public func didSelect(element: AnyObject) {
+        
+    }
+
+    public func didDeselect(element: AnyObject) {
+        
     }
 }
