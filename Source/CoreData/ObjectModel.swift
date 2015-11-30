@@ -270,6 +270,18 @@ public extension ObjectModel /* Querys */ {
             return nil
         }
     }
+    
+    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type) -> [T] {
+        let request = fetchedRequestForEntity(type)
+        
+        do {
+            let result = try managedObjectContext.executeFetchRequest(request)
+            return result as! [T]
+        } catch {
+            Logging.log(error)
+            return []
+        }
+    }
 }
 
 public extension ObjectModel /* Batch updates */ {
@@ -293,6 +305,21 @@ public extension ObjectModel /* Batch updates */ {
         } catch {
             Logging.log("Update error: \(error)")
         }
+    }
+}
+
+public extension ObjectModel {
+    public func entitiesInCurrentContext<T: NSManagedObject>(entities: [T]) -> [T] {
+        var result = [T]()
+        for entity in entities {
+            result.append(entityInCurrentContext(entity))
+        }
+        
+        return result
+    }
+
+    public func entityInCurrentContext<T: NSManagedObject>(entity: T) -> T {
+        return managedObjectContext.objectWithID(entity.objectID) as! T
     }
 }
 
