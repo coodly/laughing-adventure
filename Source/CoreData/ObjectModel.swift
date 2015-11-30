@@ -16,6 +16,9 @@
 
 import CoreData
 
+private let SavingContextName = "Saving"
+private let MainContextName = "Main"
+
 public class ObjectModel {
     struct StackConfig {
         var storeType: String!
@@ -27,6 +30,7 @@ public class ObjectModel {
     private var storeType: String!
     private var writingContext: NSManagedObjectContext?
     public var wipeDatabaseOnConflict = false
+    private static var spawnedBackgroundCount = 0
     
     public init() {
         fatalError("Use some other init method instead")
@@ -61,9 +65,17 @@ public class ObjectModel {
             saving.persistentStoreCoordinator = self.persistentStoreCoordinator
             saving.mergePolicy = mergePolicy
             self.writingContext = saving
+            saving.name = SavingContextName
         }
         
         var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
+        if isPrivateInstance {
+            spawnedBackgroundCount++
+            managedContext.name = "Worker \(spawnedBackgroundCount)"
+            Logging.log("Spawned worker \(spawnedBackgroundCount)")
+        } else {
+            managedContext.name = MainContextName
+        }
         managedContext.parentContext = self.writingContext
         managedContext.mergePolicy = mergePolicy
         
@@ -136,6 +148,7 @@ public class ObjectModel {
 
     public func saveInBlock(handler:((model: ObjectModel) -> Void), completion: (() -> ())?) {
         let spawned = spawnBackgroundInstance()
+        Logging.log("Spawned worker from \(managedObjectContext.name!)")
         spawned.performBlock { () -> () in
             handler(model: spawned)
             spawned.saveContext(completion)
@@ -143,10 +156,12 @@ public class ObjectModel {
     }
 
     public func performBlock(block: (() -> ())) {
+        Logging.log("Perform block on \(managedObjectContext.name!)")
         managedObjectContext.performBlock(block)
     }
     
     private func saveContext(context: NSManagedObjectContext, completion: (() -> Void)?) {
+        Logging.log("Save \(context.name!)")
         context.performBlock { () -> Void in
             if context.hasChanges {
                 do {
