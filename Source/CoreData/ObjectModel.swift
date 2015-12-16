@@ -228,6 +228,16 @@ public extension ObjectModel /* Fetch request */ {
 }
 
 public extension ObjectModel /* Delete */ {
+    public func deleteObjects(objects: [NSManagedObject], saveAfter: Bool = true) {
+        for obj in objects {
+            deleteObject(obj, saveAfter: false)
+        }
+        
+        if saveAfter {
+            saveContext()
+        }
+    }
+    
     public func deleteObject(object: NSManagedObject, saveAfter: Bool = true) {
         managedObjectContext.deleteObject(object)
         
@@ -286,8 +296,8 @@ public extension ObjectModel /* Querys */ {
         }
     }
     
-    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type) -> [T] {
-        let request = fetchRequestForEntity(type)
+    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> [T] {
+        let request = fetchRequestForEntity(type, predicate: predicate)
         
         do {
             let result = try managedObjectContext.executeFetchRequest(request)
