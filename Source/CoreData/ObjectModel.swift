@@ -192,7 +192,7 @@ public extension ObjectModel /* Fetched controller */ {
     }
 
     public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
-        let fetchRequest = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
+        let fetchRequest = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
         do {
@@ -207,19 +207,19 @@ public extension ObjectModel /* Fetched controller */ {
 
 public extension ObjectModel /* Fetch request */ {
     
-    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type) -> NSFetchRequest {
-        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: [])
+    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type) -> NSFetchRequest {
+        return fetchRequestForEntity(type, predicate: nil, sortDescriptors: [])
     }
     
-    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> NSFetchRequest {
-        return fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: [])
+    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> NSFetchRequest {
+        return fetchRequestForEntity(type, predicate: predicate, sortDescriptors: [])
     }
     
-    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
-        return fetchedRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
+    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        return fetchRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
     }
     
-    public func fetchedRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
         let request = NSFetchRequest(entityName: type.entityName())
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
@@ -237,7 +237,7 @@ public extension ObjectModel /* Delete */ {
     }
     
     public func deleteAllEntitiesOfType<T: NSManagedObject>(type: T.Type, saveAfter: Bool = true) {
-        let fetchRequest = fetchedRequestForEntity(type)
+        let fetchRequest = fetchRequestForEntity(type)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         do {
             try managedObjectContext.executeRequest(deleteRequest)
@@ -257,7 +257,7 @@ public extension ObjectModel /* Querys */ {
     }
     
     public func count<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> Int {
-        let request = fetchedRequestForEntity(type, predicate: predicate)
+        let request = fetchRequestForEntity(type, predicate: predicate)
         
         var error: NSError?
         let count = managedObjectContext.countForFetchRequest(request, error: &error)
@@ -275,7 +275,7 @@ public extension ObjectModel /* Querys */ {
     }
     
     public func fetchFirstEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
-        let request = fetchedRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
+        let request = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
             let result = try managedObjectContext.executeFetchRequest(request)
@@ -287,13 +287,27 @@ public extension ObjectModel /* Querys */ {
     }
     
     public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type) -> [T] {
-        let request = fetchedRequestForEntity(type)
+        let request = fetchRequestForEntity(type)
         
         do {
             let result = try managedObjectContext.executeFetchRequest(request)
             return result as! [T]
         } catch {
             Logging.log(error)
+            return []
+        }
+    }
+    
+    public func fetchEntityAttribute<T: NSManagedObject>(type: T.Type, attributeName: String) -> [AnyObject] {
+        let request = fetchRequestForEntity(type)
+        request.resultType = .DictionaryResultType
+        request.propertiesToFetch = [attributeName]
+        
+        do {
+            let objects = try managedObjectContext.executeFetchRequest(request) as! [[String: AnyObject]]
+            return objects.map { $0[attributeName]! }
+        } catch {
+            Logging.log("fetchEntityAttribute error: \(error)")
             return []
         }
     }
