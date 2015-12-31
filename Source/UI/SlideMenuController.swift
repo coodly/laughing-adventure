@@ -139,6 +139,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         addRightGestures()
     }
     
+    @available(iOS 8.0, *)
     public override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
         mainContainerView.transform = CGAffineTransformMakeScale(1.0, 1.0)
