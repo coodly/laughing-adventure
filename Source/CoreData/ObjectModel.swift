@@ -186,7 +186,8 @@ public class ObjectModel {
     }
 }
 
-public extension ObjectModel /* Fetched controller */ {
+// MARK: - Fetched controller
+public extension ObjectModel {
     public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
         return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors, sectionNameKeyPath: sectionNameKeyPath)
     }
@@ -260,7 +261,8 @@ public extension ObjectModel /* Delete */ {
     }
 }
 
-public extension ObjectModel /* Querys */ {
+// MARK: - Queries
+public extension ObjectModel {
     public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
         let predicate = predicateForAttribute(attribute, withValue: hasValue)
         return count(type, predicate: predicate) == 1
@@ -362,7 +364,8 @@ public extension ObjectModel {
     }
 }
 
-public extension ObjectModel /* Predicates */ {
+// MARK: - Predicates
+public extension ObjectModel {
     public func predicateForAttribute(attributeName: String, withValue: AnyObject) -> NSPredicate {
         let predicate: NSPredicate
         
