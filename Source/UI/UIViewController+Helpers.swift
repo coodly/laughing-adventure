@@ -17,12 +17,6 @@
 import UIKit
 
 public extension UIViewController {
-    public func presentErrorAlert(title: String, error: NSError, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
-        let alert = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .Alert)
-        alert.addAction(UIAlertAction(title: dismissButtonTitle, style: .Cancel, handler: nil))
-        presentViewController(alert, animated: true, completion: nil)
-    }
-    
     public func pushMaybeModally(controller: UIViewController, closeButtonTitle: String = NSLocalizedString("modally.presented.close.button.title", comment: "")) {
         if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
             navigationController!.pushViewController(controller, animated: true)
@@ -49,5 +43,22 @@ public extension UIViewController {
     
     @objc private func closeModal() {
         dismissViewControllerAnimated(true, completion: nil)
+    }
+}
+
+public protocol QuickAlertPresenter {
+    func presentAlert(title: String, message: String, dismissButtonTitle: String)
+    func presentErrorAlert(title: String, error: NSError, dismissButtonTitle: String)
+}
+
+public extension QuickAlertPresenter where Self: UIViewController {
+    func presentAlert(title: String, message: String, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+        alert.addAction(UIAlertAction(title: dismissButtonTitle, style: .Cancel, handler: nil))
+        presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    func presentErrorAlert(title: String, error: NSError, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
+        presentAlert(title, message: error.localizedDescription, dismissButtonTitle: dismissButtonTitle)
     }
 }
