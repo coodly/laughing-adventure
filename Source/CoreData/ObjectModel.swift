@@ -265,10 +265,10 @@ public extension ObjectModel /* Delete */ {
 public extension ObjectModel {
     public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
         let predicate = predicateForAttribute(attribute, withValue: hasValue)
-        return count(type, predicate: predicate) == 1
+        return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func count<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> Int {
+    public func countInstancesOfEntity<T: NSManagedObject>(type: T.Type, usingPredicate predicate: NSPredicate) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
         var error: NSError?
