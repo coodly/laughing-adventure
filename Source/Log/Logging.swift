@@ -15,7 +15,7 @@
 */
 
 class Logging {
-    class func log<T>(object: T, file: String = __FILE__, function: String = __FUNCTION__, line: Int = __LINE__) {
+    class func log<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
         var cleanedFile = "-"
         let fileURL = NSURL(fileURLWithPath: file, isDirectory: false)
         if let cleaned = fileURL.lastPathComponent {

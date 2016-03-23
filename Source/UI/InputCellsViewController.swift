@@ -26,7 +26,7 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(InputCellsViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -111,7 +111,7 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
     }
     
     private func indexPathForCell(cell: UITableViewCell) -> NSIndexPath? {
-        for var section = 0; section < sections.count; section++ {
+        for section in 0 ..< sections.count {
             let sec = sections[section]
             
             if let row = sec.cells.indexOf(cell) {
@@ -126,10 +126,10 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         var section = indexPath.section
         var row = indexPath.row + 1
         
-        for ; section < sections.count; section++ {
+        for ; section < sections.count; section += 1 {
             let sec = sections[section]
             
-            for ; row < sec.cells.count; row++ {
+            for ; row < sec.cells.count; row += 1 {
                 if let cell = sec.cells[row] as? TextEntryCell {
                     return cell
                 }

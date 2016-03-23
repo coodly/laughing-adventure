@@ -48,7 +48,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FetchedCollectionViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
     }
     
     public override func viewWillAppear(animated: Bool) {
@@ -139,11 +139,11 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func contentChanged() {
-        Logging.log("\(__FUNCTION__)")
+        Logging.log("\(#function)")
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
-        fatalError("Need to override \(__FUNCTION__)")
+        fatalError("Need to override \(#function)")
     }
     
     public func setPresentationCellNib(nib:UINib) {

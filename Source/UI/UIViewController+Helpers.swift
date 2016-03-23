@@ -25,7 +25,7 @@ public extension UIViewController {
             if let _ = controller.navigationItem.leftBarButtonItem {
                 Logging.log("Close button will not be added")
             } else {
-                controller.navigationItem.leftBarButtonItem = UIBarButtonItem(title: closeButtonTitle, style: .Plain, target: self, action: "closeModal")
+                controller.navigationItem.leftBarButtonItem = UIBarButtonItem(title: closeButtonTitle, style: .Plain, target: self, action: #selector(UIViewController.closeModal))
             }
             navigation.modalPresentationStyle = .FormSheet
             navigation.modalTransitionStyle = .CrossDissolve

@@ -25,7 +25,7 @@ public class DynamicFontReloadingTableViewCell: UITableViewCell {
     override public func awakeFromNib() {
         super.awakeFromNib()
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DynamicFontReloadingTableViewCell.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
         setUIFont()
     }
     
@@ -34,6 +34,6 @@ public class DynamicFontReloadingTableViewCell: UITableViewCell {
     }
     
     public func setUIFont() {
-        Logging.log("Override \(__FUNCTION__) to set cell font")
+        Logging.log("Override \(#function) to set cell font")
     }
 }

@@ -54,7 +54,7 @@ public class CoodlySlideMenuViewController: SlideMenuController {
 
         controller.navigationItem.leftBarButtonItem = menuButton
         menuButton.target = self
-        menuButton.action = "openMenu"
+        menuButton.action = #selector(CoodlySlideMenuViewController.openMenu)
 
         if object_getClassName(containedNavigation.viewControllers.first) == object_getClassName(controller) {
             return

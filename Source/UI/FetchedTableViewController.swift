@@ -29,7 +29,7 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "contentSizeChanged", name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FetchedTableViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -126,7 +126,7 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     }
     
     public func createFetchedController() -> NSFetchedResultsController {
-        fatalError("Need to override \(__FUNCTION__)")
+        fatalError("Need to override \(#function)")
     }
     
     public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {

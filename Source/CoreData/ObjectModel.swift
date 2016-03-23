@@ -50,7 +50,7 @@ public class ObjectModel {
     }
     
     public func spawnBackgroundInstance() -> ObjectModel {
-        fatalError("Please overwrite this method and instantiate your subclass \(__FUNCTION__)")
+        fatalError("Please overwrite this method and instantiate your subclass \(#function)")
     }
     
     lazy public var managedObjectContext: NSManagedObjectContext = {
@@ -70,7 +70,7 @@ public class ObjectModel {
         
         var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
         if isPrivateInstance {
-            spawnedBackgroundCount++
+            spawnedBackgroundCount += 1
             managedContext.name = "Worker \(spawnedBackgroundCount)"
             Logging.log("Spawned worker \(spawnedBackgroundCount)")
         } else {

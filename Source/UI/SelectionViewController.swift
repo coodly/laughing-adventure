@@ -55,7 +55,7 @@ public class SelectionViewController: UIViewController, UITableViewDataSource, U
     }
 
     func isSelected(object: AnyObject) -> Bool {
-        fatalError("Override \(__FUNCTION__)")
+        fatalError("Override \(#function)")
     }
     
     public func configureCell(cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
