@@ -16,10 +16,11 @@
 
 import UIKit
 
-public class InputCellsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
+public class InputCellsViewController: UIViewController {
     @IBOutlet public var tableView: UITableView!
-    var sections:[InputCellsSection] = []
+    private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
+    private var lastTextEntryCell: TextEntryCell?
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -34,28 +35,14 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         tableView.tableFooterView = UIView()
     }
     
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return sections.count
-    }
-    
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionCells = sections[section]
-        return sectionCells.numberOfCells()
-    }
-    
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let sectionCells = sections[indexPath.section]
-        return sectionCells.cellAtRow(indexPath.row)
-    }
-    
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    public override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         
-        let section = sections[indexPath.section]
-        let cell = section.cellAtRow(indexPath.row)
-        handleCellTap(cell, atIndexPath: indexPath)
+        if let last = lastTextEntryCell {
+            last.setReturnKeyType(.Done)
+        }
     }
-
+    
     private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) {
         if cell.isKindOfClass(TextEntryCell) {
             let entryCell = cell as! TextEntryCell
@@ -77,37 +64,9 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
             }
             
             textCell.entryField.delegate = self
+            textCell.setReturnKeyType(.Next)
+            lastTextEntryCell = textCell
         }
-    }
-    
-    public func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, validation = cell.inputValidation {
-            activeCellInputValidation = validation
-        }
-        
-        return true
-    }
-    
-    public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
-        guard let validation = activeCellInputValidation else {
-            return true
-        }
-        
-        return validation.textField(textField, shouldChangeCharactersInRange: range, replacementString: string)
-    }
-    
-    public func textFieldDidEndEditing(textField: UITextField) {
-        activeCellInputValidation = nil
-    }
-    
-    public func textFieldShouldReturn(textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
-            nextCell.entryField.becomeFirstResponder()
-        } else {
-            textField.resignFirstResponder()
-        }
-        
-        return true
     }
     
     private func indexPathForCell(cell: UITableViewCell) -> NSIndexPath? {
@@ -145,5 +104,63 @@ public class InputCellsViewController: UIViewController, UITableViewDelegate, UI
         dispatch_async(dispatch_get_main_queue()) {
             self.tableView.reloadData()
         }
+    }
+}
+
+// MARK: - Table view delegates
+extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
+    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return sections.count
+    }
+    
+    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let sectionCells = sections[section]
+        return sectionCells.numberOfCells()
+    }
+    
+    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let sectionCells = sections[indexPath.section]
+        return sectionCells.cellAtRow(indexPath.row)
+    }
+    
+    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
+        let section = sections[indexPath.section]
+        let cell = section.cellAtRow(indexPath.row)
+        handleCellTap(cell, atIndexPath: indexPath)
+    }
+}
+
+// MARK: - Text field delegate
+extension InputCellsViewController: UITextFieldDelegate {
+    public func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+        if let cell = textField.findContainingCell() as? TextEntryCell, validation = cell.inputValidation {
+            activeCellInputValidation = validation
+        }
+        
+        return true
+    }
+    
+    public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        guard let validation = activeCellInputValidation else {
+            return true
+        }
+        
+        return validation.textField(textField, shouldChangeCharactersInRange: range, replacementString: string)
+    }
+    
+    public func textFieldDidEndEditing(textField: UITextField) {
+        activeCellInputValidation = nil
+    }
+    
+    public func textFieldShouldReturn(textField: UITextField) -> Bool {
+        if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
+            nextCell.entryField.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
+        
+        return true
     }
 }

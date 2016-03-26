@@ -19,6 +19,7 @@ import UIKit
 public class TextEntryCell: DynamicFontReloadingTableViewCell {
     @IBOutlet public var entryField: UITextField!
     public var inputValidation: InputValidation?
+    private var dismissButton: UIBarButtonItem?
     
     public func value() -> String {
         if let result = entryField.text {
@@ -26,5 +27,43 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
         }
         
         return ""
+    }
+    
+    func setReturnKeyType(type: UIReturnKeyType) {
+        entryField.returnKeyType = type
+        
+        guard let dismiss = dismissButton else {
+            return
+        }
+        
+        if type == .Next {
+            dismissButton?.title = NSLocalizedString("coodly.text.field.next", comment: "")
+        } else {
+            dismissButton?.title = NSLocalizedString("coodly.text.field.done", comment: "")
+        }
+    }
+}
+
+// MARK: - Decimal input
+public extension TextEntryCell {
+    func decimalInput() {
+        inputValidation = DecimalInputValidation()
+        entryField.keyboardType = .DecimalPad
+        addAccessoryToolbar()
+    }
+}
+
+private extension TextEntryCell {
+    func addAccessoryToolbar()  {
+        let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
+        
+        let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: #selector(TextEntryCell.dismissPressed))
+        toolbar.setItems([spacer, dismissButton!], animated: false)
+        entryField.inputAccessoryView = toolbar
+    }
+    
+    @objc private func dismissPressed() {
+        entryField.delegate?.textFieldShouldReturn?(entryField)
     }
 }
