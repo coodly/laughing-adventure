@@ -16,6 +16,10 @@
 
 import UIKit
 
+private extension Selector {
+    static let dismissKeyboardPressed = #selector(TextEntryCell.dismissPressed)
+}
+
 public class TextEntryCell: DynamicFontReloadingTableViewCell {
     @IBOutlet public var entryField: UITextField!
     public var inputValidation: InputValidation?
@@ -32,7 +36,7 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
     func setReturnKeyType(type: UIReturnKeyType) {
         entryField.returnKeyType = type
         
-        guard let dismiss = dismissButton else {
+        guard let _ = dismissButton else {
             return
         }
         
@@ -58,7 +62,7 @@ private extension TextEntryCell {
         let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
         
         let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
-        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: #selector(TextEntryCell.dismissPressed))
+        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: .dismissKeyboardPressed)
         toolbar.setItems([spacer, dismissButton!], animated: false)
         entryField.inputAccessoryView = toolbar
     }

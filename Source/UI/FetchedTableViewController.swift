@@ -17,6 +17,10 @@
 import UIKit
 import CoreData
 
+private extension Selector {
+    static let contentSizeChanged = #selector(FetchedTableViewController.contentSizeChanged)
+}
+
 let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
 public class FetchedTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
@@ -29,7 +33,7 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FetchedTableViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension

@@ -18,6 +18,10 @@ import Foundation
 import UIKit
 import CoreData
 
+private extension Selector {
+    static let contentSizeChanged = #selector(FetchedCollectionViewController.contentSizeChanged)
+}
+
 class CollectionCoreDataChangeAction {
     var indexPath: NSIndexPath?
     var newIndexPath: NSIndexPath?
@@ -48,7 +52,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FetchedCollectionViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
     }
     
     public override func viewWillAppear(animated: Bool) {

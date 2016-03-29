@@ -16,6 +16,10 @@
 
 import UIKit
 
+private extension Selector {
+    static let openMenuTapped = #selector(CoodlySlideMenuViewController.openMenu)
+}
+
 public class CoodlySlideMenuViewController: SlideMenuController {
     private var containedNavigation: UINavigationController!
     private var menuController: MenuViewController!
@@ -54,7 +58,7 @@ public class CoodlySlideMenuViewController: SlideMenuController {
 
         controller.navigationItem.leftBarButtonItem = menuButton
         menuButton.target = self
-        menuButton.action = #selector(CoodlySlideMenuViewController.openMenu)
+        menuButton.action = .openMenuTapped
 
         if object_getClassName(containedNavigation.viewControllers.first) == object_getClassName(controller) {
             return

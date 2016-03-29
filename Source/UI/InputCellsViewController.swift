@@ -16,6 +16,10 @@
 
 import UIKit
 
+private extension Selector {
+    static let contentSizeChanged = #selector(InputCellsViewController.contentSizeChanged)
+}
+
 public class InputCellsViewController: UIViewController {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
@@ -27,7 +31,7 @@ public class InputCellsViewController: UIViewController {
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(InputCellsViewController.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension

@@ -16,6 +16,10 @@
 
 import UIKit
 
+private extension Selector {
+    static let contentSizeChanged = #selector(DynamicFontReloadingTableViewCell.contentSizeChanged)
+}
+
 public class DynamicFontReloadingTableViewCell: UITableViewCell {
 
     deinit {
@@ -25,7 +29,7 @@ public class DynamicFontReloadingTableViewCell: UITableViewCell {
     override public func awakeFromNib() {
         super.awakeFromNib()
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DynamicFontReloadingTableViewCell.contentSizeChanged), name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
         setUIFont()
     }
     
