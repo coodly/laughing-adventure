@@ -48,6 +48,18 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
     }
 }
 
+// MARK: - Done accessory
+public extension TextEntryCell {
+    func addAccessoryToolbar()  {
+        let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
+        
+        let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: .dismissKeyboardPressed)
+        toolbar.setItems([spacer, dismissButton!], animated: false)
+        entryField.inputAccessoryView = toolbar
+    }
+}
+
 // MARK: - Decimal input
 public extension TextEntryCell {
     func decimalInput() {
@@ -58,15 +70,6 @@ public extension TextEntryCell {
 }
 
 private extension TextEntryCell {
-    func addAccessoryToolbar()  {
-        let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
-        
-        let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
-        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: .dismissKeyboardPressed)
-        toolbar.setItems([spacer, dismissButton!], animated: false)
-        entryField.inputAccessoryView = toolbar
-    }
-    
     @objc private func dismissPressed() {
         entryField.delegate?.textFieldShouldReturn?(entryField)
     }

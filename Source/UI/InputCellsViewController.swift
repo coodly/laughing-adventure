@@ -24,7 +24,6 @@ public class InputCellsViewController: UIViewController {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
-    private var lastTextEntryCell: TextEntryCell?
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -42,9 +41,7 @@ public class InputCellsViewController: UIViewController {
     public override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if let last = lastTextEntryCell {
-            last.setReturnKeyType(.Done)
-        }
+        configureReturnButtons()
     }
     
     private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) {
@@ -68,8 +65,6 @@ public class InputCellsViewController: UIViewController {
             }
             
             textCell.entryField.delegate = self
-            textCell.setReturnKeyType(.Next)
-            lastTextEntryCell = textCell
         }
     }
     
@@ -109,11 +104,33 @@ public class InputCellsViewController: UIViewController {
             self.tableView.reloadData()
         }
     }
+    
+    private func configureReturnButtons() {
+        var lastEntryCell: TextEntryCell?
+        for section in sections {
+            for cell in section.cells {
+                guard let textEntry = cell as? TextEntryCell else {
+                    continue
+                }
+                
+                textEntry.setReturnKeyType(.Next)
+                lastEntryCell = textEntry
+            }
+        }
+        
+        if let last = lastEntryCell {
+            last.setReturnKeyType(.Done)
+        }
+    }
 }
 
 // MARK: - Sections / cells
 public extension InputCellsViewController {
     func replaceCell(atIndexPath indexPath: NSIndexPath, withCell cell: UITableViewCell) {
+        if let textEntryCell = cell as? TextEntryCell {
+            textEntryCell.entryField.delegate = self
+        }
+        
         tableView.beginUpdates()
         
         let section = sections[indexPath.section]
@@ -124,6 +141,8 @@ public extension InputCellsViewController {
         tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
         
         tableView.endUpdates()
+
+        configureReturnButtons()
     }
 }
 
