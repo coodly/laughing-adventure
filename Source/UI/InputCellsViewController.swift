@@ -111,6 +111,22 @@ public class InputCellsViewController: UIViewController {
     }
 }
 
+// MARK: - Sections / cells
+public extension InputCellsViewController {
+    func replaceCell(atIndexPath indexPath: NSIndexPath, withCell cell: UITableViewCell) {
+        tableView.beginUpdates()
+        
+        let section = sections[indexPath.section]
+        var cells = section.cells
+        cells[indexPath.row] = cell
+        sections[indexPath.section] = InputCellsSection(cells: cells)
+        
+        tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+        
+        tableView.endUpdates()
+    }
+}
+
 // MARK: - Table view delegates
 extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
