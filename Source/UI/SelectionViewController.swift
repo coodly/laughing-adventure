@@ -18,10 +18,16 @@ import UIKit
 
 private let SelectionTableCellIdentifier = "SelectionTableCellIdentifier"
 
-public class SelectionViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+public class SelectionViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet var tableView: UITableView!
     
     public var source: SelectionSource!
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        checkTableView()
+    }
     
     public override func viewWillAppear(animated: Bool) {
         source.tableView = tableView

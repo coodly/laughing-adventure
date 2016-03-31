@@ -20,7 +20,7 @@ private extension Selector {
     static let contentSizeChanged = #selector(InputCellsViewController.contentSizeChanged)
 }
 
-public class InputCellsViewController: UIViewController {
+public class InputCellsViewController: UIViewController, FullScreenTableCreate {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
@@ -30,6 +30,8 @@ public class InputCellsViewController: UIViewController {
     }
     
     public override func viewDidLoad() {
+        checkTableView()
+        
         NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
         
         tableView.estimatedRowHeight = 44

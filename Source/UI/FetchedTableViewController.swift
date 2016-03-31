@@ -23,7 +23,7 @@ private extension Selector {
 
 let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
-public class FetchedTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
+public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
     @IBOutlet public var tableView: UITableView!
     private var fetchedController:NSFetchedResultsController!
     private var measuringCell: UITableViewCell?
@@ -34,6 +34,8 @@ public class FetchedTableViewController: UIViewController, UITableViewDataSource
     
     public override func viewDidLoad() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        
+        checkTableView()
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
