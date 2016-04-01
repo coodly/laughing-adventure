@@ -16,19 +16,19 @@
 
 import UIKit
 
-protocol FullScreenTableCreate: UITableViewDelegate, UITableViewDataSource {
+public protocol FullScreenTableCreate: UITableViewDelegate, UITableViewDataSource {
     var tableView: UITableView! { get set }
-    func checkTableView()
+    func checkTableView(style: UITableViewStyle)
 }
 
-extension FullScreenTableCreate where Self: UIViewController {
-    func checkTableView() {
+public extension FullScreenTableCreate where Self: UIViewController {
+    func checkTableView(style: UITableViewStyle = .Plain) {
         if tableView != nil {
             return
         }
         
         //not loaded from xib
-        tableView = UITableView(frame: view.bounds)
+        tableView = UITableView(frame: view.bounds, style: style)
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)

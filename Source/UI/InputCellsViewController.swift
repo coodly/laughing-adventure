@@ -24,13 +24,14 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
+    public var preferredStyle: UITableViewStyle = .Plain
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     public override func viewDidLoad() {
-        checkTableView()
+        checkTableView(preferredStyle)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
         

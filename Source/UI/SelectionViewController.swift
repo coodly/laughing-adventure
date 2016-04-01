@@ -19,7 +19,7 @@ import UIKit
 private let SelectionTableCellIdentifier = "SelectionTableCellIdentifier"
 
 public class SelectionViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate {
-    @IBOutlet var tableView: UITableView!
+    @IBOutlet public var tableView: UITableView!
     
     public var source: SelectionSource!
     
