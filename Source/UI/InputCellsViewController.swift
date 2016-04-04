@@ -199,6 +199,7 @@ extension InputCellsViewController: UITextFieldDelegate {
     public func textFieldShouldReturn(textField: UITextField) -> Bool {
         if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
             nextCell.entryField.becomeFirstResponder()
+            activeCellInputValidation = nextCell.inputValidation
         } else {
             textField.resignFirstResponder()
         }
