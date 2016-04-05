@@ -39,6 +39,7 @@ public class MoneyFormatter {
         formatter.currencySymbol = ""
         formatter.groupingSeparator = ""
         formatter.decimalSeparator = "."
+        formatter.currencyDecimalSeparator = "."
         MoneyFormatter.setFormatterForKey(formatter, key: .AmountOnlyFormatter)
         
         return formatter
