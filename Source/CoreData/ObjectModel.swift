@@ -247,6 +247,7 @@ public extension ObjectModel /* Delete */ {
         }
     }
     
+    @available(iOS 9, *)
     public func deleteAllEntitiesOfType<T: NSManagedObject>(type: T.Type, saveAfter: Bool = true) {
         let fetchRequest = fetchRequestForEntity(type)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
