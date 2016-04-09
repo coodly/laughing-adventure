@@ -118,6 +118,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     
     public func controllerDidChangeContent(controller: NSFetchedResultsController) {
         tableView.endUpdates()
+        contentChanged()
     }
         
     public func setPresentationCellNib(nib:UINib) {
@@ -141,5 +142,9 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     
     public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject, forMeasuring:Bool) {
         Logging.log("configureCell(atIndexPath:\(atIndexPath))")
+    }
+    
+    public func contentChanged() {
+        Logging.log("Content changed")
     }
 }
