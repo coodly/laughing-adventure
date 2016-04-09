@@ -17,8 +17,9 @@
 import Foundation
 
 public class MoneyFormatter {
-    private enum FormatterKey: String {
+    private enum FormatterKey {
         case AmountOnlyFormatter
+        case CurrencyFormatter(String)
         
         func key() -> String {
             return String(reflecting: self)
@@ -27,6 +28,10 @@ public class MoneyFormatter {
     
     public class func formattedAmountOnly(number: NSDecimalNumber) -> String? {
         return amountOnlyFormatter().stringFromNumber(number)
+    }
+    
+    public class func formattedAmount(number: NSDecimalNumber, currency: String) -> String? {
+        return formatterForCurrency(currency).stringFromNumber(number)
     }
 
     private class func amountOnlyFormatter() -> NSNumberFormatter {
@@ -45,7 +50,24 @@ public class MoneyFormatter {
         return formatter
     }
     
+    private class func formatterForCurrency(currency: String) -> NSNumberFormatter {
+        if let formatter = formatterForKey(.CurrencyFormatter(currency)) {
+            return formatter
+        }
+        
+        let formatter = NSNumberFormatter()
+        formatter.numberStyle = .CurrencyStyle
+        formatter.currencyCode = currency
+        formatter.groupingSeparator = ""
+        formatter.decimalSeparator = "."
+        formatter.currencyDecimalSeparator = "."
+        MoneyFormatter.setFormatterForKey(formatter, key: .CurrencyFormatter(currency))
+        
+        return formatter
+    }
+    
     private class func setFormatterForKey(formatter: NSNumberFormatter, key: FormatterKey) {
+        print(">>>>>>>>>> \(key.key())")
         NSThread.currentThread().threadDictionary[key.key()] = formatter
     }
         

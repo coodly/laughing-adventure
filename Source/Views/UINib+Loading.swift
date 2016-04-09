@@ -1,5 +1,5 @@
 /*
-* Copyright 2015 Coodly LLC
+* Copyright 2016 Coodly LLC
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 import UIKit
 
-extension UINib {
-    func loadInstance() -> UIView {
+public extension UINib {
+    public func loadInstance() -> UIView {
         return self.instantiateWithOwner(nil, options: nil).first as! UIView
     }
 }
