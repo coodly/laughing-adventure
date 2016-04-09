@@ -20,6 +20,24 @@ private extension Selector {
     static let contentSizeChanged = #selector(InputCellsViewController.contentSizeChanged)
 }
 
+public class InputCellsSection {
+    private let cells: [UITableViewCell]
+    private var title: String?
+    
+    public init(title: String? = nil, cells: [UITableViewCell]) {
+        self.title = title
+        self.cells = cells
+    }
+    
+    func numberOfCells() -> Int {
+        return cells.count
+    }
+    
+    func cellAtRow(row: Int) -> UITableViewCell {
+        return cells[row]
+    }
+}
+
 public class InputCellsViewController: UIViewController, FullScreenTableCreate {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
@@ -171,6 +189,10 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
         let section = sections[indexPath.section]
         let cell = section.cellAtRow(indexPath.row)
         handleCellTap(cell, atIndexPath: indexPath)
+    }
+    
+    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return sections[section].title
     }
 }
 
