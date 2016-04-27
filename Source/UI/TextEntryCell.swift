@@ -49,6 +49,7 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
 }
 
 // MARK: - Done accessory
+#if os(iOS)
 public extension TextEntryCell {
     func addAccessoryToolbar()  {
         let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
@@ -59,8 +60,10 @@ public extension TextEntryCell {
         entryField.inputAccessoryView = toolbar
     }
 }
+#endif
 
 // MARK: - Decimal input
+#if os(iOS)
 public extension TextEntryCell {
     func decimalInput() {
         inputValidation = DecimalInputValidation()
@@ -68,6 +71,7 @@ public extension TextEntryCell {
         addAccessoryToolbar()
     }
 }
+#endif
 
 private extension TextEntryCell {
     @objc private func dismissPressed() {

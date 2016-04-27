@@ -14,8 +14,12 @@
 * limitations under the License.
 */
 
+#if os(iOS)
+    
 import UIKit
 
 public class MenuViewController: InputCellsViewController {
     public var container: CoodlySlideMenuViewController!
 }
+
+#endif

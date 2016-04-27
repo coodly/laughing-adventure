@@ -6,6 +6,7 @@
 //  From https://github.com/dekatotoro/SlideMenuControllerSwift
 //  Version 2.0.5
 //
+#if os(iOS)
 
 import Foundation
 import UIKit
@@ -989,3 +990,5 @@ extension UIViewController {
         }
     }
 }
+
+#endif

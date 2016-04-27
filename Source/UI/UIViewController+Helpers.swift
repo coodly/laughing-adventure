@@ -31,7 +31,9 @@ public extension UIViewController {
             } else {
                 controller.navigationItem.leftBarButtonItem = UIBarButtonItem(title: closeButtonTitle, style: .Plain, target: self, action: .closeModalPressed)
             }
+            #if os(iOS)
             navigation.modalPresentationStyle = .FormSheet
+            #endif
             navigation.modalTransitionStyle = .CrossDissolve
             presentViewController(navigation, animated: true, completion: nil)
         }

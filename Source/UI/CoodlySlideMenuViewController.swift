@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 
+#if os(iOS)
+
 import UIKit
 
 private extension Selector {
@@ -48,8 +50,8 @@ public class CoodlySlideMenuViewController: SlideMenuController {
     public func presentModalController(controller: UIViewController) {
         closeMenu()
 
-        controller.modalPresentationStyle = UIModalPresentationStyle.FormSheet;
-        controller.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve;
+        controller.modalPresentationStyle = UIModalPresentationStyle.FormSheet
+        controller.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
         presentViewController(controller, animated: true, completion: nil)
     }
     
@@ -83,3 +85,5 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         }
     }
 }
+
+#endif
