@@ -100,7 +100,7 @@ public class ObjectModel {
         Logging.log("Using DB file at \(url)")
         
         let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
-        let config = StackConfig(storeType: NSSQLiteStoreType, storeURL: url, options: options)
+        let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
         
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
             Logging.log("Will delete DB")
