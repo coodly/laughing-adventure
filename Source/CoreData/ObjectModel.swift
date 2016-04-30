@@ -28,6 +28,7 @@ public class ObjectModel {
 
     private var modelName: String!
     private var storeType: String!
+    private var inDirectory: NSSearchPathDirectory!
     private var writingContext: NSManagedObjectContext?
     public var wipeDatabaseOnConflict = false
     private static var spawnedBackgroundCount = 0
@@ -40,9 +41,10 @@ public class ObjectModel {
         self.init(modelName: modelName, storeType: NSSQLiteStoreType)
     }
     
-    public init(modelName: String, storeType: String) {
+    public init(modelName: String, storeType: String, inDirectory: NSSearchPathDirectory = .DocumentDirectory) {
         self.modelName = modelName
         self.storeType = storeType
+        self.inDirectory = inDirectory
     }
     
     public init(parentContext: NSManagedObjectContext) {
@@ -83,9 +85,18 @@ public class ObjectModel {
     }()
 
     
-    lazy var applicationDocumentsDirectory: NSURL = {
-        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
-        return urls[urls.count-1]
+    lazy var workingFilesDirectory: NSURL = {
+        let urls = NSFileManager.defaultManager().URLsForDirectory(self.inDirectory, inDomains: .UserDomainMask)
+        let last = urls.last!
+        let identifier = NSBundle.mainBundle().bundleIdentifier!
+        let appFolder = last.URLByAppendingPathComponent(identifier)
+        let dbFolder = appFolder.URLByAppendingPathComponent("DB")
+        do {
+            try NSFileManager.defaultManager().createDirectoryAtURL(dbFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print("Create db folder error \(error)")
+        }
+        return dbFolder
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
@@ -95,7 +106,7 @@ public class ObjectModel {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
+        let url: NSURL? = self.storeType == NSSQLiteStoreType ? self.workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite") : nil
 
         Logging.log("Using DB file at \(url)")
         
@@ -104,7 +115,7 @@ public class ObjectModel {
         
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
             Logging.log("Will delete DB")
-            try! NSFileManager.defaultManager().removeItemAtURL(url)
+            try! NSFileManager.defaultManager().removeItemAtURL(url!)
             self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
         }
         
