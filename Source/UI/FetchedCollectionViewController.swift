@@ -40,10 +40,10 @@ let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
-    @IBOutlet public var collectionView:UICollectionView!
-    private var fetchedController:NSFetchedResultsController!
+    @IBOutlet public var collectionView: UICollectionView!
+    private var fetchedController: NSFetchedResultsController!
     private var measuringCell: UICollectionViewCell?
-    private var changeActions:[CollectionCoreDataChangeAction]!
+    private var changeActions: [CollectionCoreDataChangeAction]!
     
     public var ignoreOffScreenUpdates = false
     
@@ -173,5 +173,9 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         
         let size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
         return size.height
+    }
+    
+    public func objectAt(indexPath: NSIndexPath) -> AnyObject {
+        return fetchedController.objectAtIndexPath(indexPath)
     }
 }
