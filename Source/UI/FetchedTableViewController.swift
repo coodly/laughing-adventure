@@ -25,7 +25,7 @@ let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
 public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
     @IBOutlet public var tableView: UITableView!
-    private var fetchedController:NSFetchedResultsController!
+    private var fetchedController: NSFetchedResultsController?
     private var measuringCell: UITableViewCell?
     
     deinit {
@@ -42,17 +42,17 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     }
     
     public override func viewWillAppear(animated: Bool) {
-        if fetchedController != nil {
+        if let _ = fetchedController {
             return
         }
         
         fetchedController = createFetchedController()
-        fetchedController.delegate = self
-        tableView.reloadData()
+        fetchedController!.delegate = self
+        tableView!.reloadData()
     }
     
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        guard let sections = fetchedController.sections else {
+        guard let sections = fetchedController?.sections else {
             return 0
         }
         
@@ -60,13 +60,16 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     }
     
     public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
+        guard let controller = fetchedController, sections = controller.sections else {
+            return 0
+        }
+        
         return sections[section].numberOfObjects
     }
     
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)!
-        let object = fetchedController.objectAtIndexPath(indexPath)
+        let object = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath: indexPath, object: object, forMeasuring:false)
         return cell
     }
@@ -74,12 +77,12 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
-        let object = fetchedController.objectAtIndexPath(indexPath)
+        let object = fetchedController!.objectAtIndexPath(indexPath)
         tappedCell(indexPath, object: object)
     }
     
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
+        let sections:[NSFetchedResultsSectionInfo] = fetchedController!.sections! as [NSFetchedResultsSectionInfo]
         let dataSection = sections[section]
         return dataSection.name
     }
