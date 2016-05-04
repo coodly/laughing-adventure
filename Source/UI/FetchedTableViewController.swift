@@ -30,6 +30,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
+        fetchedController?.delegate = nil
     }
     
     public override func viewDidLoad() {
