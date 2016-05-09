@@ -114,17 +114,17 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
             for action in self.changeActions {
                 let type = action.changeType
                 switch(type) {
+                case NSFetchedResultsChangeType.Update:
+                    if (self.ignoreOffScreenUpdates && !visible.contains(action.indexPath!)) {
+                        continue
+                    }
+                    self.collectionView.reloadItemsAtIndexPaths([action.indexPath!])
                 case NSFetchedResultsChangeType.Insert:
                     self.collectionView.insertItemsAtIndexPaths([action.newIndexPath!])
                 case NSFetchedResultsChangeType.Delete:
                     self.collectionView.deleteItemsAtIndexPaths([action.indexPath!])
                 case NSFetchedResultsChangeType.Move:
                     self.collectionView.moveItemAtIndexPath(action.indexPath!, toIndexPath: action.newIndexPath!)
-                case NSFetchedResultsChangeType.Update:
-                    if (self.ignoreOffScreenUpdates && !visible.contains(action.indexPath!)) {
-                        continue
-                    }
-                    self.collectionView.reloadItemsAtIndexPaths([action.indexPath!])
                 }
             }
         }) { (finished) -> Void in
