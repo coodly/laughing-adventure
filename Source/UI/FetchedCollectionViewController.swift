@@ -72,7 +72,6 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        Logging.log("cellForItemAtIndexPath:\(indexPath)")
         let cell:UICollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(FetchedCollectionCellIdentifier, forIndexPath: indexPath)
         let object:AnyObject = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(cell, atIndexPath:indexPath, object:object, forMeasuring:false)
@@ -80,7 +79,6 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        Logging.log("sizeForItemAtIndexPath:\(indexPath)")
         let object = fetchedController.objectAtIndexPath(indexPath)
         configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
@@ -107,8 +105,6 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     public func controllerDidChangeContent(controller: NSFetchedResultsController) {
         Logging.log("controllerDidChangeContent")
         let visible = collectionView.indexPathsForVisibleItems()
-        
-        Logging.log("Handle \(changeActions.count) change actions")
         
         collectionView.performBatchUpdates({ () -> Void in
             for action in self.changeActions {
