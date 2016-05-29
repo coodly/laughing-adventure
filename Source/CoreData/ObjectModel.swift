@@ -89,8 +89,8 @@ public class ObjectModel {
         let urls = NSFileManager.defaultManager().URLsForDirectory(self.inDirectory, inDomains: .UserDomainMask)
         let last = urls.last!
         let identifier = NSBundle.mainBundle().bundleIdentifier!
-        let appFolder = last.URLByAppendingPathComponent(identifier)
-        let dbFolder = appFolder.URLByAppendingPathComponent("DB")
+        let dbIdentifier = identifier.stringByAppendingString(".db")
+        let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)
         do {
             try NSFileManager.defaultManager().createDirectoryAtURL(dbFolder, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
