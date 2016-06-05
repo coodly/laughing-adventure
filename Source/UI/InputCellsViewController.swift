@@ -38,7 +38,7 @@ public class InputCellsSection {
     }
 }
 
-public class InputCellsViewController: UIViewController, FullScreenTableCreate {
+public class InputCellsViewController: UIViewController, FullScreenTableCreate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
@@ -62,20 +62,24 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate {
     public override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
+        smoothDeselectRows()
+        
         configureReturnButtons()
     }
     
-    private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) {
+    private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) -> Bool {
         if cell.isKindOfClass(TextEntryCell) {
             let entryCell = cell as! TextEntryCell
             entryCell.entryField.becomeFirstResponder()
+            return false
         } else {
-            tappedCell(cell, atIndexPath: atIndexPath)
+            return tappedCell(cell, atIndexPath: atIndexPath)
         }
     }
     
-    public func tappedCell(cell:UITableViewCell, atIndexPath:NSIndexPath) {
+    public func tappedCell(cell:UITableViewCell, atIndexPath:NSIndexPath) -> Bool {
         Logging.log("tappedCell")
+        return false
     }
     
     public func addSection(section: InputCellsSection) {
@@ -184,11 +188,15 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
         let section = sections[indexPath.section]
         let cell = section.cellAtRow(indexPath.row)
-        handleCellTap(cell, atIndexPath: indexPath)
+        let detailsShonw = handleCellTap(cell, atIndexPath: indexPath)
+        
+        if detailsShonw {
+            return
+        }
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {

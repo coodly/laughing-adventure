@@ -23,7 +23,7 @@ private extension Selector {
 
 let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
-public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
+public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
     private var fetchedController: NSFetchedResultsController?
     private var measuringCell: UITableViewCell?
@@ -43,6 +43,10 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     }
     
     public override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        smoothDeselectRows()
+        
         if let _ = fetchedController {
             return
         }
@@ -76,10 +80,13 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     }
     
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
         let object = fetchedController!.objectAtIndexPath(indexPath)
-        tappedCell(indexPath, object: object)
+        let detailsShown = tappedCell(indexPath, object: object)
+        if detailsShown {
+            return
+        }
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -140,8 +147,9 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         fatalError("Need to override \(#function)")
     }
     
-    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) -> Bool {
         Logging.log("tappedCell(indexPath:\(atIndexPath))")
+        return false
     }
     
     public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject, forMeasuring:Bool) {
