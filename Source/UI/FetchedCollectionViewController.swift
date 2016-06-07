@@ -171,6 +171,19 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         return size.height
     }
     
+    public func hasObjectAtIndexPath(indexPath: NSIndexPath) -> Bool {
+        guard let sections = fetchedController.sections where sections.count > indexPath.section else {
+            return false
+        }
+        
+        let section = sections[indexPath.section]
+        if section.numberOfObjects <= indexPath.row {
+            return false
+        }
+        
+        return true
+    }
+    
     public func objectAt(indexPath: NSIndexPath) -> AnyObject {
         return fetchedController.objectAtIndexPath(indexPath)
     }
