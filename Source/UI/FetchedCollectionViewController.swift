@@ -41,7 +41,7 @@ let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView: UICollectionView!
-    private var fetchedController: NSFetchedResultsController!
+    private var fetchedController: NSFetchedResultsController?
     private var measuringCell: UICollectionViewCell?
     private var changeActions: [CollectionCoreDataChangeAction]!
     
@@ -61,13 +61,17 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         }
         
         fetchedController = createFetchedController()
-        fetchedController.delegate = self
+        fetchedController!.delegate = self
         
         collectionView.reloadData()
     }
     
     public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
+        guard let controller = fetchedController else {
+            return 0
+        }
+        
+        let sections:[NSFetchedResultsSectionInfo] = controller.sections! as [NSFetchedResultsSectionInfo]
         return sections[section].numberOfObjects
     }
     
@@ -79,7 +83,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        let object = fetchedController.objectAtIndexPath(indexPath)
+        let object = fetchedController!.objectAtIndexPath(indexPath)
         configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
         return CGSizeMake(CGRectGetWidth(collectionView.frame), height)
@@ -88,7 +92,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         collectionView.deselectItemAtIndexPath(indexPath, animated: true)
         
-        let object = fetchedController.objectAtIndexPath(indexPath)
+        let object = fetchedController!.objectAtIndexPath(indexPath)
         tappedCell(indexPath, object: object)
     }
     
@@ -135,7 +139,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func isEmpty() -> Bool {
-        return fetchedController.fetchedObjects?.count == 0
+        return fetchedController?.fetchedObjects?.count == 0
     }
     
     public func contentChanged() {
@@ -172,7 +176,11 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func hasObjectAtIndexPath(indexPath: NSIndexPath) -> Bool {
-        guard let sections = fetchedController.sections where sections.count > indexPath.section else {
+        guard let controller = fetchedController else {
+            return false
+        }
+        
+        guard let sections = controller.sections where sections.count > indexPath.section else {
             return false
         }
         
@@ -185,6 +193,6 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func objectAt(indexPath: NSIndexPath) -> AnyObject {
-        return fetchedController.objectAtIndexPath(indexPath)
+        return fetchedController!.objectAtIndexPath(indexPath)
     }
 }
