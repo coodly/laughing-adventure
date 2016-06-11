@@ -23,6 +23,12 @@ private extension Selector {
 public class InputCellsSection {
     private let cells: [UITableViewCell]
     private var title: String?
+    private var header: UIView?
+    
+    public init(header: UIView, cells: [UITableViewCell]) {
+        self.header = header
+        self.cells = cells
+    }
     
     public init(title: String? = nil, cells: [UITableViewCell]) {
         self.title = title
@@ -55,6 +61,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedSectionHeaderHeight = 20
         
         tableView.tableFooterView = UIView()
     }
@@ -201,6 +208,18 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return sections[section].title
+    }
+    
+    public func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return sections[section].header
+    }
+    
+    public func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        guard let header = sections[section].header else {
+            return 0
+        }
+        
+        return UITableViewAutomaticDimension
     }
 }
 
