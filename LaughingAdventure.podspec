@@ -6,11 +6,19 @@ Pod::Spec.new do |s|
   s.homepage = 'https://github.com/coodly/laughing-adventure'
   s.authors = { 'Jaanus Siim' => 'jaanus@coodly.com' }
   s.source = { :git => 'git@github.com:coodly/laughing-adventure.git', :tag => s.version }
+  s.default_subspec = 'Core'
 
   s.ios.deployment_target = '8.0'
   s.tvos.deployment_target = '9.0'
 
-  s.source_files = 'Source/*/*.swift'
+  s.subspec 'Core' do |core|
+    core.source_files = 'Source/*/*.swift'
+  end
+  
+  s.subspec 'Purchase' do |purchase|
+    purchase.source_files = "Source/Purchase"
+    purchase.frameworks = 'StoreKit'
+  end
 
   s.requires_arc = true
 end
