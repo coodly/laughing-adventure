@@ -15,10 +15,15 @@ Pod::Spec.new do |s|
     core.source_files = 'Source/*/*.swift'
   end
   
+  s.subspec 'Logging' do |log|
+  	log.source_files = "Source/Log"
+  end
+
   s.subspec 'Purchase' do |purchase|
+	purchase.dependency "LaughingAdventure/Logging"
     purchase.source_files = "Source/Purchase"
     purchase.frameworks = 'StoreKit'
   end
-
+  
   s.requires_arc = true
 end
