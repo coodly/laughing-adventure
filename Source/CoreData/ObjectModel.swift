@@ -90,7 +90,11 @@ public class ObjectModel {
         let last = urls.last!
         let identifier = NSBundle.mainBundle().bundleIdentifier!
         let dbIdentifier = identifier.stringByAppendingString(".db")
-        let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)
+        #if swift(>=2.3)
+            let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)!
+        #else
+            let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)
+        #endif
         do {
             try NSFileManager.defaultManager().createDirectoryAtURL(dbFolder, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
@@ -283,14 +287,24 @@ public extension ObjectModel {
     public func countInstancesOfEntity<T: NSManagedObject>(type: T.Type, usingPredicate predicate: NSPredicate) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
-        var error: NSError?
-        let count = managedObjectContext.countForFetchRequest(request, error: &error)
-        
-        if error != nil {
-            fatalError("Count failed: \(error)")
-        }
-        
-        return count
+        #if swift(>=2.3)
+            do {
+                let count = try managedObjectContext.countForFetchRequest(request)
+                return count
+            } catch let error as NSError {
+                fatalError("Count failed: \(error)")
+                return 0
+            }
+        #else
+            var error: NSError?
+            let count = managedObjectContext.countForFetchRequest(request, error: &error)
+            
+            if error != nil {
+                fatalError("Count failed: \(error)")
+            }
+            
+            return count
+        #endif
     }
     
     public func fetchEntity<T: NSManagedObject>(type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {

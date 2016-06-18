@@ -49,7 +49,15 @@ public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResults
     }
     
     public func indexPathForObject(object: AnyObject) -> NSIndexPath? {
-        return fetchedController.indexPathForObject(object)
+        #if swift(>=2.3)
+            guard let fetched = object as? NSFetchRequestResult else {
+                return nil
+            }
+            
+            return fetchedController.indexPathForObject(fetched)
+        #else
+            return fetchedController.indexPathForObject(object)
+        #endif
     }
     
     //TODO jaanus: copy/paste....
