@@ -20,9 +20,13 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Purchase' do |purchase|
-	purchase.dependency "LaughingAdventure/Logging"
+    purchase.dependency "LaughingAdventure/Logging"
     purchase.source_files = "Source/Purchase"
     purchase.frameworks = 'StoreKit'
+  end
+
+  s.subspec 'Feedback' do |feedback|
+    feedback.source_files = "Source/Feedback"
   end
   
   s.requires_arc = true
