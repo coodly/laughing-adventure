@@ -236,7 +236,11 @@ public extension ObjectModel /* Fetch request */ {
     }
     
     public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
-        let request = NSFetchRequest(entityName: type.entityName())
+        return fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
+    }
+
+    private func fetchRequestForEntity(named name: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+        let request = NSFetchRequest(entityName: name)
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
         return request
@@ -323,7 +327,24 @@ public extension ObjectModel {
             return nil
         }
     }
+
+    public func fetchEntity<T: NSManagedObject>(whereAttribute name: String, hasValue: AnyObject) -> T? {
+        let predicate = predicateForAttribute(name, withValue: hasValue)
+        return fetchFirstEntity(predicate)
+    }
     
+    public func fetchFirstEntity<T: NSManagedObject>(predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
+        let request = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
+        
+        do {
+            let result = try managedObjectContext.executeFetchRequest(request)
+            return result.first as? T
+        } catch {
+            Logging.log(error)
+            return nil
+        }
+    }
+
     public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> [T] {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
