@@ -82,13 +82,8 @@ public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
         Cloud.container.publicCloudDatabase.addOperation(fetchOperation)
     }
     
-    public final override func start() {
+    public override func main() {
         Logging.log("Start \(T.self)")
-        if cancelled {
-            self.finish()
-            return
-        }
-        
         performRequest()
     }
     
