@@ -20,12 +20,12 @@ public struct Cloud {
     public static var container: CKContainer = CKContainer.defaultContainer()
 }
 
-public enum CloudResult<T: CloudRecord> {
+public enum CloudResult<T: LocalRecord> {
     case Success([T])
     case Failure
 }
 
-public class CloudRequest<T: CloudRecord>: ConcurrentOperation {
+public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
     private var records = [T]()
     
     public override init() {
@@ -33,10 +33,22 @@ public class CloudRequest<T: CloudRecord>: ConcurrentOperation {
     }
     
     public final func cloud(fetch recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) {
-        Logging.log("Fetch \(recordName)")
-        
         let query = CKQuery(recordType: recordName, predicate: predicate)
+        perform(query)
+    }
+    
+    public final func cloud(fetchFirst recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = []) {
+        let query = CKQuery(recordType: recordName, predicate: predicate)
+        perform(query, limit: 1)
+    }
+    
+    private final func perform(query: CKQuery, limit: Int? = nil) {
+        Logging.log("Fetch \(query.recordType)")
+
         let fetchOperation = CKQueryOperation(query: query)
+        if let limit = limit {
+            fetchOperation.resultsLimit = limit
+        }
         
         fetchOperation.recordFetchedBlock = {
             record in
@@ -49,7 +61,7 @@ public class CloudRequest<T: CloudRecord>: ConcurrentOperation {
         
         fetchOperation.queryCompletionBlock = {
             cursor, error in
-        
+            
             if self.cancelled {
                 self.finish()
                 return
@@ -71,6 +83,7 @@ public class CloudRequest<T: CloudRecord>: ConcurrentOperation {
     }
     
     public final override func start() {
+        Logging.log("Start \(T.self)")
         if cancelled {
             self.finish()
             return
