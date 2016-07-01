@@ -49,7 +49,7 @@ public class ConcurrentOperation: NSOperation {
         }
     }
     
-    override public func start() {
+    override public final func start() {
         if cancelled {
             finish()
             return

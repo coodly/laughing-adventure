@@ -70,10 +70,14 @@ public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
             Logging.log("Completion: \(cursor) - \(error)")
             Logging.log("Have \(self.records.count) records")
             
+            let finalizer = {
+                self.finish()
+            }
+            
             if let error = error {
-                self.handleResult(.Failure)
+                self.handleResult(.Failure, completion: finalizer)
             } else {
-                self.handleResult(.Success(self.records))
+                self.handleResult(.Success(self.records), completion: finalizer)
             }
             
             self.finish()
@@ -91,7 +95,8 @@ public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
         Logging.log("Override: \(#function)")
     }
     
-    public func handleResult(result: CloudResult<T>) {
+    public func handleResult(result: CloudResult<T>, completion: () -> ()) {
         Logging.log("Handle result \(result)")
+        completion()
     }
 }
