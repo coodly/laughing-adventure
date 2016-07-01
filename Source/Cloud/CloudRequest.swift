@@ -39,6 +39,7 @@ public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
     
     public final func cloud(fetchFirst recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = []) {
         let query = CKQuery(recordType: recordName, predicate: predicate)
+        query.sortDescriptors = sort
         perform(query, limit: 1)
     }
     
