@@ -37,7 +37,15 @@ public class SubscriptionCheck {
         Cloud.container.publicCloudDatabase.fetchAllSubscriptionsWithCompletionHandler() {
             subscriptions, error in
             
-            if let error = error {
+            if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
+                Logging.log("Error: \(error)")
+                Logging.log("Will retry after \(retryAfter) seconds")
+                runAfter(retryAfter) {
+                    Logging.log("Try again")
+                    self.check()
+                }
+                return
+            } else if let error = error {
                 Logging.log("Subscription check error: \(error)")
                 return
             }
