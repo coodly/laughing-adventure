@@ -102,15 +102,14 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
     }
     
     public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        Logging.log("didChangeObject")
         changeActions.append(CollectionCoreDataChangeAction.action(indexPath, changeType: type, newIndexPath: newIndexPath))
     }
     
     public func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        Logging.log("controllerDidChangeContent")
+        Logging.log("controllerDidChangeContent: \(changeActions.count) changes")
         let visible = collectionView.indexPathsForVisibleItems()
         
-        collectionView.performBatchUpdates({ () -> Void in
+        let updateClosure = {
             for action in self.changeActions {
                 let type = action.changeType
                 switch(type) {
@@ -127,9 +126,15 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
                     self.collectionView.moveItemAtIndexPath(action.indexPath!, toIndexPath: action.newIndexPath!)
                 }
             }
-        }) { (finished) -> Void in
+        }
+        
+        let completion: (Bool) -> () = {
+            finished in
+            
             self.contentChanged()
         }
+        
+        collectionView.performBatchUpdates(updateClosure, completion: completion)
     }
         
     func contentSizeChanged() {
