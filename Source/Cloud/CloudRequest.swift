@@ -76,7 +76,15 @@ public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
                 self.finish()
             }
             
-            if let error = error {
+            if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
+                Logging.log("Error: \(error)")
+                Logging.log("Will retry after \(retryAfter) seconds")
+                runAfter(retryAfter) {
+                    Logging.log("Try again")
+                    self.perform(query, limit: limit)
+                }
+            } else if let error = error {
+                Logging.log("Error: \(error)")
                 self.handleResult(.Failure, completion: finalizer)
             } else {
                 self.handleResult(.Success(self.records), completion: finalizer)
