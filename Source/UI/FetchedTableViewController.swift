@@ -159,4 +159,8 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
     public func contentChanged() {
         Logging.log("Content changed")
     }
+    
+    public func objectAt(indexPath: NSIndexPath) -> AnyObject {
+        return fetchedController!.objectAtIndexPath(indexPath)
+    }
 }
