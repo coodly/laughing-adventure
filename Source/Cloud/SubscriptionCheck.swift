@@ -34,7 +34,8 @@ public class SubscriptionCheck {
     
     public func check() {
         Logging.log("Check subscriptions")
-        Cloud.container.publicCloudDatabase.fetchAllSubscriptionsWithCompletionHandler() {
+        
+        let resultHandler: ([CKSubscription]?, NSError?) -> () = {
             subscriptions, error in
             
             if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
@@ -63,11 +64,18 @@ public class SubscriptionCheck {
                     haveExisting = true
                 } else if self.deleteOthers {
                     Logging.log("Will delete \(sub)")
-                    Cloud.container.publicCloudDatabase.deleteSubscriptionWithID(sub.subscriptionID) {
+                    
+                    let deletionHandler: (String?, NSError?) -> () = {
                         id, error in
                         
                         Logging.log("Deletion result: \(id) - \(error)")
                     }
+                    
+                    #if swift(>=2.3)
+                        Cloud.container.publicCloudDatabase.delete(withSubscriptionID: sub.subscriptionID, completionHandler: deletionHandler)
+                    #else
+                        Cloud.container.publicCloudDatabase.deleteSubscriptionWithID(sub.subscriptionID, completionHandler: deletionHandler)
+                    #endif
                 }
             }
             
@@ -79,6 +87,12 @@ public class SubscriptionCheck {
             Logging.log("Had no subscriptions")
             self.subscribe()
         }
+
+        #if swift(>=2.3)
+            Cloud.container.publicCloudDatabase.fetchAll(completionHandler: resultHandler)
+        #else
+            Cloud.container.publicCloudDatabase.fetchAllSubscriptionsWithCompletionHandler(resultHandler)
+        #endif
     }
     
     func subscribe() {
