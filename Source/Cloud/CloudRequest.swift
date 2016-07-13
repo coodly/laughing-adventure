@@ -16,22 +16,119 @@
 
 import CloudKit
 
+public enum UsedDatabase {
+    case Public
+    case Private
+}
+
 public struct Cloud {
     public static var container: CKContainer = CKContainer.defaultContainer()
 }
 
-public enum CloudResult<T: RemoteRecord> {
+public enum CloudResult<T: FromRemoteRecord> {
     case Success([T])
     case Failure
 }
 
-public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
+public class CloudRequest<T: FromRemoteRecord, O: ToRemoteRecord>: ConcurrentOperation {
     private var records = [T]()
     
     public override init() {
         
     }
     
+    public override func main() {
+        Logging.log("Start \(T.self)")
+        performRequest()
+    }
+    
+    public func performRequest() {
+        Logging.log("Override: \(#function)")
+    }
+    
+    public func handleResult(result: CloudResult<T>, completion: () -> ()) {
+        Logging.log("Handle result \(result)")
+        completion()
+    }
+    
+    private func database(type: UsedDatabase) -> CKDatabase {
+        switch type {
+        case .Public:
+            return Cloud.container.publicCloudDatabase
+        case .Private:
+            return Cloud.container.privateCloudDatabase
+        }
+    }
+    
+    private func handleResultWithError(error: NSError?, retryClosure: () -> ()) {
+        let finalizer = {
+            self.finish()
+        }
+        
+        if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
+            Logging.log("Error: \(error)")
+            Logging.log("Will retry after \(retryAfter) seconds")
+            runAfter(retryAfter) {
+                Logging.log("Try again")
+                retryClosure()
+            }
+        } else if let error = error {
+            Logging.log("Error: \(error)")
+            self.handleResult(.Failure, completion: finalizer)
+        } else {
+            self.handleResult(.Success(self.records), completion: finalizer)
+        }
+    }
+}
+
+public extension CloudRequest {
+    public final func save(record record: O, inDatabase db: UsedDatabase = .Private) {
+        let modified: CKRecord
+        if let existing = record.recordName {
+            modified = CKRecord(recordType: record.recordType, recordID: CKRecordID(recordName: existing))
+        } else {
+            modified = CKRecord(recordType: record.recordType)
+        }
+        
+        let mirror = Mirror(reflecting: record)
+        for child in mirror.children {
+            guard let label = child.label where label != "recordName" else {
+                continue
+            }
+            
+            guard let value = child.value as? CKRecordValue else {
+                continue
+            }
+            
+            modified[label] = value
+        }
+        
+        let operation = CKModifyRecordsOperation(recordsToSave: [modified], recordIDsToDelete: nil)
+        operation.modifyRecordsCompletionBlock = {
+            saved, deleted, error in
+            
+            Logging.log("Saved: \(saved)")
+            Logging.log("Deleted: \(deleted)")
+            
+            if let saved = saved {
+                for s in saved {
+                    var local = T()
+                    if local.load(s) {
+                        self.records.append(local)
+                    }
+                }
+            }
+            
+            self.handleResultWithError(error) {
+                self.save(record: record, inDatabase: db)
+            }
+        }
+        
+        database(db).addOperation(operation)
+    }
+}
+
+public extension CloudRequest {
     public final func cloud(fetch recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) {
         let query = CKQuery(recordType: recordName, predicate: predicate)
         perform(query)
@@ -46,7 +143,7 @@ public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
     
     private final func perform(query: CKQuery, limit: Int? = nil) {
         Logging.log("Fetch \(query.recordType)")
-
+        
         let fetchOperation = CKQueryOperation(query: query)
         if let limit = limit {
             fetchOperation.resultsLimit = limit
@@ -72,41 +169,11 @@ public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
             Logging.log("Completion: \(cursor) - \(error)")
             Logging.log("Have \(self.records.count) records")
             
-            let finalizer = {
-                self.finish()
+            self.handleResultWithError(error) {
+                self.perform(query, limit: limit)
             }
-            
-            if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
-                Logging.log("Error: \(error)")
-                Logging.log("Will retry after \(retryAfter) seconds")
-                runAfter(retryAfter) {
-                    Logging.log("Try again")
-                    self.perform(query, limit: limit)
-                }
-            } else if let error = error {
-                Logging.log("Error: \(error)")
-                self.handleResult(.Failure, completion: finalizer)
-            } else {
-                self.handleResult(.Success(self.records), completion: finalizer)
-            }
-            
-            self.finish()
         }
         
         Cloud.container.publicCloudDatabase.addOperation(fetchOperation)
-    }
-    
-    public override func main() {
-        Logging.log("Start \(T.self)")
-        performRequest()
-    }
-    
-    public func performRequest() {
-        Logging.log("Override: \(#function)")
-    }
-    
-    public func handleResult(result: CloudResult<T>, completion: () -> ()) {
-        Logging.log("Handle result \(result)")
-        completion()
     }
 }

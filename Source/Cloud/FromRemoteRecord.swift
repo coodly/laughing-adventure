@@ -16,7 +16,7 @@
 
 import CloudKit
 
-public protocol RemoteRecord {
+public protocol FromRemoteRecord {
     var recordName: String? { get set }
     init()
     
@@ -24,7 +24,7 @@ public protocol RemoteRecord {
     mutating func loadFields(record: CKRecord) -> Bool
 }
 
-public extension RemoteRecord {
+public extension FromRemoteRecord {
     final mutating func load(record: CKRecord) -> Bool {
         recordName = record.recordID.recordName
         return loadFields(record)

@@ -17,11 +17,6 @@
 import CoreData
 
 extension NSManagedObjectContext {
-    @available(*, deprecated=7.0, renamed="insertEntity")
-    public func insertEntityOfType<T: NSManagedObject>(type: T.Type) -> T {
-        return insertEntity()
-    }
-    
     public func insertEntity<T: NSManagedObject>() -> T {
         return NSEntityDescription.insertNewObjectForEntityForName(T.entityName(), inManagedObjectContext: self) as! T
     }

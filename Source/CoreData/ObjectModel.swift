@@ -330,10 +330,10 @@ public extension ObjectModel {
 
     public func fetchEntity<T: NSManagedObject>(whereAttribute name: String, hasValue: AnyObject) -> T? {
         let predicate = predicateForAttribute(name, withValue: hasValue)
-        return fetchFirstEntity(predicate)
+        return fetchFirstEntity(usingPredicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
+    public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
         let request = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
