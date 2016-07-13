@@ -96,11 +96,17 @@ public extension CloudRequest {
                 continue
             }
             
-            guard let value = child.value as? CKRecordValue else {
-                continue
+            if let value = child.value as? NSString {
+                modified[label] = value
+            } else if let value = child.value as? NSNumber {
+                modified[label] = value
+            } else if let value = child.value as? NSDate {
+                modified[label] = value
+            } else if let value = child.value as? CLLocation {
+                modified[label] = value
+            } else {
+                Logging.log("Could not cast \(child) value")
             }
-            
-            modified[label] = value
         }
         
         let operation = CKModifyRecordsOperation(recordsToSave: [modified], recordIDsToDelete: nil)
@@ -129,19 +135,19 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func cloud(fetch recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) {
+    public final func cloud(fetch recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), inDatabase db: UsedDatabase = .Private) {
         let query = CKQuery(recordType: recordName, predicate: predicate)
-        perform(query)
+        perform(query, inDatabase: db)
     }
     
-    public final func cloud(fetchFirst recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = []) {
+    public final func cloud(fetchFirst recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
         Logging.log("Fetch first \(recordName). Predicate: \(predicate)")
         let query = CKQuery(recordType: recordName, predicate: predicate)
         query.sortDescriptors = sort
-        perform(query, limit: 1)
+        perform(query, limit: 1, inDatabase: db)
     }
     
-    private final func perform(query: CKQuery, limit: Int? = nil) {
+    private final func perform(query: CKQuery, limit: Int? = nil, inDatabase db: UsedDatabase) {
         Logging.log("Fetch \(query.recordType)")
         
         let fetchOperation = CKQueryOperation(query: query)
@@ -170,10 +176,10 @@ public extension CloudRequest {
             Logging.log("Have \(self.records.count) records")
             
             self.handleResultWithError(error) {
-                self.perform(query, limit: limit)
+                self.perform(query, limit: limit, inDatabase: db)
             }
         }
         
-        Cloud.container.publicCloudDatabase.addOperation(fetchOperation)
+        database(db).addOperation(fetchOperation)
     }
 }
