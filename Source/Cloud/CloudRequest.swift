@@ -20,12 +20,12 @@ public struct Cloud {
     public static var container: CKContainer = CKContainer.defaultContainer()
 }
 
-public enum CloudResult<T: LocalRecord> {
+public enum CloudResult<T: RemoteRecord> {
     case Success([T])
     case Failure
 }
 
-public class CloudRequest<T: LocalRecord>: ConcurrentOperation {
+public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
     private var records = [T]()
     
     public override init() {
