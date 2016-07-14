@@ -26,12 +26,13 @@ public struct Cloud {
 }
 
 public enum CloudResult<T: FromRemoteRecord> {
-    case Success([T])
+    case Success([T], [CKRecordID])
     case Failure
 }
 
 public class CloudRequest<T: FromRemoteRecord, O: ToRemoteRecord>: ConcurrentOperation {
     private var records = [T]()
+    private var deleted = [CKRecordID]()
     
     public override init() {
         
@@ -76,8 +77,32 @@ public class CloudRequest<T: FromRemoteRecord, O: ToRemoteRecord>: ConcurrentOpe
             Logging.log("Error: \(error)")
             self.handleResult(.Failure, completion: finalizer)
         } else {
-            self.handleResult(.Success(self.records), completion: finalizer)
+            self.handleResult(.Success(self.records, self.deleted), completion: finalizer)
         }
+    }
+}
+
+public extension CloudRequest {
+    public final func delete(record record: O, inDatabase db: UsedDatabase = .Private) {
+        Logging.log("Delete \(record)")
+        let deleted = CKRecordID(recordName: record.recordName!)
+        
+        let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [deleted])
+        operation.modifyRecordsCompletionBlock = {
+            saved, deleted, error in
+            
+            Logging.log("Saved: \(saved)")
+            Logging.log("Deleted: \(deleted)")
+            if let deleted = deleted {
+                self.deleted.appendContentsOf(deleted)
+            }
+
+            self.handleResultWithError(error) {
+                self.delete(record: record, inDatabase: db)
+            }
+        }
+        
+        database(db).addOperation(operation)
     }
 }
 
