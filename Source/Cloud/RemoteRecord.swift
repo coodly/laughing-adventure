@@ -25,6 +25,7 @@ public protocol RemoteRecord {
     
     mutating func load(record: CKRecord) -> Bool
     mutating func loadFields(record: CKRecord) -> Bool
+    func referenceRepresentation() -> CKReference
 }
 
 public extension RemoteRecord {
@@ -32,6 +33,10 @@ public extension RemoteRecord {
         recordData = archiveRecord(record)
         recordName = record.recordID.recordName
         return loadFields(record)
+    }
+    
+    func referenceRepresentation() -> CKReference {
+        return CKReference(recordID: CKRecordID(recordName: recordName!), action: .DeleteSelf)
     }
     
     private func archiveRecord(record: CKRecord) -> NSMutableData {
@@ -76,6 +81,18 @@ public extension RemoteRecord {
             } else if let value = child.value as? NSDate {
                 modified[label] = value
             } else if let value = child.value as? CLLocation {
+                modified[label] = value
+            } else if let value = child.value as? CKReference {
+                modified[label] = value
+            } else if let value = child.value as? [String] {
+                modified[label] = value
+            } else if let value = child.value as? [NSNumber] {
+                modified[label] = value
+            } else if let value = child.value as? [NSDate] {
+                modified[label] = value
+            } else if let value = child.value as? [CLLocation] {
+                modified[label] = value
+            } else if let value = child.value as? [CKReference] {
                 modified[label] = value
             } else {
                 Logging.log("Could not cast \(child) value")
