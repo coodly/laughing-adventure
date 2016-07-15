@@ -25,12 +25,12 @@ public struct Cloud {
     public static var container: CKContainer = CKContainer.defaultContainer()
 }
 
-public enum CloudResult<T: FromRemoteRecord> {
+public enum CloudResult<T: RemoteRecord> {
     case Success([T], [CKRecordID])
     case Failure
 }
 
-public class CloudRequest<T: FromRemoteRecord, O: ToRemoteRecord>: ConcurrentOperation {
+public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
     private var records = [T]()
     private var deleted = [CKRecordID]()
     
@@ -83,7 +83,7 @@ public class CloudRequest<T: FromRemoteRecord, O: ToRemoteRecord>: ConcurrentOpe
 }
 
 public extension CloudRequest {
-    public final func delete(record record: O, inDatabase db: UsedDatabase = .Private) {
+    public final func delete(record record: T, inDatabase db: UsedDatabase = .Private) {
         Logging.log("Delete \(record)")
         let deleted = CKRecordID(recordName: record.recordName!)
         
@@ -107,7 +107,7 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func save(record record: O, inDatabase db: UsedDatabase = .Private) {
+    public final func save(record record: T, inDatabase db: UsedDatabase = .Private) {
         let modified: CKRecord
         if let existing = record.recordName {
             modified = CKRecord(recordType: record.recordType, recordID: CKRecordID(recordName: existing))

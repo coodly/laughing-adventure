@@ -24,3 +24,9 @@ public func runAfter(seconds: NSTimeInterval, onQueue queue: dispatch_queue_t = 
 public func onMainThread(closure: () -> ()) {
     dispatch_async(dispatch_get_main_queue(), closure)
 }
+
+public func timeMeasured(desc: String = "", closure: () -> ()) {
+    let start = CACurrentMediaTime()
+    closure()
+    Logging.log(String(format: "%@ - time: %f", desc, CACurrentMediaTime() - start))
+}

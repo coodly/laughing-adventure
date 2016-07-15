@@ -16,17 +16,42 @@
 
 import CloudKit
 
-public protocol FromRemoteRecord {
+public protocol RemoteRecord {
     var recordName: String? { get set }
+    var recordData: NSData? { get set }
+    var recordType: String { get }
+
     init()
     
     mutating func load(record: CKRecord) -> Bool
     mutating func loadFields(record: CKRecord) -> Bool
 }
 
-public extension FromRemoteRecord {
+public extension RemoteRecord {
     final mutating func load(record: CKRecord) -> Bool {
+        recordData = archiveRecord(record)
         recordName = record.recordID.recordName
         return loadFields(record)
+    }
+    
+    private func archiveRecord(record: CKRecord) -> NSMutableData {
+        let archivedData = NSMutableData()
+        timeMeasured("Record encode") {
+            var archiver = NSKeyedArchiver(forWritingWithMutableData: archivedData)
+            archiver.requiresSecureCoding = true
+            record.encodeSystemFieldsWithCoder(archiver)
+            archiver.finishEncoding()
+        }
+        return archivedData
+    }
+    
+    private func unargchiveRecord() -> CKRecord? {
+        guard let data = recordData else {
+            return nil
+        }
+        
+        let coder = NSKeyedUnarchiver(forReadingWithData: data)
+        coder.requiresSecureCoding = true
+        return CKRecord(coder: coder)
     }
 }
