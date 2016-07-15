@@ -345,8 +345,11 @@ public extension ObjectModel {
         }
     }
 
-    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> [T] {
+    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), limit: Int = 0) -> [T] {
         let request = fetchRequestForEntity(type, predicate: predicate)
+        if limit > 0 {
+            request.fetchLimit = limit
+        }
         
         do {
             let result = try managedObjectContext.executeFetchRequest(request)
