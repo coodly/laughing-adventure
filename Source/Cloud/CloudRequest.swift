@@ -91,8 +91,8 @@ public extension CloudRequest {
         operation.modifyRecordsCompletionBlock = {
             saved, deleted, error in
             
-            Logging.log("Saved: \(saved)")
-            Logging.log("Deleted: \(deleted)")
+            Logging.log("Saved: \(saved?.count)")
+            Logging.log("Deleted: \(deleted?.count)")
             if let deleted = deleted {
                 self.deleted.appendContentsOf(deleted)
             }
@@ -109,15 +109,17 @@ public extension CloudRequest {
 public extension CloudRequest {
     public final func save(record record: T, inDatabase db: UsedDatabase = .Private) {
         let modified: CKRecord
-        if let existing = record.recordName {
-            modified = CKRecord(recordType: record.recordType, recordID: CKRecordID(recordName: existing))
+        if let existing = record.unarchiveRecord() {
+            modified = existing
+        } else if let name = record.recordName {
+            modified = CKRecord(recordType: record.recordType, recordID: CKRecordID(recordName: name))
         } else {
             modified = CKRecord(recordType: record.recordType)
         }
         
         let mirror = Mirror(reflecting: record)
         for child in mirror.children {
-            guard let label = child.label where label != "recordName" else {
+            guard let label = child.label where label != "recordName" && label != "recordData" else {
                 continue
             }
             
@@ -138,8 +140,8 @@ public extension CloudRequest {
         operation.modifyRecordsCompletionBlock = {
             saved, deleted, error in
             
-            Logging.log("Saved: \(saved)")
-            Logging.log("Deleted: \(deleted)")
+            Logging.log("Saved: \(saved?.count)")
+            Logging.log("Deleted: \(deleted?.count)")
             
             if let saved = saved {
                 for s in saved {

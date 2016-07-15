@@ -43,7 +43,7 @@ public extension RemoteRecord {
         return archivedData
     }
     
-    private func unargchiveRecord() -> CKRecord? {
+    internal func unarchiveRecord() -> CKRecord? {
         guard let data = recordData else {
             return nil
         }
