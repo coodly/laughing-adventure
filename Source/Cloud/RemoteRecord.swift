@@ -36,12 +36,10 @@ public extension RemoteRecord {
     
     private func archiveRecord(record: CKRecord) -> NSMutableData {
         let archivedData = NSMutableData()
-        timeMeasured("Record encode") {
-            var archiver = NSKeyedArchiver(forWritingWithMutableData: archivedData)
-            archiver.requiresSecureCoding = true
-            record.encodeSystemFieldsWithCoder(archiver)
-            archiver.finishEncoding()
-        }
+        let archiver = NSKeyedArchiver(forWritingWithMutableData: archivedData)
+        archiver.requiresSecureCoding = true
+        record.encodeSystemFieldsWithCoder(archiver)
+        archiver.finishEncoding()
         return archivedData
     }
     
