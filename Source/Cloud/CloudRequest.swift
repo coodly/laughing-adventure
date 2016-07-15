@@ -107,36 +107,10 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func save(record record: T, inDatabase db: UsedDatabase = .Private) {
-        let modified: CKRecord
-        if let existing = record.unarchiveRecord() {
-            modified = existing
-        } else if let name = record.recordName {
-            modified = CKRecord(recordType: record.recordType, recordID: CKRecordID(recordName: name))
-        } else {
-            modified = CKRecord(recordType: record.recordType)
-        }
+    public final func save(records records: [T], inDatabase db: UsedDatabase = .Private) {
+        let toSave = records.map { $0.recordRepresentation() }
         
-        let mirror = Mirror(reflecting: record)
-        for child in mirror.children {
-            guard let label = child.label where label != "recordName" && label != "recordData" else {
-                continue
-            }
-            
-            if let value = child.value as? NSString {
-                modified[label] = value
-            } else if let value = child.value as? NSNumber {
-                modified[label] = value
-            } else if let value = child.value as? NSDate {
-                modified[label] = value
-            } else if let value = child.value as? CLLocation {
-                modified[label] = value
-            } else {
-                Logging.log("Could not cast \(child) value")
-            }
-        }
-        
-        let operation = CKModifyRecordsOperation(recordsToSave: [modified], recordIDsToDelete: nil)
+        let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: nil)
         operation.modifyRecordsCompletionBlock = {
             saved, deleted, error in
             
@@ -153,11 +127,15 @@ public extension CloudRequest {
             }
             
             self.handleResultWithError(error) {
-                self.save(record: record, inDatabase: db)
+                self.save(records: records, inDatabase: db)
             }
         }
         
         database(db).addOperation(operation)
+    }
+    
+    public final func save(record record: T, inDatabase db: UsedDatabase = .Private) {
+        save(records: [record], inDatabase: db)
     }
 }
 

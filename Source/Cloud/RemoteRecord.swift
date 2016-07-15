@@ -43,7 +43,7 @@ public extension RemoteRecord {
         return archivedData
     }
     
-    internal func unarchiveRecord() -> CKRecord? {
+    private func unarchiveRecord() -> CKRecord? {
         guard let data = recordData else {
             return nil
         }
@@ -51,5 +51,37 @@ public extension RemoteRecord {
         let coder = NSKeyedUnarchiver(forReadingWithData: data)
         coder.requiresSecureCoding = true
         return CKRecord(coder: coder)
+    }
+    
+    internal func recordRepresentation() -> CKRecord {
+        let modified: CKRecord
+        if let existing = unarchiveRecord() {
+            modified = existing
+        } else if let name = recordName {
+            modified = CKRecord(recordType: recordType, recordID: CKRecordID(recordName: name))
+        } else {
+            modified = CKRecord(recordType: recordType)
+        }
+        
+        let mirror = Mirror(reflecting: self)
+        for child in mirror.children {
+            guard let label = child.label where label != "recordName" && label != "recordData" else {
+                continue
+            }
+            
+            if let value = child.value as? NSString {
+                modified[label] = value
+            } else if let value = child.value as? NSNumber {
+                modified[label] = value
+            } else if let value = child.value as? NSDate {
+                modified[label] = value
+            } else if let value = child.value as? CLLocation {
+                modified[label] = value
+            } else {
+                Logging.log("Could not cast \(child) value")
+            }
+        }
+
+        return modified
     }
 }
