@@ -19,7 +19,7 @@ import CloudKit
 public protocol RemoteRecord {
     var recordName: String? { get set }
     var recordData: NSData? { get set }
-    var recordType: String { get }
+    static var recordType: String { get }
 
     init()
     
@@ -63,9 +63,9 @@ public extension RemoteRecord {
         if let existing = unarchiveRecord() {
             modified = existing
         } else if let name = recordName {
-            modified = CKRecord(recordType: recordType, recordID: CKRecordID(recordName: name))
+            modified = CKRecord(recordType: Self.recordType, recordID: CKRecordID(recordName: name))
         } else {
-            modified = CKRecord(recordType: recordType)
+            modified = CKRecord(recordType: Self.recordType)
         }
         
         let mirror = Mirror(reflecting: self)

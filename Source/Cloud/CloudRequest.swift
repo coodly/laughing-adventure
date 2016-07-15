@@ -140,14 +140,15 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func cloud(fetch recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), inDatabase db: UsedDatabase = .Private) {
-        let query = CKQuery(recordType: recordName, predicate: predicate)
+    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), inDatabase db: UsedDatabase = .Private) {
+        let query = CKQuery(recordType: T.recordType, predicate: predicate)
         perform(query, inDatabase: db)
     }
     
-    public final func cloud(fetchFirst recordName: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
-        Logging.log("Fetch first \(recordName). Predicate: \(predicate)")
-        let query = CKQuery(recordType: recordName, predicate: predicate)
+    public final func fetchFirst(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
+        let type = T.recordType
+        Logging.log("Fetch first \(type). Predicate: \(predicate)")
+        let query = CKQuery(recordType: type, predicate: predicate)
         query.sortDescriptors = sort
         perform(query, limit: 1, inDatabase: db)
     }
