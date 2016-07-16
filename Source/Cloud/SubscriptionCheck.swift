@@ -99,7 +99,9 @@ public class SubscriptionCheck {
         Logging.log("Subscribe")
         let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: options)
         let notificationInfo = CKNotificationInfo()
+        #if os(iOS)
         notificationInfo.shouldSendContentAvailable = true
+        #endif
         if desiredKeys.count > 0 {
             notificationInfo.desiredKeys = desiredKeys
         }

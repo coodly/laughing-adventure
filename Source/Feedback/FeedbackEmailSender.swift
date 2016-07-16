@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#if os(iOS)
 import UIKit
 import MessageUI
 
@@ -50,3 +51,4 @@ public extension FeedbackEmailSender where Self: UIViewController {
         presentViewController(alert, animated: true, completion: nil)
     }
 }
+#endif
