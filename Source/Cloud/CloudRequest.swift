@@ -107,10 +107,10 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func save(records records: [T], inDatabase db: UsedDatabase = .Private) {
+    public final func save(records records: [T], delete: [CKRecordID] = [], inDatabase db: UsedDatabase = .Private) {
         let toSave = records.map { $0.recordRepresentation() }
         
-        let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: nil)
+        let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
         operation.modifyRecordsCompletionBlock = {
             saved, deleted, error in
             
@@ -124,6 +124,10 @@ public extension CloudRequest {
                         self.records.append(local)
                     }
                 }
+            }
+            
+            if let deleted = deleted {
+                self.deleted.appendContentsOf(deleted)
             }
             
             self.handleResultWithError(error) {
