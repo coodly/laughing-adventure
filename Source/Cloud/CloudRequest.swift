@@ -61,9 +61,18 @@ public class CloudRequest<T: RemoteRecord>: ConcurrentOperation {
         }
     }
     
-    private func handleResultWithError(error: NSError?, retryClosure: () -> ()) {
-        let finalizer = {
-            self.finish()
+    private func handleResult(withCursor cursor: CKQueryCursor?, limit: Int? = nil, error: NSError?, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
+        let finalizer: () -> ()
+        if let cursor = cursor {
+            finalizer = {
+                self.records.removeAll()
+                self.deleted.removeAll()
+                self.continueWith(cursor, limit: limit, inDatabase: db)
+            }
+        } else {
+            finalizer = {
+                self.finish()
+            }
         }
         
         if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
@@ -97,7 +106,7 @@ public extension CloudRequest {
                 self.deleted.appendContentsOf(deleted)
             }
 
-            self.handleResultWithError(error) {
+            self.handleResult(withCursor: nil, error: error, inDatabase: db) {
                 self.delete(record: record, inDatabase: db)
             }
         }
@@ -130,7 +139,7 @@ public extension CloudRequest {
                 self.deleted.appendContentsOf(deleted)
             }
             
-            self.handleResultWithError(error) {
+            self.handleResult(withCursor: nil, error: error, inDatabase: db) {
                 self.save(records: records, inDatabase: db)
             }
         }
@@ -161,10 +170,26 @@ public extension CloudRequest {
         Logging.log("Fetch \(query.recordType)")
         
         let fetchOperation = CKQueryOperation(query: query)
+        
+        execute(fetchOperation, limit: limit, pullAll: pullAll, inDatabase: db) {
+            self.perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
+        }
+    }
+
+    private func continueWith(cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
+        Logging.log("Continue with cursor")
+        let operation = CKQueryOperation(cursor: cursor)
+        execute(operation, limit: limit, pullAll: true, inDatabase: db) {
+            self.continueWith(cursor, limit: limit, inDatabase: db)
+        }
+    }
+    
+    private func execute(fetchOperation: CKQueryOperation, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
+        Logging.log("Run query operation")
         if let limit = limit {
             fetchOperation.resultsLimit = limit
         }
-        
+
         fetchOperation.recordFetchedBlock = {
             record in
             
@@ -185,17 +210,11 @@ public extension CloudRequest {
             Logging.log("Completion: \(cursor) - \(error)")
             Logging.log("Have \(self.records.count) records")
             
-            self.handleResultWithError(error) {
-                self.perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
-            }
+            let usedCursor = pullAll ? cursor : nil
+            
+            self.handleResult(withCursor: usedCursor, limit: limit, error: error, inDatabase: db, retryClosure: retryClosure)
         }
         
         database(db).addOperation(fetchOperation)
-    }
-}
-
-private extension CloudRequest {
-    func continueWith(cursor: CKQueryCursor, inDatabase db: UsedDatabase) {
-        
     }
 }
