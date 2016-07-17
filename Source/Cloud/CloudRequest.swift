@@ -144,9 +144,9 @@ public extension CloudRequest {
 }
 
 public extension CloudRequest {
-    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), inDatabase db: UsedDatabase = .Private) {
+    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .Private) {
         let query = CKQuery(recordType: T.recordType, predicate: predicate)
-        perform(query, inDatabase: db)
+        perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
     }
     
     public final func fetchFirst(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
@@ -154,10 +154,10 @@ public extension CloudRequest {
         Logging.log("Fetch first \(type). Predicate: \(predicate)")
         let query = CKQuery(recordType: type, predicate: predicate)
         query.sortDescriptors = sort
-        perform(query, limit: 1, inDatabase: db)
+        perform(query, limit: 1, pullAll: false, inDatabase: db)
     }
     
-    private final func perform(query: CKQuery, limit: Int? = nil, inDatabase db: UsedDatabase) {
+    private final func perform(query: CKQuery, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {
         Logging.log("Fetch \(query.recordType)")
         
         let fetchOperation = CKQueryOperation(query: query)
@@ -186,10 +186,16 @@ public extension CloudRequest {
             Logging.log("Have \(self.records.count) records")
             
             self.handleResultWithError(error) {
-                self.perform(query, limit: limit, inDatabase: db)
+                self.perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
             }
         }
         
         database(db).addOperation(fetchOperation)
+    }
+}
+
+private extension CloudRequest {
+    func continueWith(cursor: CKQueryCursor, inDatabase db: UsedDatabase) {
+        
     }
 }
