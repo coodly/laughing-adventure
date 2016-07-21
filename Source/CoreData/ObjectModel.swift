@@ -29,6 +29,7 @@ public class ObjectModel {
     private var modelName: String!
     private var storeType: String!
     private var inDirectory: NSSearchPathDirectory!
+    private var pathToSQLiteFile: NSURL?
     private var writingContext: NSManagedObjectContext?
     public var wipeDatabaseOnConflict = false
     private static var spawnedBackgroundCount = 0
@@ -45,6 +46,12 @@ public class ObjectModel {
         self.modelName = modelName
         self.storeType = storeType
         self.inDirectory = inDirectory
+    }
+    
+    public init(modelName: String, pathToSQLiteFile: NSURL) {
+        self.modelName = modelName
+        self.pathToSQLiteFile = pathToSQLiteFile
+        storeType = NSSQLiteStoreType
     }
     
     public init(parentContext: NSManagedObjectContext) {
@@ -110,7 +117,14 @@ public class ObjectModel {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url: NSURL? = self.storeType == NSSQLiteStoreType ? self.workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite") : nil
+        let url: NSURL?
+        if let existing = self.pathToSQLiteFile {
+            url = existing
+        } else if self.storeType == NSSQLiteStoreType {
+           url = self.workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
+        } else {
+            url = nil
+        }
 
         Logging.log("Using DB file at \(url)")
         
