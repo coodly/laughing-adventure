@@ -29,6 +29,12 @@ Pod::Spec.new do |s|
   s.subspec 'Feedback' do |feedback|
     feedback.source_files = "Source/Feedback"
   end
+
+  s.subspec 'CoreData' do |model|
+    model.dependency "LaughingAdventure/Logging"
+    model.source_files = 'Source/CoreData'
+    model.frameworks = 'CoreData'
+  end
   
   s.requires_arc = true
 end

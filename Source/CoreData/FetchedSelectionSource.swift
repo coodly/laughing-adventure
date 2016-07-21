@@ -16,6 +16,7 @@
 
 import CoreData
 
+#if os(iOS)
 public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResultsControllerDelegate {
     private var fetchedController: NSFetchedResultsController!
     public var tableView: UITableView!
@@ -85,3 +86,5 @@ public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResults
     }
 
 }
+
+#endif

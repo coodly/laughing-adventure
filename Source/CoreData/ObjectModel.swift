@@ -201,6 +201,7 @@ public class ObjectModel {
     }
 }
 
+#if os(iOS)
 // MARK: - Fetched controller
 public extension ObjectModel {
     public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
@@ -220,6 +221,7 @@ public extension ObjectModel {
         return fetchedController
     }
 }
+#endif
 
 public extension ObjectModel /* Fetch request */ {
     
