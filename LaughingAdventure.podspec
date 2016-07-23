@@ -17,7 +17,11 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'Logging' do |log|
-  	log.source_files = "Source/Log"
+    log.source_files = "Source/Log"
+  end
+
+  s.subspec 'Utils' do |utils|
+    utils.source_files = 'Source/Utils'
   end
 
   s.subspec 'Purchase' do |purchase|
@@ -34,6 +38,12 @@ Pod::Spec.new do |s|
     model.dependency "LaughingAdventure/Logging"
     model.source_files = 'Source/CoreData'
     model.frameworks = 'CoreData'
+  end
+
+  s.subspec 'Cloud' do |cloud|
+    cloud.dependency "LaughingAdventure/Logging"
+    cloud.dependency "LaughingAdventure/Utils"
+    cloud.source_files = 'Source/Cloud'
   end
   
   s.requires_arc = true
