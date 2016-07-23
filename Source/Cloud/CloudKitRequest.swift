@@ -20,6 +20,11 @@ public struct Cloud {
     public static var container: CKContainer = CKContainer.defaultContainer()
 }
 
+public enum CloudResult<T: RemoteRecord> {
+    case Success([T], [CKRecordID])
+    case Failure
+}
+
 public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest {
     private var records = [T]()
     private var deleted = [CKRecordID]()

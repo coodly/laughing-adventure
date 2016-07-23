@@ -22,17 +22,13 @@ public enum UsedDatabase {
     case Private
 }
 
-public enum CloudResult<T: RemoteRecord> {
-    case Success([T], [CKRecordID])
-    case Failure
-}
-
 public protocol CloudRequest {
-    typealias T
+    typealias Model
+    typealias Predicate
     
-    func save(record record: T, inDatabase db: UsedDatabase)
-    func save(records records: [T], delete: [CKRecordID], inDatabase db: UsedDatabase)
-    func delete(record record: T, inDatabase db: UsedDatabase)
-    func fetch(predicate predicate: NSPredicate, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
-    func fetchFirst(predicate predicate: NSPredicate, sort: [NSSortDescriptor], inDatabase db: UsedDatabase)    
+    func save(record record: Model, inDatabase db: UsedDatabase)
+    func save(records records: [Model], delete: [CKRecordID], inDatabase db: UsedDatabase)
+    func delete(record record: Model, inDatabase db: UsedDatabase)
+    func fetch(predicate predicate: Predicate, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
+    func fetchFirst(predicate predicate: Predicate, sort: [NSSortDescriptor], inDatabase db: UsedDatabase)    
 }
