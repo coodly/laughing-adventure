@@ -84,12 +84,23 @@ private extension CloudAPIRequest {
         
         var queryItems = [NSURLQueryItem]()
         queryItems.append(NSURLQueryItem(name: "ckAPIToken", value: Config.shared.apiToken))
-        if Config.shared.userToken.hasValue() {
-            queryItems.append(NSURLQueryItem(name: "ckWebAuthToken", value: Config.shared.userToken))
-        }
         components.queryItems = queryItems
         
-        let requestURL = components.URL!
+        let requestURL: NSURL
+        if Config.shared.userToken.hasValue() {
+            var urlString = components.URL!.absoluteString
+            
+            var userToken = Config.shared.userToken
+            userToken = userToken.stringByReplacingOccurrencesOfString("+", withString: "%2B")
+            userToken = userToken.stringByReplacingOccurrencesOfString("/", withString: "%2F")
+            userToken = userToken.stringByReplacingOccurrencesOfString("=", withString: "%3D")
+            
+            urlString = urlString.stringByAppendingString("&ckWebAuthToken=\(userToken)")
+            requestURL = NSURL(string: urlString)!
+        } else {
+            requestURL = components.URL!
+        }
+        
         Logging.log("POST to \(requestURL)")
         
         let request = NSMutableURLRequest(URL: requestURL)
