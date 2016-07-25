@@ -92,7 +92,7 @@ public class ObjectModel {
     }()
 
     
-    lazy var workingFilesDirectory: NSURL = {
+    public lazy var workingFilesDirectory: NSURL = {
         let urls = NSFileManager.defaultManager().URLsForDirectory(self.inDirectory, inDomains: .UserDomainMask)
         let last = urls.last!
         let identifier = NSBundle.mainBundle().bundleIdentifier!
@@ -117,14 +117,7 @@ public class ObjectModel {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url: NSURL?
-        if let existing = self.pathToSQLiteFile {
-            url = existing
-        } else if self.storeType == NSSQLiteStoreType {
-           url = self.workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
-        } else {
-            url = nil
-        }
+        let url = self.databaseFilePath()
 
         Logging.log("Using DB file at \(url)")
         
@@ -161,6 +154,28 @@ public class ObjectModel {
         }
         
         return false
+    }
+    
+    public func databaseFileExists() -> Bool {
+        guard storeType == NSSQLiteStoreType else {
+            return false
+        }
+        
+        guard let filePath = databaseFilePath(), path = filePath.path else {
+            return false
+        }
+        
+        return NSFileManager.defaultManager().fileExistsAtPath(path)
+    }
+    
+    private func databaseFilePath() -> NSURL? {
+        if let existing = pathToSQLiteFile {
+            return existing
+        } else if self.storeType == NSSQLiteStoreType {
+            return workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
+        } else {
+            return nil
+        }
     }
     
     public func saveContext () {
