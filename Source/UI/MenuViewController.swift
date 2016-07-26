@@ -20,6 +20,12 @@ import UIKit
 
 public class MenuViewController: InputCellsViewController {
     public var container: CoodlySlideMenuViewController!
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        tableView.scrollsToTop = false
+    }
 }
 
 #endif
