@@ -148,17 +148,14 @@ public extension CloudKitRequest {
 }
 
 public extension CloudKitRequest {
-    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .Private) {
+    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .Private) {
         let query = CKQuery(recordType: T.recordType, predicate: predicate)
+        query.sortDescriptors = sort
         perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
     }
     
     public final func fetchFirst(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
-        let type = T.recordType
-        Logging.log("Fetch first \(type). Predicate: \(predicate)")
-        let query = CKQuery(recordType: type, predicate: predicate)
-        query.sortDescriptors = sort
-        perform(query, limit: 1, pullAll: false, inDatabase: db)
+        fetch(predicate: predicate, sort: sort, limit: 1, pullAll: false, inDatabase: db)
     }
     
     private final func perform(query: CKQuery, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {

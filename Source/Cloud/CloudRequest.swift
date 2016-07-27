@@ -29,6 +29,6 @@ public protocol CloudRequest {
     func save(record record: Model, inDatabase db: UsedDatabase)
     func save(records records: [Model], delete: [CKRecordID], inDatabase db: UsedDatabase)
     func delete(record record: Model, inDatabase db: UsedDatabase)
-    func fetch(predicate predicate: Predicate, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
+    func fetch(predicate predicate: Predicate, sort: [NSSortDescriptor], limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
     func fetchFirst(predicate predicate: Predicate, sort: [NSSortDescriptor], inDatabase db: UsedDatabase)    
 }
