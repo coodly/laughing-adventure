@@ -17,9 +17,13 @@
 import Foundation
 
 public class ConcurrentOperation: NSOperation {
+    public var completionHandler: (Bool -> ())?
+    
     override public var concurrent: Bool {
         return true
     }
+
+    private var failed = false
     
     private var myExecuting: Bool = false
     override public var executing: Bool {
@@ -55,7 +59,21 @@ public class ConcurrentOperation: NSOperation {
             return
         }
         
-        self.executing = true
+        if completionBlock != nil {
+            Logging.log("Existing completion block. Will not add own handling")
+        } else {
+            completionBlock = {
+                [unowned self] in
+                
+                guard let completion = self.completionHandler else {
+                    return
+                }
+                
+                completion(!self.failed)
+            }
+        }
+        
+        self.myExecuting = true
         
         main()
     }
@@ -65,11 +83,12 @@ public class ConcurrentOperation: NSOperation {
         finish()
     }
     
-    public func finish() {
+    public func finish(failed: Bool = false) {
         willChangeValueForKey("isExecuting")
         willChangeValueForKey("isFinished")
         myExecuting = false
         myFinished = true
+        self.failed = failed
         didChangeValueForKey("isExecuting")
         didChangeValueForKey("isFinished")
     }
