@@ -17,7 +17,7 @@
 import Foundation
 
 public class ConcurrentOperation: NSOperation {
-    public var completionHandler: (Bool -> ())?
+    public var completionHandler: ((Bool, ConcurrentOperation) -> ())?
     
     override public var concurrent: Bool {
         return true
@@ -69,7 +69,7 @@ public class ConcurrentOperation: NSOperation {
                     return
                 }
                 
-                completion(!self.failed)
+                completion(!self.failed, self)
             }
         }
         
