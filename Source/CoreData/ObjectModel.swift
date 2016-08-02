@@ -319,7 +319,7 @@ public extension ObjectModel {
         return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func countInstancesOfEntity<T: NSManagedObject>(type: T.Type, usingPredicate predicate: NSPredicate) -> Int {
+    public func countInstancesOfEntity<T: NSManagedObject>(type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
         #if swift(>=2.3)
