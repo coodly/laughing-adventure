@@ -302,10 +302,10 @@ public extension ObjectModel {
         return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func countInstancesOfEntity<T: NSFetchRequestResult>(_ type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
-        let request = fetchRequestForEntity(type, predicate: predicate)
+    public func countInstancesOfEntity<T: NSManagedObject>(_ type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
+        let request: NSFetchRequest<NSNumber> = fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: [])
         do {
-            let count = try managedObjectContext.countForFetchRequest(request)
+            let count = try managedObjectContext.count(for: request)
             return count
         } catch let error as NSError {
             fatalError("Count failed: \(error)")
@@ -336,11 +336,11 @@ public extension ObjectModel {
     }
     
     public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
-        let request = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
+        let request: NSFetchRequest<T> = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
             let result = try managedObjectContext.fetch(request)
-            return result.first as? T
+            return result.first
         } catch {
             Logging.log(error)
             return nil
@@ -363,12 +363,12 @@ public extension ObjectModel {
     }
     
     public func fetchEntityAttribute<T: NSManagedObject>(_ type: T.Type, attributeName: String) -> [AnyObject] {
-        let request = fetchRequestForEntity(type)
+        let request: NSFetchRequest<NSDictionary> = fetchRequestForEntity(named: type.entityName(), predicate: nil, sortDescriptors: [])
         request.resultType = .dictionaryResultType
         request.propertiesToFetch = [attributeName]
         
         do {
-            let objects = try managedObjectContext.fetch(request) as! [[String: AnyObject]]
+            let objects = try managedObjectContext.fetch(request)
             return objects.map { $0[attributeName]! }
         } catch {
             Logging.log("fetchEntityAttribute error: \(error)")

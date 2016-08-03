@@ -17,15 +17,15 @@
 import CoreData
 
 #if os(iOS)
-public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResultsControllerDelegate {
-    private var fetchedController: NSFetchedResultsController<NSManagedObject>!
+public class FetchedSelectionSource<T: NSFetchRequestResult>: NSObject, SelectionSource, NSFetchedResultsControllerDelegate {
+    private var fetchedController: NSFetchedResultsController<T>!
     public var tableView: UITableView!
     
     override init() {
 
     }
     
-    public convenience init(fetchedController: NSFetchedResultsController<NSManagedObject>) {
+    public convenience init(fetchedController: NSFetchedResultsController<T>) {
         self.init()
         
         self.fetchedController = fetchedController
@@ -50,7 +50,7 @@ public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResults
     }
     
     public func indexPathForObject(_ object: AnyObject) -> IndexPath? {
-        guard let fetched = object as? NSManagedObject else {
+        guard let fetched = object as? T else {
             return nil
         }
         

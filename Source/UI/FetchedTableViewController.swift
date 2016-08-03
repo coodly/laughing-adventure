@@ -143,7 +143,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         }
     }
     
-    public func createFetchedController<T: NSManagedObject>() -> NSFetchedResultsController<T> {
+    public func createFetchedController<T: NSFetchRequestResult>() -> NSFetchedResultsController<T> {
         fatalError("Need to override \(#function)")
     }
     
