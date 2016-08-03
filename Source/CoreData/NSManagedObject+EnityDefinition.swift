@@ -22,3 +22,9 @@ public extension NSManagedObject {
         return NSStringFromClass(self).components(separatedBy: ".").last!
     }    
 }
+
+extension NSFetchRequestResult {
+    public static func entityName() -> String {
+        return NSStringFromClass(self).components(separatedBy: ".").last!
+    }
+}

@@ -235,7 +235,7 @@ public extension ObjectModel {
     }
 
     public func fetchedControllerForEntity<T: NSFetchRequestResult>(_ type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
-        let fetchRequest = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
+        let fetchRequest: NSFetchRequest<T> = fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
         do {
@@ -302,27 +302,15 @@ public extension ObjectModel {
         return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func countInstancesOfEntity<T: NSManagedObject>(_ type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
+    public func countInstancesOfEntity<T: NSFetchRequestResult>(_ type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
-        
-        #if swift(>=2.3)
-            do {
-                let count = try managedObjectContext.countForFetchRequest(request)
-                return count
-            } catch let error as NSError {
-                fatalError("Count failed: \(error)")
-                return 0
-            }
-        #else
-            var error: NSError?
-            let count = managedObjectContext.count(for: request, error: &error)
-            
-            if error != nil {
-                fatalError("Count failed: \(error)")
-            }
-            
+        do {
+            let count = try managedObjectContext.countForFetchRequest(request)
             return count
-        #endif
+        } catch let error as NSError {
+            fatalError("Count failed: \(error)")
+            return 0
+        }
     }
     
     public func fetchEntity<T: NSManagedObject>(_ type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
