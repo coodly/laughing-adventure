@@ -18,60 +18,60 @@ import Foundation
 
 public class MoneyFormatter {
     private enum FormatterKey {
-        case AmountOnlyFormatter
-        case CurrencyFormatter(String)
+        case amountOnlyFormatter
+        case currencyFormatter(String)
         
         func key() -> String {
             return String(reflecting: self)
         }
     }
     
-    public class func formattedAmountOnly(number: NSDecimalNumber) -> String? {
-        return amountOnlyFormatter().stringFromNumber(number)
+    public class func formattedAmountOnly(_ number: NSDecimalNumber) -> String? {
+        return amountOnlyFormatter().string(from: number)
     }
     
-    public class func formattedAmount(number: NSDecimalNumber, currency: String) -> String? {
-        return formatterForCurrency(currency).stringFromNumber(number)
+    public class func formattedAmount(_ number: NSDecimalNumber, currency: String) -> String? {
+        return formatterForCurrency(currency).string(from: number)
     }
 
-    private class func amountOnlyFormatter() -> NSNumberFormatter {
-        if let fomatter = MoneyFormatter.formatterForKey(.AmountOnlyFormatter) {
+    private class func amountOnlyFormatter() -> NumberFormatter {
+        if let fomatter = MoneyFormatter.formatterForKey(.amountOnlyFormatter) {
             return fomatter
         }
         
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .CurrencyStyle
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
         formatter.currencySymbol = ""
         formatter.groupingSeparator = ""
         formatter.decimalSeparator = "."
         formatter.currencyDecimalSeparator = "."
-        MoneyFormatter.setFormatterForKey(formatter, key: .AmountOnlyFormatter)
+        MoneyFormatter.setFormatterForKey(formatter, key: .amountOnlyFormatter)
         
         return formatter
     }
     
-    private class func formatterForCurrency(currency: String) -> NSNumberFormatter {
-        if let formatter = formatterForKey(.CurrencyFormatter(currency)) {
+    private class func formatterForCurrency(_ currency: String) -> NumberFormatter {
+        if let formatter = formatterForKey(.currencyFormatter(currency)) {
             return formatter
         }
         
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .CurrencyStyle
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
         formatter.currencyCode = currency
         formatter.groupingSeparator = ""
         formatter.decimalSeparator = "."
         formatter.currencyDecimalSeparator = "."
-        MoneyFormatter.setFormatterForKey(formatter, key: .CurrencyFormatter(currency))
+        MoneyFormatter.setFormatterForKey(formatter, key: .currencyFormatter(currency))
         
         return formatter
     }
     
-    private class func setFormatterForKey(formatter: NSNumberFormatter, key: FormatterKey) {
+    private class func setFormatterForKey(_ formatter: NumberFormatter, key: FormatterKey) {
         print(">>>>>>>>>> \(key.key())")
-        NSThread.currentThread().threadDictionary[key.key()] = formatter
+        Thread.current.threadDictionary[key.key()] = formatter
     }
         
-    private class func formatterForKey(key: FormatterKey) -> NSNumberFormatter? {
-        return NSThread.currentThread().threadDictionary[key.key()] as? NSNumberFormatter
+    private class func formatterForKey(_ key: FormatterKey) -> NumberFormatter? {
+        return Thread.current.threadDictionary[key.key()] as? NumberFormatter
     }
 }

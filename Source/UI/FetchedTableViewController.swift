@@ -25,16 +25,16 @@ let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
 public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
-    private var fetchedController: NSFetchedResultsController?
+    private var fetchedController: NSFetchedResultsController<AnyObject>?
     private var measuringCell: UITableViewCell?
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
         fetchedController?.delegate = nil
     }
     
     public override func viewDidLoad() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
         checkTableView()
         
@@ -42,7 +42,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         tableView.rowHeight = UITableViewAutomaticDimension
     }
     
-    public override func viewWillAppear(animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         smoothDeselectRows()
@@ -56,7 +56,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         tableView!.reloadData()
     }
     
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    public func numberOfSections(in tableView: UITableView) -> Int {
         guard let sections = fetchedController?.sections else {
             return 0
         }
@@ -64,7 +64,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         return sections.count
     }
     
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let controller = fetchedController, sections = controller.sections else {
             return 0
         }
@@ -72,87 +72,87 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         return sections[section].numberOfObjects
     }
     
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)!
-        let object = fetchedController!.objectAtIndexPath(indexPath)
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: FetchedTableCellIdentifier)!
+        let object = fetchedController!.object(at: indexPath)
         configureCell(cell, atIndexPath: indexPath, object: object, forMeasuring:false)
         return cell
     }
     
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let object = fetchedController!.objectAtIndexPath(indexPath)
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let object = fetchedController!.object(at: indexPath)
         let detailsShown = tappedCell(indexPath, object: object)
         if detailsShown {
             return
         }
         
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         let sections:[NSFetchedResultsSectionInfo] = fetchedController!.sections! as [NSFetchedResultsSectionInfo]
         let dataSection = sections[section]
         return dataSection.name
     }
     
-    public func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    public func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch(type) {
-        case .Insert:
-            tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
-        case .Delete:
-            tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
-        case .Update:
-            tableView.reloadSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
-        case .Move:
+        case .insert:
+            tableView.insertSections(IndexSet(integer: sectionIndex), with: .automatic)
+        case .delete:
+            tableView.deleteSections(IndexSet(integer: sectionIndex), with: .automatic)
+        case .update:
+            tableView.reloadSections(IndexSet(integer: sectionIndex), with: .automatic)
+        case .move:
             fatalError("Wut? \(sectionIndex)")
         }
     }
     
-    public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         
         switch(type) {
-        case NSFetchedResultsChangeType.Update:
-            tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Insert:
-            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Delete:
-            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Move:
-            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+        case NSFetchedResultsChangeType.update:
+            tableView.reloadRows(at: [indexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.insert:
+            tableView.insertRows(at: [newIndexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.delete:
+            tableView.deleteRows(at: [indexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.move:
+            tableView.deleteRows(at: [indexPath!], with: .automatic)
+            tableView.insertRows(at: [newIndexPath!], with: .automatic)
         }
     }
     
-    public func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         contentChanged()
     }
         
-    public func setPresentationCellNib(nib:UINib) {
-        tableView.registerNib(nib, forCellReuseIdentifier: FetchedTableCellIdentifier)
-        measuringCell = tableView.dequeueReusableCellWithIdentifier(FetchedTableCellIdentifier)
+    public func setPresentationCellNib(_ nib:UINib) {
+        tableView.register(nib, forCellReuseIdentifier: FetchedTableCellIdentifier)
+        measuringCell = tableView.dequeueReusableCell(withIdentifier: FetchedTableCellIdentifier)
     }
     
     func contentSizeChanged() {
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+        DispatchQueue.main.async { () -> Void in
             self.tableView.reloadData()
         }
     }
     
-    public func createFetchedController() -> NSFetchedResultsController {
+    public func createFetchedController() -> NSFetchedResultsController<AnyObject> {
         fatalError("Need to override \(#function)")
     }
     
-    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) -> Bool {
+    public func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) -> Bool {
         Logging.log("tappedCell(indexPath:\(atIndexPath))")
         return false
     }
     
-    public func configureCell(cell: UITableViewCell, atIndexPath: NSIndexPath, object: AnyObject, forMeasuring:Bool) {
+    public func configureCell(_ cell: UITableViewCell, atIndexPath: IndexPath, object: AnyObject, forMeasuring:Bool) {
         Logging.log("configureCell(atIndexPath:\(atIndexPath))")
     }
     
@@ -160,7 +160,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         Logging.log("Content changed")
     }
     
-    public func objectAt(indexPath: NSIndexPath) -> AnyObject {
-        return fetchedController!.objectAtIndexPath(indexPath)
+    public func objectAt(_ indexPath: IndexPath) -> AnyObject {
+        return fetchedController!.object(at: indexPath)
     }
 }

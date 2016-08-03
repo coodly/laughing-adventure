@@ -18,14 +18,14 @@ import CoreData
 
 #if os(iOS)
 public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResultsControllerDelegate {
-    private var fetchedController: NSFetchedResultsController!
+    private var fetchedController: NSFetchedResultsController<NSManagedObject>!
     public var tableView: UITableView!
     
     override init() {
 
     }
     
-    public convenience init(fetchedController: NSFetchedResultsController) {
+    public convenience init(fetchedController: NSFetchedResultsController<NSManagedObject>) {
         self.init()
         
         self.fetchedController = fetchedController
@@ -40,48 +40,44 @@ public class FetchedSelectionSource: NSObject, SelectionSource, NSFetchedResults
         return sections.count
     }
     
-    public func numberOfRowsInSection(section: Int) -> Int {
+    public func numberOfRowsInSection(_ section: Int) -> Int {
         let sections:[NSFetchedResultsSectionInfo] = fetchedController.sections! as [NSFetchedResultsSectionInfo]
         return sections[section].numberOfObjects
     }
     
-    public func objectAtIndexPath(indexPath: NSIndexPath) -> AnyObject {
-        return fetchedController.objectAtIndexPath(indexPath)
+    public func objectAtIndexPath(_ indexPath: IndexPath) -> AnyObject {
+        return fetchedController.object(at: indexPath)
     }
     
-    public func indexPathForObject(object: AnyObject) -> NSIndexPath? {
-        #if swift(>=2.3)
-            guard let fetched = object as? NSFetchRequestResult else {
-                return nil
-            }
-            
-            return fetchedController.indexPathForObject(fetched)
-        #else
-            return fetchedController.indexPathForObject(object)
-        #endif
+    public func indexPathForObject(_ object: AnyObject) -> IndexPath? {
+        guard let fetched = object as? NSManagedObject else {
+            return nil
+        }
+        
+        return fetchedController.indexPath(forObject: fetched)
     }
     
     //TODO jaanus: copy/paste....
-    public func controllerWillChangeContent(controller: NSFetchedResultsController) {
+    public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
     
-    public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         
         switch(type) {
-        case NSFetchedResultsChangeType.Insert:
-            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Delete:
-            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Update:
-            tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-        case NSFetchedResultsChangeType.Move:
-            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+        case NSFetchedResultsChangeType.insert:
+            tableView.insertRows(at: [newIndexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.delete:
+            tableView.deleteRows(at: [indexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.update:
+            tableView.reloadRows(at: [indexPath!], with: .automatic)
+        case NSFetchedResultsChangeType.move:
+            tableView.deleteRows(at: [indexPath!], with: .automatic)
+            tableView.insertRows(at: [newIndexPath!], with: .automatic)
         }
     }
     
-    public func controllerDidChangeContent(controller: NSFetchedResultsController) {
+    public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
     }
 

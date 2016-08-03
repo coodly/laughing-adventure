@@ -22,14 +22,14 @@ private let MainContextName = "Main"
 public class ObjectModel {
     struct StackConfig {
         var storeType: String!
-        var storeURL: NSURL!
+        var storeURL: URL!
         var options: [NSObject: AnyObject]?
     }
 
     private var modelName: String!
     private var storeType: String!
-    private var inDirectory: NSSearchPathDirectory!
-    private var pathToSQLiteFile: NSURL?
+    private var inDirectory: FileManager.SearchPathDirectory!
+    private var pathToSQLiteFile: URL?
     private var writingContext: NSManagedObjectContext?
     public var wipeDatabaseOnConflict = false
     private static var spawnedBackgroundCount = 0
@@ -42,13 +42,13 @@ public class ObjectModel {
         self.init(modelName: modelName, storeType: NSSQLiteStoreType)
     }
     
-    public init(modelName: String, storeType: String, inDirectory: NSSearchPathDirectory = .DocumentDirectory) {
+    public init(modelName: String, storeType: String, inDirectory: FileManager.SearchPathDirectory = .documentDirectory) {
         self.modelName = modelName
         self.storeType = storeType
         self.inDirectory = inDirectory
     }
     
-    public init(modelName: String, pathToSQLiteFile: NSURL) {
+    public init(modelName: String, pathToSQLiteFile: URL) {
         self.modelName = modelName
         self.pathToSQLiteFile = pathToSQLiteFile
         storeType = NSSQLiteStoreType
@@ -65,19 +65,19 @@ public class ObjectModel {
     lazy public var managedObjectContext: NSManagedObjectContext = {
         var isPrivateInstance = false
         
-        let mergePolicy = NSMergePolicy(mergeType: NSMergePolicyType.MergeByPropertyObjectTrumpMergePolicyType)
+        let mergePolicy = NSMergePolicy(merge: NSMergePolicyType.mergeByPropertyObjectTrumpMergePolicyType)
         
         if let _ = self.writingContext {
             isPrivateInstance = true
         } else {
-            let saving = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+            let saving = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
             saving.persistentStoreCoordinator = self.persistentStoreCoordinator
             saving.mergePolicy = mergePolicy
             self.writingContext = saving
             saving.name = SavingContextName
         }
         
-        var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .PrivateQueueConcurrencyType : .MainQueueConcurrencyType))
+        var managedContext = NSManagedObjectContext(concurrencyType: (isPrivateInstance ? .privateQueueConcurrencyType : .mainQueueConcurrencyType))
         if isPrivateInstance {
             spawnedBackgroundCount += 1
             managedContext.name = "Worker \(spawnedBackgroundCount)"
@@ -85,25 +85,25 @@ public class ObjectModel {
         } else {
             managedContext.name = MainContextName
         }
-        managedContext.parentContext = self.writingContext
+        managedContext.parent = self.writingContext
         managedContext.mergePolicy = mergePolicy
         
         return managedContext
     }()
 
     
-    public lazy var workingFilesDirectory: NSURL = {
-        let urls = NSFileManager.defaultManager().URLsForDirectory(self.inDirectory, inDomains: .UserDomainMask)
+    public lazy var workingFilesDirectory: URL = {
+        let urls = FileManager.default.urlsForDirectory(self.inDirectory, inDomains: .userDomainMask)
         let last = urls.last!
-        let identifier = NSBundle.mainBundle().bundleIdentifier!
-        let dbIdentifier = identifier.stringByAppendingString(".db")
+        let identifier = Bundle.main.bundleIdentifier!
+        let dbIdentifier = identifier + ".db"
         #if swift(>=2.3)
             let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)!
         #else
-            let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)
+            let dbFolder = last.appendingPathComponent(dbIdentifier)
         #endif
         do {
-            try NSFileManager.defaultManager().createDirectoryAtURL(dbFolder, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: dbFolder, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
             print("Create db folder error \(error)")
         }
@@ -111,8 +111,8 @@ public class ObjectModel {
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = NSBundle.mainBundle().URLForResource(self.modelName, withExtension: "momd")!
-        return NSManagedObjectModel(contentsOfURL: modelURL)!
+        let modelURL = Bundle.main.urlForResource(self.modelName, withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
@@ -126,16 +126,16 @@ public class ObjectModel {
         
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
             Logging.log("Will delete DB")
-            try! NSFileManager.defaultManager().removeItemAtURL(url!)
+            try! FileManager.default.removeItem(at: url!)
             self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
         }
         
         return coordinator
     }()
     
-    private func addPersistentStore(coordinator: NSPersistentStoreCoordinator, config: StackConfig, abortOnFailure: Bool) -> Bool {
+    private func addPersistentStore(_ coordinator: NSPersistentStoreCoordinator, config: StackConfig, abortOnFailure: Bool) -> Bool {
         do {
-            try coordinator.addPersistentStoreWithType(config.storeType, configuration: nil, URL: config.storeURL, options: config.options)
+            try coordinator.addPersistentStore(ofType: config.storeType, configurationName: nil, at: config.storeURL, options: config.options)
             return true
         } catch {
             // Report any error we got.
@@ -165,14 +165,14 @@ public class ObjectModel {
             return false
         }
         
-        return NSFileManager.defaultManager().fileExistsAtPath(path)
+        return FileManager.default.fileExists(atPath: path)
     }
     
-    private func databaseFilePath() -> NSURL? {
+    private func databaseFilePath() -> URL? {
         if let existing = pathToSQLiteFile {
             return existing
         } else if self.storeType == NSSQLiteStoreType {
-            return workingFilesDirectory.URLByAppendingPathComponent("\(self.modelName).sqlite")
+            return workingFilesDirectory.appendingPathComponent("\(self.modelName).sqlite")
         } else {
             return nil
         }
@@ -182,15 +182,15 @@ public class ObjectModel {
         saveContext(nil)
     }
     
-    public func saveContext(completion: (() -> Void)?) {
+    public func saveContext(_ completion: (() -> Void)?) {
         saveContext(managedObjectContext, completion: completion)
     }
     
-    public func saveInBlock(handler:((model: ObjectModel) -> Void)) {
+    public func saveInBlock(_ handler:((model: ObjectModel) -> Void)) {
         saveInBlock(handler, completion: nil)
     }
 
-    public func saveInBlock(handler:((model: ObjectModel) -> Void), completion: (() -> ())?) {
+    public func saveInBlock(_ handler:((model: ObjectModel) -> Void), completion: (() -> ())?) {
         let spawned = spawnBackgroundInstance()
         Logging.log("Spawned worker from \(managedObjectContext.name!)")
         spawned.performBlock { () -> () in
@@ -199,14 +199,14 @@ public class ObjectModel {
         }
     }
 
-    public func performBlock(block: (() -> ())) {
+    public func performBlock(_ block: (() -> ())) {
         Logging.log("Perform block on \(managedObjectContext.name!)")
-        managedObjectContext.performBlock(block)
+        managedObjectContext.perform(block)
     }
     
-    private func saveContext(context: NSManagedObjectContext, completion: (() -> Void)?) {
+    private func saveContext(_ context: NSManagedObjectContext, completion: (() -> Void)?) {
         Logging.log("Save \(context.name!)")
-        context.performBlock { () -> Void in
+        context.perform { () -> Void in
             if context.hasChanges {
                 do {
                     try context.save()
@@ -217,7 +217,7 @@ public class ObjectModel {
                 }
             }
             
-            if let parent = context.parentContext {
+            if let parent = context.parent {
                 self.saveContext(parent, completion: nil)
             }
             
@@ -225,7 +225,7 @@ public class ObjectModel {
                 return
             }
             
-            dispatch_async(dispatch_get_main_queue(), action)
+            DispatchQueue.main.async(execute: action)
         }
     }
 }
@@ -233,11 +233,11 @@ public class ObjectModel {
 #if os(iOS)
 // MARK: - Fetched controller
 public extension ObjectModel {
-    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
+    public func fetchedControllerForEntity<T: NSManagedObject>(_ type: T.Type, sortDescriptors: [SortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<AnyObject> {
         return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors, sectionNameKeyPath: sectionNameKeyPath)
     }
 
-    public func fetchedControllerForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController {
+    public func fetchedControllerForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate?, sortDescriptors: [SortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<AnyObject> {
         let fetchRequest = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
@@ -254,23 +254,23 @@ public extension ObjectModel {
 
 public extension ObjectModel /* Fetch request */ {
     
-    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type) -> NSFetchRequest {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type) -> NSFetchRequest<AnyObject> {
         return fetchRequestForEntity(type, predicate: nil, sortDescriptors: [])
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate) -> NSFetchRequest {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate) -> NSFetchRequest<AnyObject> {
         return fetchRequestForEntity(type, predicate: predicate, sortDescriptors: [])
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
         return fetchRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate?, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
         return fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
     }
 
-    private func fetchRequestForEntity(named name: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest {
+    private func fetchRequestForEntity(named name: String, predicate: Predicate?, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
         let request = NSFetchRequest(entityName: name)
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
@@ -279,7 +279,7 @@ public extension ObjectModel /* Fetch request */ {
 }
 
 public extension ObjectModel /* Delete */ {
-    public func deleteObjects(objects: [NSManagedObject], saveAfter: Bool = true) {
+    public func deleteObjects(_ objects: [NSManagedObject], saveAfter: Bool = true) {
         for obj in objects {
             deleteObject(obj, saveAfter: false)
         }
@@ -289,8 +289,8 @@ public extension ObjectModel /* Delete */ {
         }
     }
     
-    public func deleteObject(object: NSManagedObject, saveAfter: Bool = true) {
-        managedObjectContext.deleteObject(object)
+    public func deleteObject(_ object: NSManagedObject, saveAfter: Bool = true) {
+        managedObjectContext.delete(object)
         
         if saveAfter {
             saveContext()
@@ -298,11 +298,11 @@ public extension ObjectModel /* Delete */ {
     }
     
     @available(iOS 9, *)
-    public func deleteAllEntitiesOfType<T: NSManagedObject>(type: T.Type, saveAfter: Bool = true) {
+    public func deleteAllEntitiesOfType<T: NSManagedObject>(_ type: T.Type, saveAfter: Bool = true) {
         let fetchRequest = fetchRequestForEntity(type)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         do {
-            try managedObjectContext.executeRequest(deleteRequest)
+            try managedObjectContext.execute(deleteRequest)
             if saveAfter {
                 saveContext()
             }
@@ -314,12 +314,12 @@ public extension ObjectModel /* Delete */ {
 
 // MARK: - Queries
 public extension ObjectModel {
-    public func hasEntity<T: NSManagedObject>(type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
+    public func hasEntity<T: NSManagedObject>(_ type: T.Type, attribute: String, hasValue: AnyObject) -> Bool {
         let predicate = predicateForAttribute(attribute, withValue: hasValue)
         return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func countInstancesOfEntity<T: NSManagedObject>(type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
+    public func countInstancesOfEntity<T: NSManagedObject>(_ type: T.Type, usingPredicate predicate: Predicate = Predicate(format: "TRUEPREDICATE")) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
         #if swift(>=2.3)
@@ -332,7 +332,7 @@ public extension ObjectModel {
             }
         #else
             var error: NSError?
-            let count = managedObjectContext.countForFetchRequest(request, error: &error)
+            let count = managedObjectContext.count(for: request, error: &error)
             
             if error != nil {
                 fatalError("Count failed: \(error)")
@@ -342,16 +342,16 @@ public extension ObjectModel {
         #endif
     }
     
-    public func fetchEntity<T: NSManagedObject>(type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
+    public func fetchEntity<T: NSManagedObject>(_ type: T.Type, whereAttribute: String, hasValue: AnyObject) -> T? {
         let predicate = predicateForAttribute(whereAttribute, withValue: hasValue)
         return fetchFirstEntity(type, predicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(type: T.Type, predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
+    public func fetchFirstEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate, sortDescriptors: [SortDescriptor] = []) -> T? {
         let request = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
-            let result = try managedObjectContext.executeFetchRequest(request)
+            let result = try managedObjectContext.fetch(request)
             return result.first as? T
         } catch {
             Logging.log(error)
@@ -364,11 +364,11 @@ public extension ObjectModel {
         return fetchFirstEntity(usingPredicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
+    public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: Predicate, sortDescriptors: [SortDescriptor] = []) -> T? {
         let request = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
-            let result = try managedObjectContext.executeFetchRequest(request)
+            let result = try managedObjectContext.fetch(request)
             return result.first as? T
         } catch {
             Logging.log(error)
@@ -376,14 +376,14 @@ public extension ObjectModel {
         }
     }
 
-    public func fetchAllEntitiesOfType<T: NSManagedObject>(type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), limit: Int = 0) -> [T] {
+    public func fetchAllEntitiesOfType<T: NSManagedObject>(_ type: T.Type, predicate: Predicate = Predicate(format: "TRUEPREDICATE"), limit: Int = 0) -> [T] {
         let request = fetchRequestForEntity(type, predicate: predicate)
         if limit > 0 {
             request.fetchLimit = limit
         }
         
         do {
-            let result = try managedObjectContext.executeFetchRequest(request)
+            let result = try managedObjectContext.fetch(request)
             return result as! [T]
         } catch {
             Logging.log(error)
@@ -391,13 +391,13 @@ public extension ObjectModel {
         }
     }
     
-    public func fetchEntityAttribute<T: NSManagedObject>(type: T.Type, attributeName: String) -> [AnyObject] {
+    public func fetchEntityAttribute<T: NSManagedObject>(_ type: T.Type, attributeName: String) -> [AnyObject] {
         let request = fetchRequestForEntity(type)
-        request.resultType = .DictionaryResultType
+        request.resultType = .dictionaryResultType
         request.propertiesToFetch = [attributeName]
         
         do {
-            let objects = try managedObjectContext.executeFetchRequest(request) as! [[String: AnyObject]]
+            let objects = try managedObjectContext.fetch(request) as! [[String: AnyObject]]
             return objects.map { $0[attributeName]! }
         } catch {
             Logging.log("fetchEntityAttribute error: \(error)")
@@ -407,22 +407,22 @@ public extension ObjectModel {
 }
 
 public extension ObjectModel /* Batch updates */ {
-    public func updateEntitiesOfType<T: NSManagedObject>(type: T.Type, attributeName: String, value: AnyObject, predicate: NSPredicate? = nil) {
+    public func updateEntitiesOfType<T: NSManagedObject>(_ type: T.Type, attributeName: String, value: AnyObject, predicate: Predicate? = nil) {
         let request = NSBatchUpdateRequest(entityName: type.entityName())
         request.predicate = predicate
         request.propertiesToUpdate = [attributeName: value]
-        request.resultType = .UpdatedObjectIDsResultType
+        request.resultType = .updatedObjectIDsResultType
         do {
-            let result = try managedObjectContext.executeRequest(request) as! NSBatchUpdateResult
+            let result = try managedObjectContext.execute(request) as! NSBatchUpdateResult
             let objectIDs = result.result as! [NSManagedObjectID]
             Logging.log("Updated \(objectIDs.count) objects")
             for id in objectIDs {
-                let object = managedObjectContext.objectWithID(id)
-                if object.fault {
+                let object = managedObjectContext.object(with: id)
+                if object.isFault {
                     continue
                 }
                 
-                managedObjectContext.refreshObject(object, mergeChanges: true)
+                managedObjectContext.refresh(object, mergeChanges: true)
             }
         } catch {
             Logging.log("Update error: \(error)")
@@ -431,7 +431,7 @@ public extension ObjectModel /* Batch updates */ {
 }
 
 public extension ObjectModel {
-    public func entitiesInCurrentContext<T: NSManagedObject>(entities: [T]) -> [T] {
+    public func entitiesInCurrentContext<T: NSManagedObject>(_ entities: [T]) -> [T] {
         var result = [T]()
         for entity in entities {
             result.append(entityInCurrentContext(entity))
@@ -440,21 +440,21 @@ public extension ObjectModel {
         return result
     }
 
-    public func entityInCurrentContext<T: NSManagedObject>(entity: T) -> T {
-        return managedObjectContext.objectWithID(entity.objectID) as! T
+    public func entityInCurrentContext<T: NSManagedObject>(_ entity: T) -> T {
+        return managedObjectContext.object(with: entity.objectID) as! T
     }
 }
 
 // MARK: - Predicates
 public extension ObjectModel {
-    public func predicateForAttribute(attributeName: String, withValue: AnyObject) -> NSPredicate {
-        let predicate: NSPredicate
+    public func predicateForAttribute(_ attributeName: String, withValue: AnyObject) -> Predicate {
+        let predicate: Predicate
         
         switch(withValue) {
         case is String:
-            predicate = NSPredicate(format: "%K ==[c] %@", argumentArray: [attributeName, withValue])
+            predicate = Predicate(format: "%K ==[c] %@", argumentArray: [attributeName, withValue])
         default:
-            predicate = NSPredicate(format: "%K = %@", argumentArray: [attributeName, withValue])
+            predicate = Predicate(format: "%K = %@", argumentArray: [attributeName, withValue])
         }
         
         return predicate

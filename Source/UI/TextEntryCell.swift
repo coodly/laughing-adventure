@@ -33,14 +33,14 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
         return ""
     }
     
-    func setReturnKeyType(type: UIReturnKeyType) {
+    func setReturnKeyType(_ type: UIReturnKeyType) {
         entryField.returnKeyType = type
         
         guard let _ = dismissButton else {
             return
         }
         
-        if type == .Next {
+        if type == .next {
             dismissButton?.title = NSLocalizedString("coodly.text.field.next", comment: "")
         } else {
             dismissButton?.title = NSLocalizedString("coodly.text.field.done", comment: "")
@@ -52,10 +52,10 @@ public class TextEntryCell: DynamicFontReloadingTableViewCell {
 #if os(iOS)
 public extension TextEntryCell {
     func addAccessoryToolbar()  {
-        let toolbar = UIToolbar(frame: CGRectMake(0, 0, 100, 44))
+        let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
         
-        let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
-        dismissButton = UIBarButtonItem(title: "", style: .Plain, target: self, action: .dismissKeyboardPressed)
+        let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        dismissButton = UIBarButtonItem(title: "", style: .plain, target: self, action: .dismissKeyboardPressed)
         toolbar.setItems([spacer, dismissButton!], animated: false)
         entryField.inputAccessoryView = toolbar
     }
@@ -67,7 +67,7 @@ public extension TextEntryCell {
 public extension TextEntryCell {
     func decimalInput() {
         inputValidation = DecimalInputValidation()
-        entryField.keyboardType = .DecimalPad
+        entryField.keyboardType = .decimalPad
         addAccessoryToolbar()
     }
 }

@@ -19,6 +19,6 @@ import CoreData
 
 public extension NSManagedObject {
     public class func entityName() -> String {
-        return NSStringFromClass(self).componentsSeparatedByString(".").last!
+        return NSStringFromClass(self).components(separatedBy: ".").last!
     }    
 }

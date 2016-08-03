@@ -18,6 +18,6 @@ import UIKit
 
 public extension UINib {
     public func loadInstance() -> UIView {
-        return self.instantiateWithOwner(nil, options: nil).first as! UIView
+        return self.instantiate(withOwner: nil, options: nil).first as! UIView
     }
 }

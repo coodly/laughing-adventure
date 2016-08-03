@@ -20,22 +20,22 @@ public class MultiSelectionViewController: SelectionViewController {
     public var selectionHandler: ((selected: [AnyObject]) -> Void)!
     var selectedElements: [AnyObject]!
  
-    public override func viewWillDisappear(animated: Bool) {
+    public override func viewWillDisappear(_ animated: Bool) {
         selectionHandler(selected: selectedElements)
     }
 
-    override func isSelected(object: AnyObject) -> Bool {
-        return selectedElements.contains( { $0.isEqual(object)} )
+    override func isSelected(_ object: AnyObject) -> Bool {
+        return selectedElements.contains( where: { $0.isEqual(object)} )
     }
     
-    public func markSelectedElements(selected: [AnyObject]) {
+    public func markSelectedElements(_ selected: [AnyObject]) {
         selectedElements = selected
         tableView.reloadData()
     }
     
-    public override func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
-        if isSelected(object), let index = selectedElements.indexOf({ $0.isEqual(object) }) {
-            let removed = selectedElements.removeAtIndex(index)
+    public override func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) {
+        if isSelected(object), let index = selectedElements.index(where: { $0.isEqual(object) }) {
+            let removed = selectedElements.remove(at: index)
             didDeselect(removed)
         } else {
             selectedElements.append(object)
@@ -43,20 +43,20 @@ public class MultiSelectionViewController: SelectionViewController {
         }
         
         tableView.beginUpdates()
-        tableView.reloadRowsAtIndexPaths([atIndexPath], withRowAnimation: .Automatic)
+        tableView.reloadRows(at: [atIndexPath], with: .automatic)
         tableView.endUpdates()
     }
     
-    public func addToSelected(object: AnyObject) {
+    public func addToSelected(_ object: AnyObject) {
         selectedElements.append(object)
         tableView.reloadData()
     }
     
-    public func didSelect(element: AnyObject) {
+    public func didSelect(_ element: AnyObject) {
         
     }
 
-    public func didDeselect(element: AnyObject) {
+    public func didDeselect(_ element: AnyObject) {
         
     }
 }

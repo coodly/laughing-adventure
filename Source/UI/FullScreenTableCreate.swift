@@ -18,11 +18,11 @@ import UIKit
 
 public protocol FullScreenTableCreate: UITableViewDelegate, UITableViewDataSource {
     var tableView: UITableView! { get set }
-    func checkTableView(style: UITableViewStyle)
+    func checkTableView(_ style: UITableViewStyle)
 }
 
 public extension FullScreenTableCreate where Self: UIViewController {
-    func checkTableView(style: UITableViewStyle = .Plain) {
+    func checkTableView(_ style: UITableViewStyle = .plain) {
         if tableView != nil {
             return
         }
@@ -33,10 +33,10 @@ public extension FullScreenTableCreate where Self: UIViewController {
         tableView.dataSource = self
         view.addSubview(tableView)
         
-        let views = ["table": tableView]
+        let views: [String: AnyObject] = ["table": tableView]
         
-        let vertical = NSLayoutConstraint.constraintsWithVisualFormat("V:|[table]|", options: [], metrics: nil, views: views)
-        let horizontal = NSLayoutConstraint.constraintsWithVisualFormat("H:|[table]|", options: [], metrics: nil, views: views)
+        let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[table]|", options: [], metrics: nil, views: views)
+        let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[table]|", options: [], metrics: nil, views: views)
         
         view.addConstraints(vertical + horizontal)
     }

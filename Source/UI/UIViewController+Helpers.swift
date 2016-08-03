@@ -21,50 +21,50 @@ private extension Selector {
 }
 
 public extension UIViewController {
-    public func pushMaybeModally(controller: UIViewController, closeButtonTitle: String = NSLocalizedString("modally.presented.close.button.title", comment: "")) {
-        if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
+    public func pushMaybeModally(_ controller: UIViewController, closeButtonTitle: String = NSLocalizedString("modally.presented.close.button.title", comment: "")) {
+        if UIDevice.current.userInterfaceIdiom == .phone {
             navigationController!.pushViewController(controller, animated: true)
         } else {
             let navigation = UINavigationController(rootViewController: controller)
             if let _ = controller.navigationItem.leftBarButtonItem {
                 Logging.log("Close button will not be added")
             } else {
-                controller.navigationItem.leftBarButtonItem = UIBarButtonItem(title: closeButtonTitle, style: .Plain, target: self, action: .closeModalPressed)
+                controller.navigationItem.leftBarButtonItem = UIBarButtonItem(title: closeButtonTitle, style: .plain, target: self, action: .closeModalPressed)
             }
             #if os(iOS)
-            navigation.modalPresentationStyle = .FormSheet
+            navigation.modalPresentationStyle = .formSheet
             #endif
-            navigation.modalTransitionStyle = .CrossDissolve
-            presentViewController(navigation, animated: true, completion: nil)
+            navigation.modalTransitionStyle = .crossDissolve
+            present(navigation, animated: true, completion: nil)
         }
     }
     
     public func popOrDismiss() {
         if navigationController!.viewControllers.count == 1 {
-            dismissViewControllerAnimated(true, completion: nil)
+            dismiss(animated: true, completion: nil)
         } else {
-            navigationController!.popViewControllerAnimated(true)
+            navigationController!.popViewController(animated: true)
         }
     }
     
     @objc private func closeModal() {
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
 }
 
 public protocol QuickAlertPresenter {
-    func presentAlert(title: String, message: String, dismissButtonTitle: String)
-    func presentErrorAlert(title: String, error: NSError, dismissButtonTitle: String)
+    func presentAlert(_ title: String, message: String, dismissButtonTitle: String)
+    func presentErrorAlert(_ title: String, error: NSError, dismissButtonTitle: String)
 }
 
 public extension QuickAlertPresenter where Self: UIViewController {
-    func presentAlert(title: String, message: String, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        alert.addAction(UIAlertAction(title: dismissButtonTitle, style: .Cancel, handler: nil))
-        presentViewController(alert, animated: true, completion: nil)
+    func presentAlert(_ title: String, message: String, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: dismissButtonTitle, style: .cancel, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
     
-    func presentErrorAlert(title: String, error: NSError, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
+    func presentErrorAlert(_ title: String, error: NSError, dismissButtonTitle: String = NSLocalizedString("generic.button.title.ok", comment: "")) {
         presentAlert(title, message: error.localizedDescription, dismissButtonTitle: dismissButtonTitle)
     }
 }

@@ -23,6 +23,6 @@ public extension UIView {
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
         animation.duration = 0.6
         animation.values = [-10, 10, -10, 10, -5, 5, -3, 3, 0]
-        layer.addAnimation(animation, forKey: "shake")
+        layer.add(animation, forKey: "shake")
     }
 }

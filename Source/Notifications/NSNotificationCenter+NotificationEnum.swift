@@ -18,14 +18,14 @@ public protocol CoodlyNotification {
     
 }
 
-public extension NSNotificationCenter {
-    func postNotification(notification: CoodlyNotification, object: AnyObject? = nil) {
+public extension NotificationCenter {
+    func postNotification(_ notification: CoodlyNotification, object: AnyObject? = nil) {
         let name = String(reflecting: notification)
         Logging.log("Post notification named \(name)")
-        postNotificationName(name, object: object)
+        post(name: Notification.Name(rawValue: name), object: object)
     }
     
-    func addObserver(observer: AnyObject, selector aSelector: Selector, notification: CoodlyNotification) {
-        addObserver(observer, selector: aSelector, name: String(reflecting: notification), object: nil)
+    func addObserver(_ observer: AnyObject, selector aSelector: Selector, notification: CoodlyNotification) {
+        addObserver(observer, selector: aSelector, name: NSNotification.Name(rawValue: String(reflecting: notification)), object: nil)
     }
 }

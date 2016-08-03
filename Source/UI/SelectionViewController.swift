@@ -29,46 +29,46 @@ public class SelectionViewController: UIViewController, FullScreenTableCreate, U
         checkTableView()
     }
     
-    public override func viewWillAppear(animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         source.tableView = tableView
         tableView.reloadData()
     }
     
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    public func numberOfSections(in tableView: UITableView) -> Int {
         return source.numberOfSections()
     }
     
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return source.numberOfRowsInSection(section)
     }
 
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(SelectionTableCellIdentifier)!
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: SelectionTableCellIdentifier)!
         let object = source.objectAtIndexPath(indexPath)
         configureCell(cell, withObject: object, selected:isSelected(object))
         return cell
     }
     
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         
         let selected = source.objectAtIndexPath(indexPath)
         tappedCell(indexPath, object: selected)
     }
     
-    public func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+    public func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) {
         Logging.log("tappedCell(indexPath:\(atIndexPath))")
     }
 
-    func isSelected(object: AnyObject) -> Bool {
+    func isSelected(_ object: AnyObject) -> Bool {
         fatalError("Override \(#function)")
     }
     
-    public func configureCell(cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
+    public func configureCell(_ cell: UITableViewCell, withObject: AnyObject, selected: Bool) {
         Logging.log("configureCell(selected:\(selected))")
     }
 
-    public func setPresentationCellNib(nib:UINib) {
-        tableView.registerNib(nib, forCellReuseIdentifier: SelectionTableCellIdentifier)
+    public func setPresentationCellNib(_ nib:UINib) {
+        tableView.register(nib, forCellReuseIdentifier: SelectionTableCellIdentifier)
     }
 }

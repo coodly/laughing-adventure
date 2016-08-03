@@ -17,7 +17,7 @@
 import Foundation
 
 class Localized {
-    class func string(key: String) -> String {
+    class func string(_ key: String) -> String {
         return NSLocalizedString(key, comment: "")
     }
 }

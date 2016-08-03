@@ -17,7 +17,7 @@
 import UIKit
 
 public protocol InputValidation {
-    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool
+    func textField(_ textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool
 }
 
 public class DecimalInputValidation: InputValidation {
@@ -25,7 +25,7 @@ public class DecimalInputValidation: InputValidation {
         
     }
     
-    public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+    public func textField(_ textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
         if string == " " {
             return false
         }
@@ -38,7 +38,7 @@ public class DecimalInputValidation: InputValidation {
             return true
         }
         
-        if let _ = original.rangeOfString(".") {
+        if let _ = original.range(of: ".") {
             return false
         }
         
@@ -47,7 +47,7 @@ public class DecimalInputValidation: InputValidation {
         }
         
         var replaced = original
-        replaced.replaceRange(range, with: ".")
+        replaced.replaceSubrange(range, with: ".")
         textField.text = replaced
         return false
     }

@@ -19,12 +19,12 @@ import CloudKit
 
 public class SubscriptionCheck {
     private let recordType: String
-    private let predicate: NSPredicate
+    private let predicate: Predicate
     private let options: CKSubscriptionOptions
     private let desiredKeys: [String]
     private let deleteOthers: Bool
     
-    public init(recordType: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), options: CKSubscriptionOptions, desiredKeys: [String] = [], deleteOthers: Bool = false) {
+    public init(recordType: String, predicate: Predicate = Predicate(format: "TRUEPREDICATE"), options: CKSubscriptionOptions, desiredKeys: [String] = [], deleteOthers: Bool = false) {
         self.recordType = recordType
         self.predicate = predicate
         self.options = options
@@ -38,7 +38,7 @@ public class SubscriptionCheck {
         let resultHandler: ([CKSubscription]?, NSError?) -> () = {
             subscriptions, error in
             
-            if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
+            if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
                 Logging.log("Error: \(error)")
                 Logging.log("Will retry after \(retryAfter) seconds")
                 runAfter(retryAfter) {
@@ -74,7 +74,7 @@ public class SubscriptionCheck {
                     #if swift(>=2.3)
                         Cloud.container.publicCloudDatabase.delete(withSubscriptionID: sub.subscriptionID, completionHandler: deletionHandler)
                     #else
-                        Cloud.container.publicCloudDatabase.deleteSubscriptionWithID(sub.subscriptionID, completionHandler: deletionHandler)
+                        Cloud.container.publicCloudDatabase.delete(withSubscriptionID: sub.subscriptionID, completionHandler: deletionHandler)
                     #endif
                 }
             }
@@ -91,7 +91,7 @@ public class SubscriptionCheck {
         #if swift(>=2.3)
             Cloud.container.publicCloudDatabase.fetchAll(completionHandler: resultHandler)
         #else
-            Cloud.container.publicCloudDatabase.fetchAllSubscriptionsWithCompletionHandler(resultHandler)
+            Cloud.container.publicCloudDatabase.fetchAll(completionHandler: resultHandler)
         #endif
     }
     
@@ -106,7 +106,7 @@ public class SubscriptionCheck {
             notificationInfo.desiredKeys = desiredKeys
         }
         subscription.notificationInfo = notificationInfo
-        Cloud.container.publicCloudDatabase.saveSubscription(subscription) {
+        Cloud.container.publicCloudDatabase.save(subscription) {
             subscription, error in
             
             Logging.log("Subscription result: \(subscription) - \(error)")

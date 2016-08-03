@@ -19,11 +19,11 @@ import StoreKit
 public typealias ProductsResponse = ([SKProduct], [String]) -> ()
 
 public protocol ProductsHandler {
-    func retrieveProducts(identifiers: [String], completion: ProductsResponse)
+    func retrieveProducts(_ identifiers: [String], completion: ProductsResponse)
 }
 
 public extension ProductsHandler {
-    func retrieveProducts(identifiers: [String], completion: ProductsResponse) {
+    func retrieveProducts(_ identifiers: [String], completion: ProductsResponse) {
         Logging.log("Retrieve products: \(identifiers)")
         let request = SKProductsRequest(productIdentifiers: Set(identifiers))
         Store.sharedInstance.perform(request, completion: completion)
@@ -34,15 +34,15 @@ private class Store: NSObject, SKProductsRequestDelegate {
     private static let sharedInstance = Store()
     private var requests = [SKProductsRequest: ProductsResponse]()
     
-    private func perform(request: SKProductsRequest, completion: ProductsResponse) {
+    private func perform(_ request: SKProductsRequest, completion: ProductsResponse) {
         request.delegate = self
         requests[request] = completion
         request.start()
     }
     
-    public func productsRequest(request: SKProductsRequest, didReceiveResponse response: SKProductsResponse) {
+    public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         Logging.log("Retrieved: \(response.products.count). Invalid \(response.invalidProductIdentifiers)")
-        guard let completion = requests.removeValueForKey(request) else {
+        guard let completion = requests.removeValue(forKey: request) else {
             return
         }
         

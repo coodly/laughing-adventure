@@ -18,17 +18,17 @@ import Foundation
 import CloudKit
 
 public enum UsedDatabase {
-    case Public
-    case Private
+    case `public`
+    case `private`
 }
 
 public protocol CloudRequest {
-    typealias Model
-    typealias Predicate
+    associatedtype Model
+    associatedtype Predicate
     
-    func save(record record: Model, inDatabase db: UsedDatabase)
-    func save(records records: [Model], delete: [CKRecordID], inDatabase db: UsedDatabase)
-    func delete(record record: Model, inDatabase db: UsedDatabase)
-    func fetch(predicate predicate: Predicate, sort: [NSSortDescriptor], limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
-    func fetchFirst(predicate predicate: Predicate, sort: [NSSortDescriptor], inDatabase db: UsedDatabase)    
+    func save(record: Model, inDatabase db: UsedDatabase)
+    func save(records: [Model], delete: [CKRecordID], inDatabase db: UsedDatabase)
+    func delete(record: Model, inDatabase db: UsedDatabase)
+    func fetch(predicate: Predicate, sort: [NSSortDescriptor], limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase)
+    func fetchFirst(predicate: Predicate, sort: [NSSortDescriptor], inDatabase db: UsedDatabase)
 }

@@ -16,45 +16,45 @@
 
 import Foundation
 
-public class ConcurrentOperation: NSOperation {
+public class ConcurrentOperation: Operation {
     public var completionHandler: ((Bool, ConcurrentOperation) -> ())?
     
-    override public var concurrent: Bool {
+    override public var isConcurrent: Bool {
         return true
     }
 
     private var failed = false
     
     private var myExecuting: Bool = false
-    override public var executing: Bool {
+    override public var isExecuting: Bool {
         get {
             return myExecuting
         }
         set {
             if myExecuting != newValue {
-                willChangeValueForKey("isExecuting")
+                willChangeValue(forKey: "isExecuting")
                 myExecuting = newValue
-                didChangeValueForKey("isExecuting")
+                didChangeValue(forKey: "isExecuting")
             }
         }
     }
     
     private var myFinished: Bool = false;
-    override public var finished: Bool {
+    override public var isFinished: Bool {
         get {
             return myFinished
         }
         set {
             if myFinished != newValue {
-                willChangeValueForKey("isFinished")
+                willChangeValue(forKey: "isFinished")
                 myFinished = newValue
-                didChangeValueForKey("isFinished")
+                didChangeValue(forKey: "isFinished")
             }
         }
     }
     
     override public final func start() {
-        if cancelled {
+        if isCancelled {
             finish()
             return
         }
@@ -83,13 +83,13 @@ public class ConcurrentOperation: NSOperation {
         finish()
     }
     
-    public func finish(failed: Bool = false) {
-        willChangeValueForKey("isExecuting")
-        willChangeValueForKey("isFinished")
+    public func finish(_ failed: Bool = false) {
+        willChangeValue(forKey: "isExecuting")
+        willChangeValue(forKey: "isFinished")
         myExecuting = false
         myFinished = true
         self.failed = failed
-        didChangeValueForKey("isExecuting")
-        didChangeValueForKey("isFinished")
+        didChangeValue(forKey: "isExecuting")
+        didChangeValue(forKey: "isFinished")
     }
 }

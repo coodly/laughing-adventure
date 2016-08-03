@@ -20,33 +20,33 @@ public class SingleSelectionViewController: SelectionViewController {
     public var selectionHandler: ((selected: AnyObject?) -> Void)!
     var selectedElement: AnyObject?
         
-    public override func viewWillDisappear(animated: Bool) {
+    public override func viewWillDisappear(_ animated: Bool) {
         selectionHandler(selected: selectedElement)
     }
 
-    override func isSelected(object: AnyObject) -> Bool {
+    override func isSelected(_ object: AnyObject) -> Bool {
         return object.isEqual(selectedElement)
     }
     
-    public override func tappedCell(atIndexPath: NSIndexPath, object: AnyObject) {
+    public override func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) {
         moveSelectionToElement(object)
     }
     
-    public func markSelected(element: AnyObject) {
+    public func markSelected(_ element: AnyObject) {
         moveSelectionToElement(element)
     }
     
-    func moveSelectionToElement(element: AnyObject) {
+    func moveSelectionToElement(_ element: AnyObject) {
         tableView.beginUpdates()
         
         
         if let previous = selectedElement, let previousIndexPath = source.indexPathForObject(previous) {
-            tableView.reloadRowsAtIndexPaths([previousIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+            tableView.reloadRows(at: [previousIndexPath], with: UITableViewRowAnimation.automatic)
         }
         
         selectedElement = element
         if let selectedIndexPath = source.indexPathForObject(element) {
-            tableView.reloadRowsAtIndexPaths([selectedIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+            tableView.reloadRows(at: [selectedIndexPath], with: UITableViewRowAnimation.automatic)
         }
         
         tableView.endUpdates()

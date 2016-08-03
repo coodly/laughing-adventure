@@ -39,7 +39,7 @@ public class InputCellsSection {
         return cells.count
     }
     
-    func cellAtRow(row: Int) -> UITableViewCell {
+    func cellAtRow(_ row: Int) -> UITableViewCell {
         return cells[row]
     }
 }
@@ -48,16 +48,16 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
     @IBOutlet public var tableView: UITableView!
     private var sections:[InputCellsSection] = []
     private var activeCellInputValidation: InputValidation?
-    public var preferredStyle: UITableViewStyle = .Plain
+    public var preferredStyle: UITableViewStyle = .plain
     
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
     public override func viewDidLoad() {
         checkTableView(preferredStyle)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: .contentSizeChanged, name: UIContentSizeCategoryDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -66,7 +66,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         tableView.tableFooterView = UIView()
     }
     
-    public override func viewWillAppear(animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         smoothDeselectRows()
@@ -74,8 +74,8 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         configureReturnButtons()
     }
     
-    private func handleCellTap(cell: UITableViewCell, atIndexPath:NSIndexPath) -> Bool {
-        if cell.isKindOfClass(TextEntryCell) {
+    private func handleCellTap(_ cell: UITableViewCell, atIndexPath:IndexPath) -> Bool {
+        if cell.isKind(of: TextEntryCell.self) {
             let entryCell = cell as! TextEntryCell
             entryCell.entryField.becomeFirstResponder()
             return false
@@ -84,12 +84,12 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         }
     }
     
-    public func tappedCell(cell:UITableViewCell, atIndexPath:NSIndexPath) -> Bool {
+    public func tappedCell(_ cell:UITableViewCell, atIndexPath:IndexPath) -> Bool {
         Logging.log("tappedCell")
         return false
     }
     
-    public func addSection(section: InputCellsSection) {
+    public func addSection(_ section: InputCellsSection) {
         sections.append(section)
         for cell in section.cells {
             guard let textCell = cell as? TextEntryCell else {
@@ -100,21 +100,21 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         }
     }
     
-    private func indexPathForCell(cell: UITableViewCell) -> NSIndexPath? {
+    private func indexPathForCell(_ cell: UITableViewCell) -> IndexPath? {
         for section in 0 ..< sections.count {
             let sec = sections[section]
             
-            if let row = sec.cells.indexOf(cell) {
-                return NSIndexPath(forRow: row, inSection: section)
+            if let row = sec.cells.index(of: cell) {
+                return IndexPath(row: row, section: section)
             }
         }
         
         return nil
     }
     
-    private func nextEntryCellAfterIndexPath(indexPath: NSIndexPath) -> TextEntryCell? {
-        var section = indexPath.section
-        var row = indexPath.row + 1
+    private func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
+        var section = (indexPath as NSIndexPath).section
+        var row = (indexPath as NSIndexPath).row + 1
         
         for ; section < sections.count; section += 1 {
             let sec = sections[section]
@@ -132,7 +132,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
     }
     
     @objc private func contentSizeChanged() {
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
@@ -145,32 +145,32 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
                     continue
                 }
                 
-                textEntry.setReturnKeyType(.Next)
+                textEntry.setReturnKeyType(.next)
                 lastEntryCell = textEntry
             }
         }
         
         if let last = lastEntryCell {
-            last.setReturnKeyType(.Done)
+            last.setReturnKeyType(.done)
         }
     }
 }
 
 // MARK: - Sections / cells
 public extension InputCellsViewController {
-    func replaceCell(atIndexPath indexPath: NSIndexPath, withCell cell: UITableViewCell) {
+    func replaceCell(atIndexPath indexPath: IndexPath, withCell cell: UITableViewCell) {
         if let textEntryCell = cell as? TextEntryCell {
             textEntryCell.entryField.delegate = self
         }
         
         tableView.beginUpdates()
         
-        let section = sections[indexPath.section]
+        let section = sections[(indexPath as NSIndexPath).section]
         var cells = section.cells
-        cells[indexPath.row] = cell
-        sections[indexPath.section] = InputCellsSection(cells: cells)
+        cells[(indexPath as NSIndexPath).row] = cell
+        sections[(indexPath as NSIndexPath).section] = InputCellsSection(cells: cells)
         
-        tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
         
         tableView.endUpdates()
 
@@ -180,41 +180,41 @@ public extension InputCellsViewController {
 
 // MARK: - Table view delegates
 extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
-    public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    public func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
     
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionCells = sections[section]
         return sectionCells.numberOfCells()
     }
     
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let sectionCells = sections[indexPath.section]
-        return sectionCells.cellAtRow(indexPath.row)
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let sectionCells = sections[(indexPath as NSIndexPath).section]
+        return sectionCells.cellAtRow((indexPath as NSIndexPath).row)
     }
     
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let section = sections[indexPath.section]
-        let cell = section.cellAtRow(indexPath.row)
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let section = sections[(indexPath as NSIndexPath).section]
+        let cell = section.cellAtRow((indexPath as NSIndexPath).row)
         let detailsShonw = handleCellTap(cell, atIndexPath: indexPath)
         
         if detailsShonw {
             return
         }
         
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return sections[section].title
     }
     
-    public func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         return sections[section].header
     }
     
-    public func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         guard let header = sections[section].header else {
             return 0
         }
@@ -225,7 +225,7 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: - Text field delegate
 extension InputCellsViewController: UITextFieldDelegate {
-    public func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+    public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         if let cell = textField.findContainingCell() as? TextEntryCell, validation = cell.inputValidation {
             activeCellInputValidation = validation
         }
@@ -233,7 +233,7 @@ extension InputCellsViewController: UITextFieldDelegate {
         return true
     }
     
-    public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let validation = activeCellInputValidation else {
             return true
         }
@@ -241,11 +241,11 @@ extension InputCellsViewController: UITextFieldDelegate {
         return validation.textField(textField, shouldChangeCharactersInRange: range, replacementString: string)
     }
     
-    public func textFieldDidEndEditing(textField: UITextField) {
+    public func textFieldDidEndEditing(_ textField: UITextField) {
         activeCellInputValidation = nil
     }
     
-    public func textFieldShouldReturn(textField: UITextField) -> Bool {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
             nextCell.entryField.becomeFirstResponder()
             activeCellInputValidation = nextCell.inputValidation

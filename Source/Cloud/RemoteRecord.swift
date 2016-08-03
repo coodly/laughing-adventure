@@ -18,32 +18,32 @@ import CloudKit
 
 public protocol RemoteRecord {
     var recordName: String? { get set }
-    var recordData: NSData? { get set }
+    var recordData: Data? { get set }
     static var recordType: String { get }
 
     init()
     
-    mutating func load(record: CKRecord) -> Bool
-    mutating func loadFields(record: CKRecord) -> Bool
+    mutating func load(_ record: CKRecord) -> Bool
+    mutating func loadFields(_ record: CKRecord) -> Bool
     func referenceRepresentation() -> CKReference
 }
 
 public extension RemoteRecord {
-    final mutating func load(record: CKRecord) -> Bool {
-        recordData = archiveRecord(record)
+    final mutating func load(_ record: CKRecord) -> Bool {
+        recordData = archiveRecord(record) as Data
         recordName = record.recordID.recordName
         return loadFields(record)
     }
     
     func referenceRepresentation() -> CKReference {
-        return CKReference(recordID: CKRecordID(recordName: recordName!), action: .DeleteSelf)
+        return CKReference(recordID: CKRecordID(recordName: recordName!), action: .deleteSelf)
     }
     
-    private func archiveRecord(record: CKRecord) -> NSMutableData {
+    private func archiveRecord(_ record: CKRecord) -> NSMutableData {
         let archivedData = NSMutableData()
-        let archiver = NSKeyedArchiver(forWritingWithMutableData: archivedData)
+        let archiver = NSKeyedArchiver(forWritingWith: archivedData)
         archiver.requiresSecureCoding = true
-        record.encodeSystemFieldsWithCoder(archiver)
+        record.encodeSystemFields(with: archiver)
         archiver.finishEncoding()
         return archivedData
     }
@@ -53,7 +53,7 @@ public extension RemoteRecord {
             return nil
         }
         
-        let coder = NSKeyedUnarchiver(forReadingWithData: data)
+        let coder = NSKeyedUnarchiver(forReadingWith: data)
         coder.requiresSecureCoding = true
         return CKRecord(coder: coder)
     }
@@ -78,7 +78,7 @@ public extension RemoteRecord {
                 modified[label] = value
             } else if let value = child.value as? NSNumber {
                 modified[label] = value
-            } else if let value = child.value as? NSDate {
+            } else if let value = child.value as? Date {
                 modified[label] = value
             } else if let value = child.value as? CLLocation {
                 modified[label] = value
@@ -88,7 +88,7 @@ public extension RemoteRecord {
                 modified[label] = value
             } else if let value = child.value as? [NSNumber] {
                 modified[label] = value
-            } else if let value = child.value as? [NSDate] {
+            } else if let value = child.value as? [Date] {
                 modified[label] = value
             } else if let value = child.value as? [CLLocation] {
                 modified[label] = value

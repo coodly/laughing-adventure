@@ -16,16 +16,16 @@
 
 import Foundation
 
-public func runAfter(seconds: NSTimeInterval, onQueue queue: dispatch_queue_t = dispatch_get_main_queue(), closure: () -> ()) {
-    let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(seconds * Double(NSEC_PER_SEC)))
-    dispatch_after(delayTime, queue, closure)
+public func runAfter(_ seconds: TimeInterval, onQueue queue: DispatchQueue = DispatchQueue.main, closure: () -> ()) {
+    let delayTime = DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+    queue.asyncAfter(deadline: delayTime, execute: closure)
 }
 
-public func onMainThread(closure: () -> ()) {
-    dispatch_async(dispatch_get_main_queue(), closure)
+public func onMainThread(_ closure: () -> ()) {
+    DispatchQueue.main.async(execute: closure)
 }
 
-public func timeMeasured(desc: String = "", closure: () -> ()) {
+public func timeMeasured(_ desc: String = "", closure: () -> ()) {
     let start = CACurrentMediaTime()
     closure()
     Logging.log(String(format: "%@ - time: %f", desc, CACurrentMediaTime() - start))

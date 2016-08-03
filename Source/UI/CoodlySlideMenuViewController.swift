@@ -30,7 +30,7 @@ public class CoodlySlideMenuViewController: SlideMenuController {
     public var initialViewController: UIViewController!
     public var menuButton: UIBarButtonItem!
 
-    override public func viewWillAppear(animated: Bool) {
+    override public func viewWillAppear(_ animated: Bool) {
         if shown {
             return
         }
@@ -47,15 +47,15 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         presentRootController(initialViewController)
     }
 
-    public func presentModalController(controller: UIViewController) {
+    public func presentModalController(_ controller: UIViewController) {
         closeMenu()
 
-        controller.modalPresentationStyle = UIModalPresentationStyle.FormSheet
-        controller.modalTransitionStyle = UIModalTransitionStyle.CrossDissolve
-        presentViewController(controller, animated: true, completion: nil)
+        controller.modalPresentationStyle = UIModalPresentationStyle.formSheet
+        controller.modalTransitionStyle = UIModalTransitionStyle.crossDissolve
+        present(controller, animated: true, completion: nil)
     }
     
-    public func presentRootController(controller: UIViewController) {
+    public func presentRootController(_ controller: UIViewController) {
         closeMenu()
 
         controller.navigationItem.leftBarButtonItem = menuButton
@@ -79,8 +79,8 @@ public class CoodlySlideMenuViewController: SlideMenuController {
         removeLeftGestures()
     }
 
-    override public func track(trackAction: TrackAction) {
-        if trackAction == .LeftTapClose || trackAction == .LeftFlickClose {
+    override public func track(_ trackAction: TrackAction) {
+        if trackAction == .leftTapClose || trackAction == .leftFlickClose {
             removeLeftGestures()
         }
     }

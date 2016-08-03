@@ -30,25 +30,25 @@ extension SmoothTableRowDeselection where Self: UIViewController {
             return
         }
         
-        guard let coordinator = transitionCoordinator() else {
+        guard let coordinator = transitionCoordinator else {
             for selected in selectedPaths {
-                tableView.deselectRowAtIndexPath(selected, animated: false)
+                tableView.deselectRow(at: selected, animated: false)
             }
             return
         }
         
-        coordinator.animateAlongsideTransitionInView(parentViewController?.view, animation: {
+        coordinator.animateAlongsideTransition(in: parent?.view, animation: {
             context in
         
             for selected in selectedPaths {
-                self.tableView.deselectRowAtIndexPath(selected, animated: context.isAnimated())
+                self.tableView.deselectRow(at: selected, animated: context.isAnimated)
             }
         }, completion: {
             context in
         
-            if context.isCancelled() {
+            if context.isCancelled {
                 for selected in selectedPaths {
-                    self.tableView.selectRowAtIndexPath(selected, animated: false, scrollPosition: .None)
+                    self.tableView.selectRow(at: selected, animated: false, scrollPosition: .none)
                 }
             }
         })

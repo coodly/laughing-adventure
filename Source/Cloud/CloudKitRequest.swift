@@ -17,12 +17,12 @@
 import CloudKit
 
 public struct Cloud {
-    public static var container: CKContainer = CKContainer.defaultContainer()
+    public static var container: CKContainer = CKContainer.default()
 }
 
 public enum CloudResult<T: RemoteRecord> {
-    case Success([T], [CKRecordID])
-    case Failure
+    case success([T], [CKRecordID])
+    case failure
 }
 
 public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest {
@@ -42,16 +42,16 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
         Logging.log("Override: \(#function)")
     }
     
-    public func handleResult(result: CloudResult<T>, completion: () -> ()) {
+    public func handleResult(_ result: CloudResult<T>, completion: () -> ()) {
         Logging.log("Handle result \(result)")
         completion()
     }
     
-    private func database(type: UsedDatabase) -> CKDatabase {
+    private func database(_ type: UsedDatabase) -> CKDatabase {
         switch type {
-        case .Public:
+        case .public:
             return Cloud.container.publicCloudDatabase
-        case .Private:
+        case .private:
             return Cloud.container.privateCloudDatabase
         }
     }
@@ -71,7 +71,7 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
             }
         }
         
-        if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? NSTimeInterval {
+        if let error = error, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
             Logging.log("Error: \(error)")
             Logging.log("Will retry after \(retryAfter) seconds")
             runAfter(retryAfter) {
@@ -81,15 +81,15 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
         } else if let error = error {
             Logging.log("Error: \(error)")
             hadFailure = true
-            self.handleResult(.Failure, completion: finalizer)
+            self.handleResult(.failure, completion: finalizer)
         } else {
-            self.handleResult(.Success(self.records, self.deleted), completion: finalizer)
+            self.handleResult(.success(self.records, self.deleted), completion: finalizer)
         }
     }
 }
 
 public extension CloudKitRequest {
-    public final func delete(record record: T, inDatabase db: UsedDatabase = .Private) {
+    public final func delete(record: T, inDatabase db: UsedDatabase = .private) {
         Logging.log("Delete \(record)")
         let deleted = CKRecordID(recordName: record.recordName!)
         
@@ -100,7 +100,7 @@ public extension CloudKitRequest {
             Logging.log("Saved: \(saved?.count)")
             Logging.log("Deleted: \(deleted?.count)")
             if let deleted = deleted {
-                self.deleted.appendContentsOf(deleted)
+                self.deleted.append(contentsOf: deleted)
             }
 
             self.handleResult(withCursor: nil, error: error, inDatabase: db) {
@@ -108,12 +108,12 @@ public extension CloudKitRequest {
             }
         }
         
-        database(db).addOperation(operation)
+        database(db).add(operation)
     }
 }
 
 public extension CloudKitRequest {
-    public final func save(records records: [T], delete: [CKRecordID] = [], inDatabase db: UsedDatabase = .Private) {
+    public final func save(records: [T], delete: [CKRecordID] = [], inDatabase db: UsedDatabase = .private) {
         let toSave = records.map { $0.recordRepresentation() }
         
         let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
@@ -133,7 +133,7 @@ public extension CloudKitRequest {
             }
             
             if let deleted = deleted {
-                self.deleted.appendContentsOf(deleted)
+                self.deleted.append(contentsOf: deleted)
             }
             
             self.handleResult(withCursor: nil, error: error, inDatabase: db) {
@@ -141,26 +141,26 @@ public extension CloudKitRequest {
             }
         }
         
-        database(db).addOperation(operation)
+        database(db).add(operation)
     }
     
-    public final func save(record record: T, inDatabase db: UsedDatabase = .Private) {
+    public final func save(record: T, inDatabase db: UsedDatabase = .private) {
         save(records: [record], inDatabase: db)
     }
 }
 
 public extension CloudKitRequest {
-    public final func fetch(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .Private) {
+    public final func fetch(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .private) {
         let query = CKQuery(recordType: T.recordType, predicate: predicate)
         query.sortDescriptors = sort
         perform(query, limit: limit, pullAll: pullAll, inDatabase: db)
     }
     
-    public final func fetchFirst(predicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .Private) {
+    public final func fetchFirst(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .private) {
         fetch(predicate: predicate, sort: sort, limit: 1, pullAll: false, inDatabase: db)
     }
     
-    private final func perform(query: CKQuery, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {
+    private final func perform(_ query: CKQuery, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {
         Logging.log("Fetch \(query.recordType)")
         
         let fetchOperation = CKQueryOperation(query: query)
@@ -170,7 +170,7 @@ public extension CloudKitRequest {
         }
     }
 
-    private func continueWith(cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
+    private func continueWith(_ cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
         execute(operation, limit: limit, pullAll: true, inDatabase: db) {
@@ -178,7 +178,7 @@ public extension CloudKitRequest {
         }
     }
     
-    private func execute(fetchOperation: CKQueryOperation, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
+    private func execute(_ fetchOperation: CKQueryOperation, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
         Logging.log("Run query operation")
         if let limit = limit {
             fetchOperation.resultsLimit = limit
@@ -196,7 +196,7 @@ public extension CloudKitRequest {
         fetchOperation.queryCompletionBlock = {
             cursor, error in
             
-            if self.cancelled {
+            if self.isCancelled {
                 self.finish()
                 return
             }
@@ -209,6 +209,6 @@ public extension CloudKitRequest {
             self.handleResult(withCursor: usedCursor, limit: limit, error: error, inDatabase: db, retryClosure: retryClosure)
         }
         
-        database(db).addOperation(fetchOperation)
+        database(db).add(fetchOperation)
     }
 }

@@ -40,30 +40,30 @@ public class AdPresentingContainerViewController: UIViewController {
         addChildViewController(show)
 
         show.view.frame = container.bounds
-        show.view.autoresizingMask = [UIViewAutoresizing.FlexibleWidth, UIViewAutoresizing.FlexibleHeight]
+        show.view.autoresizingMask = [UIViewAutoresizing.flexibleWidth, UIViewAutoresizing.flexibleHeight]
         container.addSubview(show.view)
     }
     
-    public override func viewDidAppear(animated: Bool) {
+    public override func viewDidAppear(_ animated: Bool) {
         if let _ = banner {
             return
         }
         
         banner = createBanner()
-        banner.autoresizingMask = [UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleRightMargin, UIViewAutoresizing.FlexibleBottomMargin]
+        banner.autoresizingMask = [UIViewAutoresizing.flexibleLeftMargin, UIViewAutoresizing.flexibleTopMargin, UIViewAutoresizing.flexibleRightMargin, UIViewAutoresizing.flexibleBottomMargin]
         adContainerView.addSubview(banner)
     }
     
-    public func showBanner(banner: UIView) {
-        banner.center = CGPointMake(CGRectGetWidth(adContainerView.frame) / 2, CGRectGetHeight(adContainerView.frame) / 2)
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
-            self.adContainerHeightConstraint.constant = CGRectGetHeight(banner.frame)
+    public func showBanner(_ banner: UIView) {
+        banner.center = CGPoint(x: adContainerView.frame.width / 2, y: adContainerView.frame.height / 2)
+        UIView.animate(withDuration: 0.3, animations: { () -> Void in
+            self.adContainerHeightConstraint.constant = banner.frame.height
             self.view.layoutIfNeeded()
         })
     }
     
-    public func hideBanner(banner: UIView) {
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
+    public func hideBanner(_ banner: UIView) {
+        UIView.animate(withDuration: 0.3, animations: { () -> Void in
             self.adContainerHeightConstraint.constant = 0
             self.view.layoutIfNeeded()
         })

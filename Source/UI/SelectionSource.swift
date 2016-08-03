@@ -19,7 +19,7 @@ import Foundation
 public protocol SelectionSource {
     var tableView: UITableView! { get set }
     func numberOfSections() -> Int
-    func numberOfRowsInSection(section: Int) -> Int
-    func objectAtIndexPath(indexPath: NSIndexPath) -> AnyObject
-    func indexPathForObject(object: AnyObject) -> NSIndexPath?
+    func numberOfRowsInSection(_ section: Int) -> Int
+    func objectAtIndexPath(_ indexPath: IndexPath) -> AnyObject
+    func indexPathForObject(_ object: AnyObject) -> IndexPath?
 }
