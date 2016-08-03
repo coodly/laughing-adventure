@@ -293,20 +293,6 @@ public extension ObjectModel /* Delete */ {
             saveContext()
         }
     }
-    
-    @available(iOS 9, *)
-    public func deleteAllEntitiesOfType<T: NSManagedObject>(_ type: T.Type, saveAfter: Bool = true) {
-        let fetchRequest = fetchRequestForEntity(type)
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-        do {
-            try managedObjectContext.execute(deleteRequest)
-            if saveAfter {
-                saveContext()
-            }
-        } catch {
-            Logging.log("Delete error: \(error)")
-        }
-    }
 }
 
 // MARK: - Queries
@@ -399,30 +385,6 @@ public extension ObjectModel {
         } catch {
             Logging.log("fetchEntityAttribute error: \(error)")
             return []
-        }
-    }
-}
-
-public extension ObjectModel /* Batch updates */ {
-    public func updateEntitiesOfType<T: NSManagedObject>(_ type: T.Type, attributeName: String, value: AnyObject, predicate: NSPredicate? = nil) {
-        let request = NSBatchUpdateRequest(entityName: type.entityName())
-        request.predicate = predicate
-        request.propertiesToUpdate = [attributeName: value]
-        request.resultType = .updatedObjectIDsResultType
-        do {
-            let result = try managedObjectContext.execute(request) as! NSBatchUpdateResult
-            let objectIDs = result.result as! [NSManagedObjectID]
-            Logging.log("Updated \(objectIDs.count) objects")
-            for id in objectIDs {
-                let object = managedObjectContext.object(with: id)
-                if object.isFault {
-                    continue
-                }
-                
-                managedObjectContext.refresh(object, mergeChanges: true)
-            }
-        } catch {
-            Logging.log("Update error: \(error)")
         }
     }
 }
