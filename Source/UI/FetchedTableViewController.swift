@@ -23,9 +23,9 @@ private extension Selector {
 
 let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
-public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
+public class FetchedTableViewController<T: NSManagedObject>: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
-    private var fetchedController: NSFetchedResultsController<NSManagedObject>?
+    private var fetchedController: NSFetchedResultsController<T>?
     private var measuringCell: UITableViewCell?
     
     deinit {
@@ -143,7 +143,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         }
     }
     
-    public func createFetchedController<T: NSFetchRequestResult>() -> NSFetchedResultsController<T> {
+    public func createFetchedController() -> NSFetchedResultsController<T> {
         fatalError("Need to override \(#function)")
     }
     
