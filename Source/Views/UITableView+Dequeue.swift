@@ -17,11 +17,13 @@
 import UIKit
 
 public extension UITableView {
-    public func registerNibForType<T: UITableViewCell>(_ type: T.Type) {
+    public func dequeueReusableCell<T: UITableViewCell>() -> T {
+        if let cell = dequeueReusableCell(withIdentifier: T.identifier()) as? T {
+            return cell
+        }
+        
         register(T.viewNib(), forCellReuseIdentifier: T.identifier())
-    }
-    
-    public func dequeueReusableCellOfType<T: UITableViewCell>(_ type: T.Type) -> T {
+        
         return dequeueReusableCell(withIdentifier: T.identifier()) as! T
     }
 }
