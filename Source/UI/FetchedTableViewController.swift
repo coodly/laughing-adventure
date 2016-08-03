@@ -25,7 +25,7 @@ let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
 
 public class FetchedTableViewController: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
-    private var fetchedController: NSFetchedResultsController<AnyObject>?
+    private var fetchedController: NSFetchedResultsController<NSManagedObject>?
     private var measuringCell: UITableViewCell?
     
     deinit {
@@ -143,7 +143,7 @@ public class FetchedTableViewController: UIViewController, FullScreenTableCreate
         }
     }
     
-    public func createFetchedController() -> NSFetchedResultsController<AnyObject> {
+    public func createFetchedController<T: NSManagedObject>() -> NSFetchedResultsController<T> {
         fatalError("Need to override \(#function)")
     }
     

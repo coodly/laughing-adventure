@@ -93,15 +93,11 @@ public class ObjectModel {
 
     
     public lazy var workingFilesDirectory: URL = {
-        let urls = FileManager.default.urlsForDirectory(self.inDirectory, inDomains: .userDomainMask)
+        let urls = FileManager.default.urls(for: self.inDirectory, in: .userDomainMask)
         let last = urls.last!
         let identifier = Bundle.main.bundleIdentifier!
         let dbIdentifier = identifier + ".db"
-        #if swift(>=2.3)
-            let dbFolder = last.URLByAppendingPathComponent(dbIdentifier)!
-        #else
-            let dbFolder = last.appendingPathComponent(dbIdentifier)
-        #endif
+        let dbFolder = last.appendingPathComponent(dbIdentifier)
         do {
             try FileManager.default.createDirectory(at: dbFolder, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
@@ -111,7 +107,7 @@ public class ObjectModel {
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = Bundle.main.urlForResource(self.modelName, withExtension: "momd")!
+        let modelURL = Bundle.main.url(forResource: self.modelName, withExtension: "momd")!
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
@@ -161,10 +157,11 @@ public class ObjectModel {
             return false
         }
         
-        guard let filePath = databaseFilePath(), path = filePath.path else {
+        guard let filePath = databaseFilePath() else {
             return false
         }
         
+        let path = filePath.path
         return FileManager.default.fileExists(atPath: path)
     }
     
@@ -233,11 +230,11 @@ public class ObjectModel {
 #if os(iOS)
 // MARK: - Fetched controller
 public extension ObjectModel {
-    public func fetchedControllerForEntity<T: NSManagedObject>(_ type: T.Type, sortDescriptors: [SortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<AnyObject> {
+    public func fetchedControllerForEntity<T: NSFetchRequestResult>(_ type: T.Type, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
         return fetchedControllerForEntity(type, predicate: nil, sortDescriptors: sortDescriptors, sectionNameKeyPath: sectionNameKeyPath)
     }
 
-    public func fetchedControllerForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate?, sortDescriptors: [SortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<AnyObject> {
+    public func fetchedControllerForEntity<T: NSFetchRequestResult>(_ type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
         let fetchRequest = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
@@ -254,24 +251,24 @@ public extension ObjectModel {
 
 public extension ObjectModel /* Fetch request */ {
     
-    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type) -> NSFetchRequest<AnyObject> {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type) -> NSFetchRequest<T> {
         return fetchRequestForEntity(type, predicate: nil, sortDescriptors: [])
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate) -> NSFetchRequest<AnyObject> {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: NSPredicate) -> NSFetchRequest<T> {
         return fetchRequestForEntity(type, predicate: predicate, sortDescriptors: [])
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest<T> {
         return fetchRequestForEntity(type, predicate: nil, sortDescriptors: sortDescriptors)
     }
     
-    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate?, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
+    public func fetchRequestForEntity<T: NSManagedObject>(_ type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest<T> {
         return fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
     }
 
-    private func fetchRequestForEntity(named name: String, predicate: Predicate?, sortDescriptors: [SortDescriptor]) -> NSFetchRequest<AnyObject> {
-        let request = NSFetchRequest(entityName: name)
+    private func fetchRequestForEntity<T: NSFetchRequestResult>(named name: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest<T> {
+        let request = NSFetchRequest<T>(entityName: name)
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
         return request
@@ -319,7 +316,7 @@ public extension ObjectModel {
         return countInstancesOfEntity(type, usingPredicate: predicate) == 1
     }
     
-    public func countInstancesOfEntity<T: NSManagedObject>(_ type: T.Type, usingPredicate predicate: Predicate = Predicate(format: "TRUEPREDICATE")) -> Int {
+    public func countInstancesOfEntity<T: NSManagedObject>(_ type: T.Type, usingPredicate predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> Int {
         let request = fetchRequestForEntity(type, predicate: predicate)
         
         #if swift(>=2.3)
@@ -347,12 +344,12 @@ public extension ObjectModel {
         return fetchFirstEntity(type, predicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(_ type: T.Type, predicate: Predicate, sortDescriptors: [SortDescriptor] = []) -> T? {
+    public func fetchFirstEntity<T: NSManagedObject>(_ type: T.Type, predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
         let request = fetchRequestForEntity(type, predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
             let result = try managedObjectContext.fetch(request)
-            return result.first as? T
+            return result.first
         } catch {
             Logging.log(error)
             return nil
@@ -364,7 +361,7 @@ public extension ObjectModel {
         return fetchFirstEntity(usingPredicate: predicate)
     }
     
-    public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: Predicate, sortDescriptors: [SortDescriptor] = []) -> T? {
+    public func fetchFirstEntity<T: NSManagedObject>(usingPredicate predicate: NSPredicate, sortDescriptors: [NSSortDescriptor] = []) -> T? {
         let request = fetchRequestForEntity(named: T.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
         
         do {
@@ -376,7 +373,7 @@ public extension ObjectModel {
         }
     }
 
-    public func fetchAllEntitiesOfType<T: NSManagedObject>(_ type: T.Type, predicate: Predicate = Predicate(format: "TRUEPREDICATE"), limit: Int = 0) -> [T] {
+    public func fetchAllEntitiesOfType<T: NSManagedObject>(_ type: T.Type, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), limit: Int = 0) -> [T] {
         let request = fetchRequestForEntity(type, predicate: predicate)
         if limit > 0 {
             request.fetchLimit = limit
@@ -407,7 +404,7 @@ public extension ObjectModel {
 }
 
 public extension ObjectModel /* Batch updates */ {
-    public func updateEntitiesOfType<T: NSManagedObject>(_ type: T.Type, attributeName: String, value: AnyObject, predicate: Predicate? = nil) {
+    public func updateEntitiesOfType<T: NSManagedObject>(_ type: T.Type, attributeName: String, value: AnyObject, predicate: NSPredicate? = nil) {
         let request = NSBatchUpdateRequest(entityName: type.entityName())
         request.predicate = predicate
         request.propertiesToUpdate = [attributeName: value]
@@ -447,14 +444,14 @@ public extension ObjectModel {
 
 // MARK: - Predicates
 public extension ObjectModel {
-    public func predicateForAttribute(_ attributeName: String, withValue: AnyObject) -> Predicate {
-        let predicate: Predicate
+    public func predicateForAttribute(_ attributeName: String, withValue: AnyObject) -> NSPredicate {
+        let predicate: NSPredicate
         
         switch(withValue) {
         case is String:
-            predicate = Predicate(format: "%K ==[c] %@", argumentArray: [attributeName, withValue])
+            predicate = NSPredicate(format: "%K ==[c] %@", argumentArray: [attributeName, withValue])
         default:
-            predicate = Predicate(format: "%K = %@", argumentArray: [attributeName, withValue])
+            predicate = NSPredicate(format: "%K = %@", argumentArray: [attributeName, withValue])
         }
         
         return predicate

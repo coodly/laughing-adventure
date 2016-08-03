@@ -42,7 +42,7 @@ public class DecimalInputValidation: InputValidation {
             return false
         }
         
-        guard let range = original.rangeFromNSRange(range) else {
+        guard let range = original.range(from: range) else {
             return true
         }
         

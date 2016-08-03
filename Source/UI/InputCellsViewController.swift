@@ -114,12 +114,16 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
     
     private func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
         var section = (indexPath as NSIndexPath).section
-        var row = (indexPath as NSIndexPath).row + 1
+        var row = (indexPath as NSIndexPath).row + 1                
         
-        for ; section < sections.count; section += 1 {
+        let sectionRange = section..<sections.count
+        
+        for section in sectionRange {
             let sec = sections[section]
             
-            for ; row < sec.cells.count; row += 1 {
+            let rowRange = row..<sec.cells.count
+            
+            for row in rowRange {
                 if let cell = sec.cells[row] as? TextEntryCell {
                     return cell
                 }

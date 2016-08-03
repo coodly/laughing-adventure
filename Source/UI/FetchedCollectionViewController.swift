@@ -41,7 +41,7 @@ let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView: UICollectionView!
-    private var fetchedController: NSFetchedResultsController<AnyObject>?
+    private var fetchedController: NSFetchedResultsController<NSManagedObject>?
     private var measuringCell: UICollectionViewCell?
     private var changeActions: [CollectionCoreDataChangeAction]!
     
@@ -151,7 +151,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         Logging.log("\(#function)")
     }
     
-    public func createFetchedController() -> NSFetchedResultsController<AnyObject> {
+    public func createFetchedController<T: NSManagedObject>() -> NSFetchedResultsController<T> {
         fatalError("Need to override \(#function)")
     }
     
