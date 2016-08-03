@@ -123,7 +123,7 @@ public class ObjectModel {
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
             Logging.log("Will delete DB")
             try! FileManager.default.removeItem(at: url!)
-            self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
+            _ = self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
         }
         
         return coordinator
@@ -309,7 +309,6 @@ public extension ObjectModel {
             return count
         } catch let error as NSError {
             fatalError("Count failed: \(error)")
-            return 0
         }
     }
     
@@ -355,7 +354,7 @@ public extension ObjectModel {
         
         do {
             let result = try managedObjectContext.fetch(request)
-            return result as! [T]
+            return result
         } catch {
             Logging.log(error)
             return []

@@ -38,7 +38,7 @@ public class SubscriptionCheck {
         let resultHandler: ([CKSubscription]?, Error?) -> () = {
             subscriptions, error in
             
-            if let error = error as? NSError, retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+            if let error = error as? NSError, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
                 Logging.log("Error: \(error)")
                 Logging.log("Will retry after \(retryAfter) seconds")
                 runAfter(retryAfter) {
@@ -51,7 +51,7 @@ public class SubscriptionCheck {
                 return
             }
             
-            guard let subs = subscriptions where subs.count > 0 else {
+            guard let subs = subscriptions, subs.count > 0 else {
                 Logging.log("No subscriptions. Will create")
                 self.subscribe()
                 return

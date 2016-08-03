@@ -70,7 +70,7 @@ public extension RemoteRecord {
         
         let mirror = Mirror(reflecting: self)
         for child in mirror.children {
-            guard let label = child.label where label != "recordName" && label != "recordData" else {
+            guard let label = child.label, label != "recordName" && label != "recordData" else {
                 continue
             }
             

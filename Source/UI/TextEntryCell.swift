@@ -75,6 +75,6 @@ public extension TextEntryCell {
 
 private extension TextEntryCell {
     @objc private func dismissPressed() {
-        entryField.delegate?.textFieldShouldReturn?(entryField)
+        _ = entryField.delegate?.textFieldShouldReturn?(entryField)
     }
 }

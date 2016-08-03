@@ -83,7 +83,7 @@ extension Purchaser: SKPaymentTransactionObserver {
             case .failed: // Transaction was cancelled or failed before being added to the server queue.
                 Logging.log("Failed: \(transaction.error)")
                 finishTransaction = true
-                if let error = transaction.error as? NSError where error.code == SKError.paymentCancelled.rawValue {
+                if let error = transaction.error as? NSError, error.code == SKError.paymentCancelled.rawValue {
                     notifyMonitor?.purchase(.cancelled, forProduct: productIdentifier)
                 } else {
                     notifyMonitor?.purchase(.failure, forProduct: productIdentifier)
@@ -103,7 +103,7 @@ extension Purchaser: SKPaymentTransactionObserver {
         Logging.log("Restore completed")
     }
     
-    public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: NSError) {
+    public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         Logging.log("Restore failed with error: \(error)")
     }
 }

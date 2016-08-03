@@ -113,8 +113,8 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
     }
     
     private func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
-        var section = (indexPath as NSIndexPath).section
-        var row = (indexPath as NSIndexPath).row + 1                
+        let section = indexPath.section
+        var row = indexPath.row + 1
         
         let sectionRange = section..<sections.count
         
@@ -219,7 +219,7 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        guard let header = sections[section].header else {
+        guard let _ = sections[section].header else {
             return 0
         }
         
@@ -230,7 +230,7 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - Text field delegate
 extension InputCellsViewController: UITextFieldDelegate {
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, validation = cell.inputValidation {
+        if let cell = textField.findContainingCell() as? TextEntryCell, let validation = cell.inputValidation {
             activeCellInputValidation = validation
         }
         
@@ -250,7 +250,7 @@ extension InputCellsViewController: UITextFieldDelegate {
     }
     
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, indexPath = indexPathForCell(cell), nextCell = nextEntryCellAfterIndexPath(indexPath) {
+        if let cell = textField.findContainingCell() as? TextEntryCell, let indexPath = indexPathForCell(cell), let nextCell = nextEntryCellAfterIndexPath(indexPath) {
             nextCell.entryField.becomeFirstResponder()
             activeCellInputValidation = nextCell.inputValidation
         } else {

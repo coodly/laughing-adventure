@@ -65,7 +65,7 @@ public class FetchedTableViewController<T: NSManagedObject>: UIViewController, F
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let controller = fetchedController, sections = controller.sections else {
+        guard let controller = fetchedController, let sections = controller.sections else {
             return 0
         }
         

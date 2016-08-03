@@ -185,7 +185,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
             return false
         }
         
-        guard let sections = controller.sections where sections.count > (indexPath as NSIndexPath).section else {
+        guard let sections = controller.sections, sections.count > (indexPath as NSIndexPath).section else {
             return false
         }
         
