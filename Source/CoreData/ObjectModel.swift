@@ -392,7 +392,6 @@ public extension ObjectModel {
         
         do {
             let result = try managedObjectContext.fetch(request)
-            print("AAAA \(result)")
             if let first = result.first, let value = first[sumKey] as? NSDecimalNumber {
                 return value
             }
