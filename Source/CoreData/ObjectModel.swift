@@ -169,7 +169,8 @@ public class ObjectModel {
         if let existing = pathToSQLiteFile {
             return existing
         } else if self.storeType == NSSQLiteStoreType {
-            return workingFilesDirectory.appendingPathComponent("\(self.modelName).sqlite")
+            //TODO jaanus: check this ! here
+            return workingFilesDirectory.appendingPathComponent("\(self.modelName!).sqlite")
         } else {
             return nil
         }
