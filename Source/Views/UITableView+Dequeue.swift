@@ -26,4 +26,12 @@ public extension UITableView {
         
         return dequeueReusableCell(withIdentifier: T.identifier()) as! T
     }
+
+    public func registerCell<T: UITableViewCell>(forType type: T.Type) {
+        register(T.viewNib(), forCellReuseIdentifier: T.identifier())
+    }
+    
+    public func dequeueReusableCell<T: UITableViewCell>(for indexPath: IndexPath) -> T {
+        return dequeueReusableCell(withIdentifier: T.identifier(), for: indexPath) as! T
+    }
 }

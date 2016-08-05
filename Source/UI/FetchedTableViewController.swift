@@ -21,12 +21,9 @@ private extension Selector {
     static let contentSizeChanged = #selector(FetchedTableViewController.contentSizeChanged)
 }
 
-let FetchedTableCellIdentifier = "FetchedTableCellIdentifier"
-
-public class FetchedTableViewController<T: NSManagedObject>: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
+public class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableViewCell>: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
-    private var fetchedController: NSFetchedResultsController<T>?
-    private var measuringCell: UITableViewCell?
+    private var fetchedController: NSFetchedResultsController<Entity>?
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -34,12 +31,16 @@ public class FetchedTableViewController<T: NSManagedObject>: UIViewController, F
     }
     
     public override func viewDidLoad() {
+        super.viewDidLoad()
+        
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
         checkTableView()
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
+        
+        tableView.registerCell(forType: Cell.self)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -73,15 +74,15 @@ public class FetchedTableViewController<T: NSManagedObject>: UIViewController, F
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: FetchedTableCellIdentifier)!
+        let cell = tableView.dequeueReusableCell(for: indexPath) as Cell
         let object = fetchedController!.object(at: indexPath)
-        configureCell(cell, atIndexPath: indexPath, object: object, forMeasuring:false)
+        configure(cell: cell, at: indexPath, with: object, forMeasuring:false)
         return cell
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let object = fetchedController!.object(at: indexPath)
-        let detailsShown = tappedCell(indexPath, object: object)
+        let detailsShown = tappedCell(at: indexPath, object: object)
         if detailsShown {
             return
         }
@@ -132,35 +133,30 @@ public class FetchedTableViewController<T: NSManagedObject>: UIViewController, F
         contentChanged()
     }
         
-    public func setPresentationCellNib(_ nib:UINib) {
-        tableView.register(nib, forCellReuseIdentifier: FetchedTableCellIdentifier)
-        measuringCell = tableView.dequeueReusableCell(withIdentifier: FetchedTableCellIdentifier)
-    }
-    
     func contentSizeChanged() {
         DispatchQueue.main.async { () -> Void in
             self.tableView.reloadData()
         }
     }
     
-    public func createFetchedController() -> NSFetchedResultsController<T> {
+    public func createFetchedController() -> NSFetchedResultsController<Entity> {
         fatalError("Need to override \(#function)")
     }
     
-    public func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) -> Bool {
-        Logging.log("tappedCell(indexPath:\(atIndexPath))")
+    public func tappedCell(at indexPath: IndexPath, object: Entity) -> Bool {
+        Logging.log("tappedCell(indexPath:\(indexPath))")
         return false
     }
     
-    public func configureCell(_ cell: UITableViewCell, atIndexPath: IndexPath, object: AnyObject, forMeasuring:Bool) {
-        Logging.log("configureCell(atIndexPath:\(atIndexPath))")
+    public func configure(cell: Cell, at indexPath: IndexPath, with object: Entity, forMeasuring: Bool) {
+        Logging.log("configure(cell: at IndexPath:\(indexPath))")
     }
     
     public func contentChanged() {
         Logging.log("Content changed")
     }
     
-    public func objectAt(_ indexPath: IndexPath) -> AnyObject {
+    public func object(at indexPath: IndexPath) -> Entity {
         return fetchedController!.object(at: indexPath)
     }
 }
