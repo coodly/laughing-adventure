@@ -35,6 +35,7 @@ public extension FullScreenTableCreate where Self: UIViewController {
         
         let views: [String: AnyObject] = ["table": tableView]
         
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[table]|", options: [], metrics: nil, views: views)
         let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[table]|", options: [], metrics: nil, views: views)
         
