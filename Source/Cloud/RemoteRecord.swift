@@ -19,6 +19,7 @@ import CloudKit
 public protocol RemoteRecord {
     var recordName: String? { get set }
     var recordData: Data? { get set }
+    var parent: CKRecordID? { get set }
     static var recordType: String { get }
 
     init()
@@ -32,6 +33,7 @@ public extension RemoteRecord {
     final mutating func load(_ record: CKRecord) -> Bool {
         recordData = archiveRecord(record) as Data
         recordName = record.recordID.recordName
+        parent = record.parent?.recordID
         return loadFields(record)
     }
     
@@ -74,7 +76,9 @@ public extension RemoteRecord {
                 continue
             }
             
-            if let value = child.value as? NSString {
+            if label == "parent", let value = child.value as? CKRecordID {
+                modified.setParent(value)
+            } else if let value = child.value as? NSString {
                 modified[label] = value
             } else if let value = child.value as? NSNumber {
                 modified[label] = value
