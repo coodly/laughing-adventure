@@ -31,8 +31,8 @@ public class CorePersistence {
         return context
     }()
     
-    public init(modelName: String) {
-        stack = LegacyCoreStack(modelName: modelName)
+    public init(modelName: String, wipeOnConflict: Bool = false) {
+        stack = LegacyCoreStack(modelName: modelName, wipeOnConflict: wipeOnConflict)
     }
     
     public func perform(wait: Bool = true, block: TaskClosure) {
@@ -220,6 +220,12 @@ public extension NSManagedObjectContext {
     public func inCurrentContext<T: NSManagedObject>(entity: T) -> T {
         return object(with: entity.objectID) as! T
     }
+    
+    public func delete<T: NSManagedObject>(objects: [T]) {
+        for d in objects {
+            delete(d)
+        }
+    }
 }
 
 private protocol CoreStack {
@@ -297,11 +303,12 @@ private class LegacyCoreStack: CoreStack {
     
     private static var spawnedBackgroundCount = 0
     
-    init(modelName: String, type: String = NSSQLiteStoreType, in directory: FileManager.SearchPathDirectory = .documentDirectory, mergePolicy: NSMergePolicyType = .mergeByPropertyObjectTrumpMergePolicyType) {
+    init(modelName: String, type: String = NSSQLiteStoreType, in directory: FileManager.SearchPathDirectory = .documentDirectory, mergePolicy: NSMergePolicyType = .mergeByPropertyObjectTrumpMergePolicyType, wipeOnConflict: Bool) {
         self.modelName = modelName
         self.storeType = type
         self.directory = directory
         self.mergePolicy = mergePolicy
+        self.wipeDatabaseOnConflict = wipeOnConflict
     }
     
     private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
