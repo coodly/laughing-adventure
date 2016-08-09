@@ -202,6 +202,10 @@ public extension NSManagedObjectContext {
         
         return fetchedController
     }
+    
+    public func has<T: NSManagedObject>(entity type: T.Type, where attribute: String, is value: AnyObject) -> Bool {
+        return count(instancesOf: type, predicate: predicate(for: attribute, withValue: value)) == 1
+    }
 }
 
 private protocol CoreStack {
