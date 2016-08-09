@@ -17,6 +17,8 @@
 import Foundation
 import CoreData
 
+public typealias TaskClosure = (NSManagedObjectContext) -> ()
+
 private extension NSPredicate {
     static let truePredicate = NSPredicate(format: "TRUEPREDICATE")
 }
@@ -30,14 +32,10 @@ public class CorePersistence {
     }()
     
     public init(modelName: String) {
-        if #available(iOS 10, *) {
-            stack = CoreDataStack(modelName: modelName)
-        } else {
-            stack = LegacyCoreStack()
-        }
+        stack = LegacyCoreStack(modelName: modelName)
     }
     
-    public func perform(wait: Bool = true, block: ((NSManagedObjectContext) -> ())) {
+    public func perform(wait: Bool = true, block: TaskClosure) {
         let context = stack.mainContext!
         
         if wait {
@@ -51,12 +49,26 @@ public class CorePersistence {
         }
     }
     
-    public func performBackgroundTask(closure: ((NSManagedObjectContext) -> ()), completion: () -> ()) {
-        stack.performBackgroundTask() {
-            context in
+    public func save(inClosure task: TaskClosure, completion: (() -> ())? = nil) {
+        save(inClosures: [task], completion: completion)
+    }
 
-            closure(context)
-            self.save(context: context, completion: completion)
+    public func save(inClosures tasks: [TaskClosure], completion: (() -> ())? = nil) {
+        Logging.log("Perform \(tasks.count) tasks")
+        if let task = tasks.first {
+            stack.performUsingWorker() {
+                context in
+                
+                task(context)
+                self.save(context: context) {
+                    var remaining = tasks
+                    _ = remaining.removeFirst()
+                    self.save(inClosures: remaining, completion: completion)
+                }
+            }
+        } else if let completion = completion {
+            Logging.log("All complete")
+            completion()
         }
     }
     
@@ -88,9 +100,12 @@ public class CorePersistence {
 }
 
 public extension NSManagedObjectContext {
-    public func fetch<T: NSManagedObject>(predicate: NSPredicate = .truePredicate) -> [T] {
+    public func fetch<T: NSManagedObject>(predicate: NSPredicate = .truePredicate, limit: Int? = nil) -> [T] {
         let request: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName())
         request.predicate = predicate
+        if let limit = limit {
+            request.fetchLimit = limit
+        }
         
         do {
             return try fetch(request)
@@ -131,11 +146,52 @@ public extension NSManagedObjectContext {
         
         return predicate
     }
+    
+    public func sumOfDecimalProperty<T: NSManagedObject>(onType type: T.Type, name: String, predicate: NSPredicate = .truePredicate) -> NSDecimalNumber {
+        
+        let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: T.entityName())
+        request.resultType = .dictionaryResultType
+        request.predicate = predicate
+        
+        let sumKey = "sumOfProperty"
+        
+        let expression = NSExpressionDescription()
+        expression.name = sumKey
+        expression.expression = NSExpression(forKeyPath: "@sum.\(name)")
+        expression.expressionResultType = .decimalAttributeType
+        
+        request.propertiesToFetch = [expression]
+        
+        do {
+            let result = try fetch(request)
+            if let first = result.first, let value = first[sumKey] as? NSDecimalNumber {
+                return value
+            }
+            
+            Logging.log("Will return zero for sum of \(name)")
+            
+            return NSDecimalNumber.zero
+        } catch {
+            Logging.log("addDecimalProperty error: \(error)")
+            return NSDecimalNumber.notANumber
+        }
+    }
+    
+    public func count<T: NSManagedObject>(instancesOf entity: T.Type, predicate: NSPredicate = .truePredicate) -> Int {
+        let request: NSFetchRequest<NSNumber> = NSFetchRequest(entityName: T.entityName())
+        request.predicate = predicate
+
+        do {
+            return try count(for: request)
+        } catch let error as NSError {
+            fatalError("Count failed: \(error)")
+        }
+    }
 }
 
 private protocol CoreStack {
     var mainContext: NSManagedObjectContext! { get }
-    func performBackgroundTask(closure: ((NSManagedObjectContext) -> ()))
+    func performUsingWorker(closure: ((NSManagedObjectContext) -> ()))
 }
 
 @available(iOS 10, *)
@@ -145,6 +201,8 @@ private class CoreDataStack: CoreStack {
         let container = NSPersistentContainer(name: self.modelName)
         container.loadPersistentStores {
             storeDescription, error in
+            
+            print(">>>>>>>>> Store: \(storeDescription)")
             
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
@@ -156,25 +214,162 @@ private class CoreDataStack: CoreStack {
     private var mainContext: NSManagedObjectContext! {
         return container.viewContext
     }
+    private var workerCount = 0
     
     init(modelName: String) {
         self.modelName = modelName
     }
+    
+    private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
+        
+    }
 
     private func performBackgroundTask(closure: ((NSManagedObjectContext) -> ())) {
+        Logging.log("Main: \(container.viewContext) - \(container.viewContext.parent) - \(container.viewContext.persistentStoreCoordinator)")
         container.performBackgroundTask() {
             context in
+            
+            if context.name == nil {
+                self.workerCount += 1
+                context.name = "Worker \(self.workerCount)"
+            }
+            
+            Logging.log(">>> \(context) - \(context.parent) - \(context.persistentStoreCoordinator)")
             
             closure(context)
         }
     }
 }
 
+private let SavingContextName = "Saving"
+private let MainContextName = "Main"
 private class LegacyCoreStack: CoreStack {
-    private var mainContext: NSManagedObjectContext!
+    struct StackConfig {
+        var storeType: String!
+        var storeURL: URL!
+        var options: [NSObject: AnyObject]?
+    }
+
+    private var mainContext: NSManagedObjectContext! {
+        return managedObjectContext
+    }
     
-    private func performBackgroundTask(closure: ((NSManagedObjectContext) -> ())) {
+    private let modelName: String
+    private let storeType: String
+    private let directory: FileManager.SearchPathDirectory
+    private var writingContext: NSManagedObjectContext?
+    private var wipeDatabaseOnConflict = false
+    private var pathToSQLiteFile: URL?
+    private let mergePolicy: NSMergePolicyType
+    
+    private static var spawnedBackgroundCount = 0
+    
+    init(modelName: String, type: String = NSSQLiteStoreType, in directory: FileManager.SearchPathDirectory = .documentDirectory, mergePolicy: NSMergePolicyType = .mergeByPropertyObjectTrumpMergePolicyType) {
+        self.modelName = modelName
+        self.storeType = type
+        self.directory = directory
+        self.mergePolicy = mergePolicy
+    }
+    
+    private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
+        var managedContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        LegacyCoreStack.spawnedBackgroundCount += 1
+        managedContext.name = "Worker \(LegacyCoreStack.spawnedBackgroundCount)"
+        managedContext.parent = managedObjectContext
+        managedContext.mergePolicy = NSMergePolicy(merge: mergePolicy)
         
+        closure(managedContext)
+    }
+    
+    lazy public var managedObjectContext: NSManagedObjectContext = {
+        var isPrivateInstance = false
+        
+        let mergePolicy = NSMergePolicy(merge: self.mergePolicy)
+        
+        let saving = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        saving.persistentStoreCoordinator = self.persistentStoreCoordinator
+        saving.mergePolicy = mergePolicy
+        self.writingContext = saving
+        saving.name = SavingContextName
+        
+        var managedContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        managedContext.name = MainContextName
+        managedContext.parent = self.writingContext
+        managedContext.mergePolicy = mergePolicy
+        
+        return managedContext
+    }()
+    
+    
+    public lazy var workingFilesDirectory: URL = {
+        let urls = FileManager.default.urls(for: self.directory, in: .userDomainMask)
+        let last = urls.last!
+        let identifier = Bundle.main.bundleIdentifier!
+        let dbIdentifier = identifier + ".db"
+        let dbFolder = last.appendingPathComponent(dbIdentifier)
+        do {
+            try FileManager.default.createDirectory(at: dbFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print("Create db folder error \(error)")
+        }
+        return dbFolder
+    }()
+    
+    lazy var managedObjectModel: NSManagedObjectModel = {
+        let modelURL = Bundle.main.url(forResource: self.modelName, withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
+    }()
+    
+    lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
+        let url = self.databaseFilePath()
+        
+        Logging.log("Using DB file at \(url)")
+        
+        let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
+        
+        if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
+            Logging.log("Will delete DB")
+            try! FileManager.default.removeItem(at: url!)
+            _ = self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
+        }
+        
+        return coordinator
+    }()
+    
+    private func addPersistentStore(_ coordinator: NSPersistentStoreCoordinator, config: StackConfig, abortOnFailure: Bool) -> Bool {
+        do {
+            try coordinator.addPersistentStore(ofType: config.storeType, configurationName: nil, at: config.storeURL, options: config.options)
+            return true
+        } catch {
+            // Report any error we got.
+            let failureReason = "There was an error creating or loading the application's saved data."
+            var dict = [String: AnyObject]()
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason
+            
+            dict[NSUnderlyingErrorKey] = error as NSError
+            let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
+            Logging.log("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
+        }
+        
+        if abortOnFailure {
+            abort()
+        }
+        
+        return false
+    }
+    
+    private func databaseFilePath() -> URL? {
+        if let existing = pathToSQLiteFile {
+            return existing
+        } else if self.storeType == NSSQLiteStoreType {
+            //TODO jaanus: check this ! here
+            return workingFilesDirectory.appendingPathComponent("\(self.modelName).sqlite")
+        } else {
+            return nil
+        }
     }
 }
 

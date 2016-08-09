@@ -377,32 +377,8 @@ public extension ObjectModel {
     }
     
     public func sumOfDecimalProperty<T: NSManagedObject>(onType type: T.Type, name: String, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE")) -> NSDecimalNumber {
-        
-        let request: NSFetchRequest<NSDictionary> = fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: [])
-        request.resultType = .dictionaryResultType
-        
-        let sumKey = "sumOfProperty"
-        
-        let expression = NSExpressionDescription()
-        expression.name = sumKey
-        expression.expression = NSExpression(forKeyPath: "@sum.\(name)")
-        expression.expressionResultType = .decimalAttributeType
-        
-        request.propertiesToFetch = [expression]
-        
-        do {
-            let result = try managedObjectContext.fetch(request)
-            if let first = result.first, let value = first[sumKey] as? NSDecimalNumber {
-                return value
-            }
-            
-            Logging.log("Will return zero for sum of \(name)")
-            
-            return NSDecimalNumber.zero
-        } catch {
-            Logging.log("addDecimalProperty error: \(error)")
-            return NSDecimalNumber.notANumber
-        }
+
+        return managedObjectContext.sumOfDecimalProperty(onType: type, name: name, predicate: predicate)
     }
 }
 
