@@ -115,10 +115,11 @@ public extension NSManagedObjectContext {
         }
     }
     
-    public func fetchFirst<T: NSManagedObject>(predicate: NSPredicate = .truePredicate) -> T? {
+    public func fetchFirst<T: NSManagedObject>(predicate: NSPredicate = .truePredicate, sort: [NSSortDescriptor] = []) -> T? {
         let request: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName())
         request.predicate = predicate
         request.fetchLimit = 1
+        request.sortDescriptors = sort
         
         do {
             let result = try fetch(request)
@@ -205,6 +206,19 @@ public extension NSManagedObjectContext {
     
     public func has<T: NSManagedObject>(entity type: T.Type, where attribute: String, is value: AnyObject) -> Bool {
         return count(instancesOf: type, predicate: predicate(for: attribute, withValue: value)) == 1
+    }
+    
+    public func inCurrentContext<T: NSManagedObject>(entities: [T]) -> [T] {
+        var result = [T]()
+        for e in entities {
+            result.append(inCurrentContext(entity: e))
+        }
+        
+        return result
+    }
+    
+    public func inCurrentContext<T: NSManagedObject>(entity: T) -> T {
+        return object(with: entity.objectID) as! T
     }
 }
 
