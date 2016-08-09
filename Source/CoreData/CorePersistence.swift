@@ -187,6 +187,21 @@ public extension NSManagedObjectContext {
             fatalError("Count failed: \(error)")
         }
     }
+    
+    public func fetchedController<T: NSFetchRequestResult>(predicate: NSPredicate? = nil, sort: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
+        let fetchRequest: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName())
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = sort
+        let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
+        
+        do {
+            try fetchedController.performFetch()
+        } catch {
+            Logging.log("Fetch error: \(error)")
+        }
+        
+        return fetchedController
+    }
 }
 
 private protocol CoreStack {
