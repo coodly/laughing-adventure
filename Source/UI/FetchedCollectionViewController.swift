@@ -38,10 +38,10 @@ class CollectionCoreDataChangeAction {
 
 let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
-public class FetchedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
+public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView: UICollectionView!
-    private var fetchedController: NSFetchedResultsController<NSManagedObject>?
+    private var fetchedController: NSFetchedResultsController<Model>?
     private var measuringCell: UICollectionViewCell?
     private var changeActions: [CollectionCoreDataChangeAction]!
     
@@ -151,7 +151,7 @@ public class FetchedCollectionViewController: UIViewController, UICollectionView
         Logging.log("\(#function)")
     }
     
-    public func createFetchedController<T: NSManagedObject>() -> NSFetchedResultsController<T> {
+    public func createFetchedController() -> NSFetchedResultsController<Model> {
         fatalError("Need to override \(#function)")
     }
     

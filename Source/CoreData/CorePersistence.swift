@@ -234,6 +234,7 @@ private protocol CoreStack {
 }
 
 @available(iOS 10, *)
+@available(tvOS 10.0, *)
 private class CoreDataStack: CoreStack {
     private let modelName: String!
     private lazy var container: NSPersistentContainer = {
@@ -312,7 +313,7 @@ private class LegacyCoreStack: CoreStack {
     }
     
     private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
-        var managedContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        let managedContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         LegacyCoreStack.spawnedBackgroundCount += 1
         managedContext.name = "Worker \(LegacyCoreStack.spawnedBackgroundCount)"
         managedContext.parent = managedObjectContext
