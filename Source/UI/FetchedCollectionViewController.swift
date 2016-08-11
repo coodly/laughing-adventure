@@ -53,6 +53,26 @@ public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewCont
     
     public override func viewDidLoad() {
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
+        
+        if collectionView != nil {
+            return
+        }
+        
+        //not loaded from xib
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        view.addSubview(collectionView)
+        
+        let views: [String: AnyObject] = ["collection": collectionView]
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[collection]|", options: [], metrics: nil, views: views)
+        let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[collection]|", options: [], metrics: nil, views: views)
+        
+        view.addConstraints(vertical + horizontal)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
