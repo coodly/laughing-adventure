@@ -38,11 +38,11 @@ class CollectionCoreDataChangeAction {
 
 let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
-public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
+public class FetchedCollectionViewController<Model: NSManagedObject, Cell: UICollectionViewCell>: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView: UICollectionView!
     private var fetchedController: NSFetchedResultsController<Model>?
-    private var measuringCell: UICollectionViewCell?
+    private var measuringCell: Cell?
     private var changeActions: [CollectionCoreDataChangeAction]!
     
     public var ignoreOffScreenUpdates = false
@@ -96,15 +96,15 @@ public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewCont
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell:UICollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: FetchedCollectionCellIdentifier, for: indexPath)
-        let object:AnyObject = fetchedController!.object(at: indexPath)
-        configureCell(cell, atIndexPath:indexPath, object:object, forMeasuring:false)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FetchedCollectionCellIdentifier, for: indexPath) as! Cell
+        let object = fetchedController!.object(at: indexPath)
+        configure(cell: cell, at: indexPath, with: object, forMeasuring: false)
         return cell
     }
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let object = fetchedController!.object(at: indexPath)
-        configureCell(measuringCell!, atIndexPath: indexPath, object: object, forMeasuring:true)
+        configure(cell: measuringCell!, at: indexPath, with: object, forMeasuring: true)
         let height = calculateHeightForConfiguredSizingCell(measuringCell!)
         return CGSize(width: collectionView.frame.width, height: height)
     }
@@ -113,7 +113,7 @@ public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewCont
         collectionView.deselectItem(at: indexPath, animated: true)
         
         let object = fetchedController!.object(at: indexPath)
-        tappedCell(indexPath, object: object)
+        tappedCell(at: indexPath, object: object)
     }
     
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
@@ -177,15 +177,15 @@ public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewCont
     
     public func setPresentationCellNib(_ nib:UINib) {
         collectionView.register(nib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
-        measuringCell = nib.loadInstance() as? UICollectionViewCell
+        measuringCell = nib.loadInstance() as? Cell
     }
     
-    public func configureCell(_ cell:UICollectionViewCell, atIndexPath:IndexPath, object:AnyObject, forMeasuring:Bool) {
-        Logging.log("configureCell(atIndexPath:\(atIndexPath))")
+    public func configure(cell: Cell, at indexPath: IndexPath, with object: Model, forMeasuring: Bool) {
+        Logging.log("configureCell(atIndexPath:\(indexPath))")
     }
     
-    public func tappedCell(_ atIndexPath: IndexPath, object: AnyObject) {
-        Logging.log("tappedCell(indexPath:\(atIndexPath))")
+    public func tappedCell(at indexPath: IndexPath, object: Model) {
+        Logging.log("tappedCell(indexPath:\(indexPath))")
     }
     
     func calculateHeightForConfiguredSizingCell(_ cell: UICollectionViewCell) -> CGFloat {
@@ -200,24 +200,24 @@ public class FetchedCollectionViewController<Model: NSManagedObject>: UIViewCont
         return size.height
     }
     
-    public func hasObjectAtIndexPath(_ indexPath: IndexPath) -> Bool {
+    public func hasObject(at indexPath: IndexPath) -> Bool {
         guard let controller = fetchedController else {
             return false
         }
         
-        guard let sections = controller.sections, sections.count > (indexPath as NSIndexPath).section else {
+        guard let sections = controller.sections, sections.count > indexPath.section else {
             return false
         }
         
-        let section = sections[(indexPath as NSIndexPath).section]
-        if section.numberOfObjects <= (indexPath as NSIndexPath).row {
+        let section = sections[indexPath.section]
+        if section.numberOfObjects <= indexPath.row {
             return false
         }
         
         return true
     }
     
-    public func objectAt(_ indexPath: IndexPath) -> AnyObject {
+    public func object(at indexPath: IndexPath) -> Model {
         return fetchedController!.object(at: indexPath)
     }
 }
