@@ -31,8 +31,8 @@ public class CorePersistence {
         return context
     }()
     
-    public init(modelName: String, storeType: String = NSSQLiteStoreType, wipeOnConflict: Bool = false) {
-        stack = LegacyCoreStack(modelName: modelName, type: storeType, wipeOnConflict: wipeOnConflict)
+    public init(modelName: String, storeType: String = NSSQLiteStoreType, in directory: FileManager.SearchPathDirectory = .documentDirectory, wipeOnConflict: Bool = false) {
+        stack = LegacyCoreStack(modelName: modelName, type: storeType, in: directory, wipeOnConflict: wipeOnConflict)
     }
     
     public func perform(wait: Bool = true, block: TaskClosure) {
