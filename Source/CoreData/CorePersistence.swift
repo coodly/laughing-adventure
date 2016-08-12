@@ -31,8 +31,8 @@ public class CorePersistence {
         return context
     }()
     
-    public init(modelName: String, wipeOnConflict: Bool = false) {
-        stack = LegacyCoreStack(modelName: modelName, wipeOnConflict: wipeOnConflict)
+    public init(modelName: String, storeType: String = NSSQLiteStoreType, wipeOnConflict: Bool = false) {
+        stack = LegacyCoreStack(modelName: modelName, type: storeType, wipeOnConflict: wipeOnConflict)
     }
     
     public func perform(wait: Bool = true, block: TaskClosure) {
