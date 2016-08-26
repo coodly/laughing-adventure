@@ -36,7 +36,7 @@ public struct SlideMenuOptions {
     public static var rightViewWidth: CGFloat = 270.0
     public static var rightBezelWidth: CGFloat? = 16.0
     public static var rightPanFromBezel: Bool = true
-    public static var hideStatusBar: Bool = true
+    public static var hideStatusBar: Bool = false
     public static var pointOfNoReturnWidth: CGFloat = 44.0
     public static var simultaneousGestureRecognizers: Bool = true
     public static var opacityViewBackgroundColor: UIColor = UIColor.black
@@ -190,16 +190,17 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         super.viewDidLoad()
         edgesForExtendedLayout = UIRectEdge()
     }
-    
-    /*public override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
+
+    /*
+    public override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
         if let mainController = self.mainViewController{
-            return mainController.supportedInterfaceOrientations
+            return mainController.supportedInterfaceOrientations()
         }
         return UIInterfaceOrientationMask.all
     }
     
     public override func shouldAutorotate() -> Bool {
-        return mainViewController?.shouldAutorotate ?? false
+        return mainViewController?.shouldAutorotate() ?? false
     }*/
     
     public override func viewWillLayoutSubviews() {
@@ -383,6 +384,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
             applyLeftContentViewScale()
         case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
             if LeftPanState.lastState != .changed {
+                setCloseWindowLevel()
                 return
             }
             
@@ -464,6 +466,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
             
         case UIGestureRecognizerState.ended, UIGestureRecognizerState.cancelled:
             if RightPanState.lastState != .changed {
+                setCloseWindowLevel()
                 return
             }
             
@@ -514,7 +517,6 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
                 strongSelf.opacityView.layer.opacity = Float(SlideMenuOptions.contentViewOpacity)
                 
                 SlideMenuOptions.contentViewDrag == true ? (strongSelf.mainContainerView.transform = CGAffineTransform(translationX: SlideMenuOptions.leftViewWidth, y: 0)) : (strongSelf.mainContainerView.transform = CGAffineTransform(scaleX: SlideMenuOptions.contentViewScale, y: SlideMenuOptions.contentViewScale))
-                
             }
         }) { [weak self](Bool) -> Void in
             if let strongSelf = self {
@@ -972,8 +974,8 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
             var leftBezelRect: CGRect = CGRect.zero
             var tempRect: CGRect = CGRect.zero
             
-            view.bounds.divided(slice: &leftBezelRect, remainder: &tempRect, atDistance: bezelWidth, from: CGRectEdge.minXEdge)            
-            return leftBezelRect.contains(point)
+            let divided = view.bounds.divided(atDistance: bezelWidth, from: .minXEdge)
+            return divided.slice.contains(point)
         } else {
             return true
         }
@@ -995,8 +997,8 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
             var tempRect: CGRect = CGRect.zero
             let bezelWidth: CGFloat = view.bounds.width - rightBezelWidth
             
-            view.bounds.divided(slice: &tempRect, remainder: &rightBezelRect, atDistance: bezelWidth, from: CGRectEdge.minXEdge)
-            return rightBezelRect.contains(point)
+            let divided = view.bounds.divided(atDistance: rightBezelWidth, from: .maxXEdge)
+            return divided.slice.contains(point)
         } else {
             return true
         }

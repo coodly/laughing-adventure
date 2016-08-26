@@ -16,12 +16,12 @@
 
 import Foundation
 
-public func runAfter(_ seconds: TimeInterval, onQueue queue: DispatchQueue = DispatchQueue.main, closure: () -> ()) {
+public func runAfter(_ seconds: TimeInterval, onQueue queue: DispatchQueue = DispatchQueue.main, closure: @escaping () -> ()) {
     let delayTime = DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
     queue.asyncAfter(deadline: delayTime, execute: closure)
 }
 
-public func onMainThread(_ closure: () -> ()) {
+public func onMainThread(_ closure: @escaping () -> ()) {
     DispatchQueue.main.async(execute: closure)
 }
 

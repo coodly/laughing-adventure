@@ -31,10 +31,10 @@ public extension ProductsHandler {
 }
 
 private class Store: NSObject, SKProductsRequestDelegate {
-    private static let sharedInstance = Store()
+    fileprivate static let sharedInstance = Store()
     private var requests = [SKProductsRequest: ProductsResponse]()
     
-    private func perform(_ request: SKProductsRequest, completion: ProductsResponse) {
+    fileprivate func perform(_ request: SKProductsRequest, completion: ProductsResponse) {
         request.delegate = self
         requests[request] = completion
         request.start()

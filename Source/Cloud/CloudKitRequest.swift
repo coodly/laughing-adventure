@@ -26,8 +26,8 @@ public enum CloudResult<T: RemoteRecord> {
 }
 
 public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest {
-    private var records = [T]()
-    private var deleted = [CKRecordID]()
+    fileprivate var records = [T]()
+    fileprivate var deleted = [CKRecordID]()
     
     public override init() {
         
@@ -47,7 +47,7 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
         completion()
     }
     
-    private func database(_ type: UsedDatabase) -> CKDatabase {
+    fileprivate func database(_ type: UsedDatabase) -> CKDatabase {
         switch type {
         case .public:
             return Cloud.container.publicCloudDatabase
@@ -56,7 +56,7 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
         }
     }
     
-    private func handleResult(withCursor cursor: CKQueryCursor?, limit: Int? = nil, error: NSError?, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
+    fileprivate func handleResult(withCursor cursor: CKQueryCursor?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         let finalizer: () -> ()
         var hadFailure = false
         if let cursor = cursor {
@@ -71,7 +71,7 @@ public class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation, CloudRequest
             }
         }
         
-        if let error = error, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+        if let error = error as? NSError, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
             Logging.log("Error: \(error)")
             Logging.log("Will retry after \(retryAfter) seconds")
             runAfter(retryAfter) {
@@ -170,7 +170,7 @@ public extension CloudKitRequest {
         }
     }
 
-    private func continueWith(_ cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
+    fileprivate func continueWith(_ cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
         execute(operation, limit: limit, pullAll: true, inDatabase: db) {
@@ -178,7 +178,7 @@ public extension CloudKitRequest {
         }
     }
     
-    private func execute(_ fetchOperation: CKQueryOperation, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: () -> ()) {
+    private func execute(_ fetchOperation: CKQueryOperation, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         Logging.log("Run query operation")
         if let limit = limit {
             fetchOperation.resultsLimit = limit

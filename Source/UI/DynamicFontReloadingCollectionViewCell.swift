@@ -33,7 +33,7 @@ public class DynamicFontReloadingCollectionViewCell: UICollectionViewCell {
         setUIFont()
     }
     
-    @objc private func contentSizeChanged() {
+    @objc fileprivate func contentSizeChanged() {
         setUIFont()
     }
     

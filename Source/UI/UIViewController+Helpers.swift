@@ -47,7 +47,7 @@ public extension UIViewController {
         }
     }
     
-    @objc private func closeModal() {
+    @objc fileprivate func closeModal() {
         dismiss(animated: true, completion: nil)
     }
 }

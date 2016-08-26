@@ -117,7 +117,7 @@ public class ObjectModel {
 
         Logging.log("Using DB file at \(url)")
         
-        let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
         let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
         
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
@@ -137,8 +137,8 @@ public class ObjectModel {
             // Report any error we got.
             let failureReason = "There was an error creating or loading the application's saved data."
             var dict = [String: AnyObject]()
-            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
-            dict[NSLocalizedFailureReasonErrorKey] = failureReason
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data" as AnyObject
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason as AnyObject
             
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
@@ -184,15 +184,15 @@ public class ObjectModel {
         saveContext(managedObjectContext, completion: completion)
     }
     
-    public func saveInBlock(_ handler:((model: ObjectModel) -> Void)) {
+    public func saveInBlock(_ handler:((ObjectModel) -> Void)) {
         saveInBlock(handler, completion: nil)
     }
 
-    public func saveInBlock(_ handler:((model: ObjectModel) -> Void), completion: (() -> ())?) {
+    public func saveInBlock(_ handler:((ObjectModel) -> Void), completion: (() -> ())?) {
         let spawned = spawnBackgroundInstance()
         Logging.log("Spawned worker from \(managedObjectContext.name!)")
         spawned.performBlock { () -> () in
-            handler(model: spawned)
+            handler(spawned)
             spawned.saveContext(completion)
         }
     }
@@ -268,7 +268,7 @@ public extension ObjectModel /* Fetch request */ {
         return fetchRequestForEntity(named: type.entityName(), predicate: predicate, sortDescriptors: sortDescriptors)
     }
 
-    private func fetchRequestForEntity<T: NSFetchRequestResult>(named name: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest<T> {
+    fileprivate func fetchRequestForEntity<T: NSFetchRequestResult>(named name: String, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]) -> NSFetchRequest<T> {
         let request = NSFetchRequest<T>(entityName: name)
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
@@ -369,7 +369,7 @@ public extension ObjectModel {
         
         do {
             let objects = try managedObjectContext.fetch(request)
-            return objects.map { $0[attributeName]! }
+            return objects.map { $0[attributeName] as AnyObject }
         } catch {
             Logging.log("fetchEntityAttribute error: \(error)")
             return []

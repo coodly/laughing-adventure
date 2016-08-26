@@ -23,7 +23,7 @@ private extension Selector {
 public class TextEntryCell: DynamicFontReloadingTableViewCell {
     @IBOutlet public var entryField: UITextField!
     public var inputValidation: InputValidation?
-    private var dismissButton: UIBarButtonItem?
+    fileprivate var dismissButton: UIBarButtonItem?
     
     public func value() -> String {
         if let result = entryField.text {
@@ -73,8 +73,8 @@ public extension TextEntryCell {
 }
 #endif
 
-private extension TextEntryCell {
-    @objc private func dismissPressed() {
+fileprivate extension TextEntryCell {
+    @objc fileprivate func dismissPressed() {
         _ = entryField.delegate?.textFieldShouldReturn?(entryField)
     }
 }

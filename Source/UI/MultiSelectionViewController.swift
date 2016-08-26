@@ -17,11 +17,11 @@
 import UIKit
 
 public class MultiSelectionViewController: SelectionViewController {
-    public var selectionHandler: ((selected: [AnyObject]) -> Void)!
+    public var selectionHandler: (([AnyObject]) -> Void)!
     var selectedElements: [AnyObject]!
  
     public override func viewWillDisappear(_ animated: Bool) {
-        selectionHandler(selected: selectedElements)
+        selectionHandler(selectedElements)
     }
 
     override func isSelected(_ object: AnyObject) -> Bool {

@@ -33,7 +33,7 @@ public class DynamicFontReloadingTableViewCell: UITableViewCell {
         setUIFont()
     }
     
-    @objc private func contentSizeChanged() {
+    @objc fileprivate func contentSizeChanged() {
         setUIFont()
     }
     

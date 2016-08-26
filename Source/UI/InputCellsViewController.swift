@@ -21,9 +21,9 @@ private extension Selector {
 }
 
 public class InputCellsSection {
-    private let cells: [UITableViewCell]
-    private var title: String?
-    private var header: UIView?
+    fileprivate let cells: [UITableViewCell]
+    fileprivate var title: String?
+    fileprivate var header: UIView?
     
     public init(header: UIView, cells: [UITableViewCell]) {
         self.header = header
@@ -46,8 +46,8 @@ public class InputCellsSection {
 
 public class InputCellsViewController: UIViewController, FullScreenTableCreate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
-    private var sections:[InputCellsSection] = []
-    private var activeCellInputValidation: InputValidation?
+    fileprivate var sections: [InputCellsSection] = []
+    fileprivate var activeCellInputValidation: InputValidation?
     public var preferredStyle: UITableViewStyle = .plain
     
     deinit {
@@ -74,7 +74,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         configureReturnButtons()
     }
     
-    private func handleCellTap(_ cell: UITableViewCell, atIndexPath:IndexPath) -> Bool {
+    fileprivate func handleCellTap(_ cell: UITableViewCell, atIndexPath:IndexPath) -> Bool {
         if cell.isKind(of: TextEntryCell.self) {
             let entryCell = cell as! TextEntryCell
             entryCell.entryField.becomeFirstResponder()
@@ -100,7 +100,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         }
     }
     
-    private func indexPathForCell(_ cell: UITableViewCell) -> IndexPath? {
+    fileprivate func indexPathForCell(_ cell: UITableViewCell) -> IndexPath? {
         for section in 0 ..< sections.count {
             let sec = sections[section]
             
@@ -112,7 +112,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         return nil
     }
     
-    private func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
+    fileprivate func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
         let section = indexPath.section
         var row = indexPath.row + 1
         
@@ -135,13 +135,13 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         return nil
     }
     
-    @objc private func contentSizeChanged() {
+    @objc fileprivate func contentSizeChanged() {
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
     }
     
-    private func configureReturnButtons() {
+    fileprivate func configureReturnButtons() {
         var lastEntryCell: TextEntryCell?
         for section in sections {
             for cell in section.cells {

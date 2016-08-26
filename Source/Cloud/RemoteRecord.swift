@@ -83,21 +83,21 @@ public extension RemoteRecord {
             } else if let value = child.value as? NSNumber {
                 modified[label] = value
             } else if let value = child.value as? Date {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else if let value = child.value as? CLLocation {
                 modified[label] = value
             } else if let value = child.value as? CKReference {
                 modified[label] = value
             } else if let value = child.value as? [String] {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else if let value = child.value as? [NSNumber] {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else if let value = child.value as? [Date] {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else if let value = child.value as? [CLLocation] {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else if let value = child.value as? [CKReference] {
-                modified[label] = value
+                modified[label] = value as CKRecordValue
             } else {
                 Logging.log("Could not cast \(child) value")
             }

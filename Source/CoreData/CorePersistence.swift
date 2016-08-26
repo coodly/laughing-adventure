@@ -251,7 +251,7 @@ private class CoreDataStack: CoreStack {
         }
         return container
     }()
-    private var mainContext: NSManagedObjectContext! {
+    fileprivate var mainContext: NSManagedObjectContext! {
         return container.viewContext
     }
     private var workerCount = 0
@@ -260,7 +260,7 @@ private class CoreDataStack: CoreStack {
         self.modelName = modelName
     }
     
-    private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
+    fileprivate func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
         
     }
 
@@ -290,7 +290,7 @@ private class LegacyCoreStack: CoreStack {
         var options: [NSObject: AnyObject]?
     }
 
-    private var mainContext: NSManagedObjectContext! {
+    fileprivate var mainContext: NSManagedObjectContext! {
         return managedObjectContext
     }
     
@@ -312,7 +312,7 @@ private class LegacyCoreStack: CoreStack {
         self.wipeDatabaseOnConflict = wipeOnConflict
     }
     
-    private func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
+    fileprivate func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
         let managedContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         LegacyCoreStack.spawnedBackgroundCount += 1
         managedContext.name = "Worker \(LegacyCoreStack.spawnedBackgroundCount)"
@@ -367,7 +367,7 @@ private class LegacyCoreStack: CoreStack {
         
         Logging.log("Using DB file at \(url)")
         
-        let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+        let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
         let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
         
         if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
@@ -387,8 +387,8 @@ private class LegacyCoreStack: CoreStack {
             // Report any error we got.
             let failureReason = "There was an error creating or loading the application's saved data."
             var dict = [String: AnyObject]()
-            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
-            dict[NSLocalizedFailureReasonErrorKey] = failureReason
+            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data" as AnyObject
+            dict[NSLocalizedFailureReasonErrorKey] = failureReason as AnyObject
             
             dict[NSUnderlyingErrorKey] = error as NSError
             let wrappedError = NSError(domain: "YOUR_ERROR_DOMAIN", code: 9999, userInfo: dict)
