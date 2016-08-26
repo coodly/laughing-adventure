@@ -42,7 +42,7 @@ public struct SlideMenuOptions {
     public static var opacityViewBackgroundColor: UIColor = UIColor.black
 }
 
-public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
+open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
     
     public enum SlideAction {
         case open
@@ -111,7 +111,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         initView()
     }
     
-    public override func awakeFromNib() {
+    open override func awakeFromNib() {
         initView()
     }
     
@@ -162,7 +162,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         }
     }
     
-    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         mainContainerView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
         leftContainerView.isHidden = true
@@ -186,7 +186,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         })
     }
     
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         edgesForExtendedLayout = UIRectEdge()
     }
@@ -203,7 +203,7 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
         return mainViewController?.shouldAutorotate() ?? false
     }*/
     
-    public override func viewWillLayoutSubviews() {
+    open override func viewWillLayoutSubviews() {
         // topLayoutGuideの値が確定するこのタイミングで各種ViewControllerをセットする
         setUpViewController(mainContainerView, targetViewController: mainViewController)
         setUpViewController(leftContainerView, targetViewController: leftViewController)

@@ -22,7 +22,7 @@ private extension Selector {
     static let openMenuTapped = #selector(CoodlySlideMenuViewController.openMenu)
 }
 
-public class CoodlySlideMenuViewController: SlideMenuController {
+open class CoodlySlideMenuViewController: SlideMenuController {
     private var containedNavigation: UINavigationController!
     private var menuController: MenuViewController!
     private var shown = false
@@ -30,7 +30,9 @@ public class CoodlySlideMenuViewController: SlideMenuController {
     public var initialViewController: UIViewController!
     public var menuButton: UIBarButtonItem!
 
-    override public func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         if shown {
             return
         }

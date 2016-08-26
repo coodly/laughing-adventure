@@ -44,7 +44,7 @@ public class InputCellsSection {
     }
 }
 
-public class InputCellsViewController: UIViewController, FullScreenTableCreate, SmoothTableRowDeselection {
+open class InputCellsViewController: UIViewController, FullScreenTableCreate, SmoothTableRowDeselection {
     @IBOutlet public var tableView: UITableView!
     fileprivate var sections: [InputCellsSection] = []
     fileprivate var activeCellInputValidation: InputValidation?
@@ -54,7 +54,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         NotificationCenter.default.removeObserver(self)
     }
     
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         checkTableView(preferredStyle)
         
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
@@ -66,7 +66,7 @@ public class InputCellsViewController: UIViewController, FullScreenTableCreate, 
         tableView.tableFooterView = UIView()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         smoothDeselectRows()
