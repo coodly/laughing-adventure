@@ -38,7 +38,7 @@ class CollectionCoreDataChangeAction {
 
 let FetchedCollectionCellIdentifier = "FetchedCollectionCellIdentifier"
 
-public class FetchedCollectionViewController<Model: NSManagedObject, Cell: UICollectionViewCell>: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
+open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UICollectionViewCell>: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate {
     
     @IBOutlet public var collectionView: UICollectionView!
     private var fetchedController: NSFetchedResultsController<Model>?
@@ -51,31 +51,36 @@ public class FetchedCollectionViewController<Model: NSManagedObject, Cell: UICol
         NotificationCenter.default.removeObserver(self)
     }
     
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
-        if collectionView != nil {
-            return
+        if collectionView == nil {
+            //not loaded from xib
+            let layout = UICollectionViewFlowLayout()
+            layout.scrollDirection = .vertical
+            collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            collectionView.backgroundColor = UIColor.clear
+            view.addSubview(collectionView)
+            
+            let views: [String: AnyObject] = ["collection": collectionView]
+            
+            collectionView.translatesAutoresizingMaskIntoConstraints = false
+            let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[collection]|", options: [], metrics: nil, views: views)
+            let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[collection]|", options: [], metrics: nil, views: views)
+            
+            view.addConstraints(vertical + horizontal)
         }
-        
-        //not loaded from xib
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        view.addSubview(collectionView)
-        
-        let views: [String: AnyObject] = ["collection": collectionView]
-        
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[collection]|", options: [], metrics: nil, views: views)
-        let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[collection]|", options: [], metrics: nil, views: views)
-        
-        view.addConstraints(vertical + horizontal)
+
+        let cellNib = Cell.viewNib()
+        collectionView.register(cellNib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
+        measuringCell = cellNib.loadInstance() as! Cell
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         if fetchedController != nil {
             return
         }
@@ -171,13 +176,8 @@ public class FetchedCollectionViewController<Model: NSManagedObject, Cell: UICol
         Logging.log("\(#function)")
     }
     
-    public func createFetchedController() -> NSFetchedResultsController<Model> {
+    open func createFetchedController() -> NSFetchedResultsController<Model> {
         fatalError("Need to override \(#function)")
-    }
-    
-    public func setPresentationCellNib(_ nib:UINib) {
-        collectionView.register(nib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
-        measuringCell = nib.loadInstance() as? Cell
     }
     
     public func configure(cell: Cell, at indexPath: IndexPath, with object: Model, forMeasuring: Bool) {
