@@ -16,17 +16,17 @@
 
 import Foundation
 
-public class ConcurrentOperation: Operation {
+open class ConcurrentOperation: Operation {
     public var completionHandler: ((Bool, ConcurrentOperation) -> ())?
     
-    override public var isConcurrent: Bool {
+    override open var isConcurrent: Bool {
         return true
     }
 
     private var failed = false
     
     private var myExecuting: Bool = false
-    override public var isExecuting: Bool {
+    override public final var isExecuting: Bool {
         get {
             return myExecuting
         }
@@ -40,7 +40,7 @@ public class ConcurrentOperation: Operation {
     }
     
     private var myFinished: Bool = false;
-    override public var isFinished: Bool {
+    override public final var isFinished: Bool {
         get {
             return myFinished
         }
@@ -78,7 +78,7 @@ public class ConcurrentOperation: Operation {
         main()
     }
     
-    override public func cancel() {
+    override public final func cancel() {
         super.cancel()
         finish()
     }
