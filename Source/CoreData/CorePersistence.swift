@@ -231,6 +231,7 @@ public extension NSManagedObjectContext {
         let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: T.entityName())
         request.resultType = .dictionaryResultType
         request.propertiesToFetch = [named]
+        request.predicate = predicate
         if let limit = limit {
             request.fetchLimit = limit
         }
