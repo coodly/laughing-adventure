@@ -226,6 +226,23 @@ public extension NSManagedObjectContext {
             delete(d)
         }
     }
+    
+    public func fetchAttribute<T: NSManagedObject>(named: String, on entity: T.Type, limit: Int? = nil, predicate: NSPredicate = .truePredicate) -> [AnyObject] {
+        let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: T.entityName())
+        request.resultType = .dictionaryResultType
+        request.propertiesToFetch = [named]
+        if let limit = limit {
+            request.fetchLimit = limit
+        }
+        
+        do {
+            let objects = try fetch(request)
+            return objects.map { $0[named] as AnyObject }
+        } catch {
+            Logging.log("fetchEntityAttribute error: \(error)")
+            return []
+        }
+    }
 }
 
 private protocol CoreStack {
