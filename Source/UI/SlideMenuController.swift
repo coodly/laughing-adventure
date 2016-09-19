@@ -4,7 +4,7 @@
 //  Created by Yuji Hato on 12/3/14.
 //
 //  From https://github.com/dekatotoro/SlideMenuControllerSwift
-//  Version 3.3.0
+//  Version 3.0.0
 //
 #if os(iOS)
     
