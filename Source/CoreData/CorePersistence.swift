@@ -17,7 +17,7 @@
 import Foundation
 import CoreData
 
-public typealias TaskClosure = (NSManagedObjectContext) -> ()
+public typealias ContextClosure = (NSManagedObjectContext) -> ()
 
 private extension NSPredicate {
     static let truePredicate = NSPredicate(format: "TRUEPREDICATE")
@@ -35,7 +35,7 @@ public class CorePersistence {
         stack = LegacyCoreStack(modelName: modelName, type: storeType, in: directory, wipeOnConflict: wipeOnConflict)
     }
     
-    public func perform(wait: Bool = true, block: @escaping TaskClosure) {
+    public func perform(wait: Bool = true, block: @escaping ContextClosure) {
         let context = stack.mainContext!
         
         if wait {
@@ -49,11 +49,11 @@ public class CorePersistence {
         }
     }
     
-    public func save(inClosure task: @escaping TaskClosure, completion: (() -> ())? = nil) {
+    public func save(inClosure task: @escaping ContextClosure, completion: (() -> ())? = nil) {
         save(inClosures: [task], completion: completion)
     }
 
-    public func save(inClosures tasks: [TaskClosure], completion: (() -> ())? = nil) {
+    public func save(inClosures tasks: [ContextClosure], completion: (() -> ())? = nil) {
         Logging.log("Perform \(tasks.count) tasks")
         if let task = tasks.first {
             stack.performUsingWorker() {
