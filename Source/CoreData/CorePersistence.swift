@@ -49,11 +49,15 @@ public class CorePersistence {
         }
     }
     
-    public func save(inClosure task: @escaping ContextClosure, completion: (() -> ())? = nil) {
-        save(inClosures: [task], completion: completion)
+    public func performInBackground(task: @escaping ContextClosure) {
+        performInBackground(task: task, completion: nil)
+    }
+    
+    public func performInBackground(task: @escaping ContextClosure, completion: (() -> ())? = nil) {
+        performInBackground(tasks: [task], completion: completion)
     }
 
-    public func save(inClosures tasks: [ContextClosure], completion: (() -> ())? = nil) {
+    public func performInBackground(tasks: [ContextClosure], completion: (() -> ())? = nil) {
         Logging.log("Perform \(tasks.count) tasks")
         if let task = tasks.first {
             stack.performUsingWorker() {
@@ -63,7 +67,7 @@ public class CorePersistence {
                 self.save(context: context) {
                     var remaining = tasks
                     _ = remaining.removeFirst()
-                    self.save(inClosures: remaining, completion: completion)
+                    self.performInBackground(tasks: remaining, completion: completion)
                 }
             }
         } else if let completion = completion {
