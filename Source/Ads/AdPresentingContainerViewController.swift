@@ -54,6 +54,7 @@ public class AdPresentingContainerViewController: UIViewController {
     }
     
     private func loadBanner() {
+        Logging.log("Load banner")
         guard var med = mediator else {
             return
         }
@@ -66,7 +67,12 @@ public class AdPresentingContainerViewController: UIViewController {
     }
     
     private func show() {
+        Logging.log("Show banner")
         guard let banner = adsContainer.subviews.first else {
+            return
+        }
+        
+        if banner.frame.height == adsContainerHeight.constant {
             return
         }
         
@@ -78,6 +84,11 @@ public class AdPresentingContainerViewController: UIViewController {
     }
     
     private func hide() {
+        Logging.log("Hide banner")
+        guard adsContainerHeight.constant > 0.1 else {
+            return
+        }
+        
         UIView.animate(withDuration: 0.3) {
             self.adsContainerHeight.constant = 0
         }
