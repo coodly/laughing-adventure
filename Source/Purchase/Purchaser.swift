@@ -17,18 +17,7 @@
 import Foundation
 import StoreKit
 
-public enum PurchaseResult {
-    case success
-    case cancelled
-    case failure
-    case defered
-    case restored
-}
-
-public protocol PurchaseMonitor: class {
-    func purchase(_ result: PurchaseResult, forProduct identifier: String)
-}
-
+@available(*, deprecated, message: "Use Storefront")
 public class Purchaser: NSObject {
     public weak var passiveMonitor: PurchaseMonitor?
     public weak var activeMonitor: PurchaseMonitor?
@@ -78,23 +67,23 @@ extension Purchaser: SKPaymentTransactionObserver {
             case .purchasing: Logging.log("Purchasing")
             case .purchased: // Transaction is in queue, user has been charged.  Client should complete the transaction.
                 Logging.log("Purchased")
-                notifyMonitor?.purchase(.success, forProduct: productIdentifier)
+                notifyMonitor?.purchaseResult(.success, for: productIdentifier)
                 finishTransaction = true
             case .failed: // Transaction was cancelled or failed before being added to the server queue.
                 Logging.log("Failed: \(transaction.error)")
                 finishTransaction = true
                 if let error = transaction.error as? NSError, error.code == SKError.paymentCancelled.rawValue {
-                    notifyMonitor?.purchase(.cancelled, forProduct: productIdentifier)
+                    notifyMonitor?.purchaseResult(.cancelled, for: productIdentifier)
                 } else {
-                    notifyMonitor?.purchase(.failure, forProduct: productIdentifier)
+                    notifyMonitor?.purchaseResult(.failure, for: productIdentifier)
                 }
             case .restored: // Transaction was restored from user's purchase history.  Client should complete the transaction.
                 Logging.log("Restored")
                 finishTransaction = true
-                notifyMonitor?.purchase(.restored, forProduct: productIdentifier)
+                notifyMonitor?.purchaseResult(.restored, for: productIdentifier)
             case .deferred: // The transaction is in the queue, but its final status is pending external action.
                 Logging.log("Deferred")
-                notifyMonitor?.purchase(.cancelled, forProduct: productIdentifier)
+                notifyMonitor?.purchaseResult(.cancelled, for: productIdentifier)
             }
         }
     }
