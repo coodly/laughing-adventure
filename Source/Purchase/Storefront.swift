@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
+import Foundation
 import StoreKit
 
-@available(*, deprecated, message: "Use Storefront")
-public protocol ProductsHandler {
-    func retrieveProducts(_ identifiers: [String], completion: ProductsResponse)
-}
+public typealias ProductsResponse = ([SKProduct], [String]) -> ()
 
-public extension ProductsHandler {
-    func retrieveProducts(_ identifiers: [String], completion: @escaping ProductsResponse) {
-        Logging.log("Retrieve products: \(identifiers)")
-        let request = SKProductsRequest(productIdentifiers: Set(identifiers))
-        Store.sharedInstance.perform(request, completion: completion)
-    }
-}
-
-private class Store: NSObject, SKProductsRequestDelegate {
-    fileprivate static let sharedInstance = Store()
+public class Storefront: NSObject, SKProductsRequestDelegate {
     private var requests = [SKProductsRequest: ProductsResponse]()
-    
-    fileprivate func perform(_ request: SKProductsRequest, completion: @escaping ProductsResponse) {
+
+    public func retrieve(products: [String], completion: @escaping ProductsResponse) {
+        Logging.log("Retrieve products: \(products)")
+        let request = SKProductsRequest(productIdentifiers: Set(products))
         request.delegate = self
         requests[request] = completion
         request.start()
