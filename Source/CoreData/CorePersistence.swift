@@ -138,12 +138,12 @@ public extension NSManagedObjectContext {
         }
     }
     
-    public func fetchEntity<T: NSManagedObject>(where name: String, hasValue: AnyObject) -> T? {
+    public func fetchEntity<T: NSManagedObject, V: Any>(where name: String, hasValue: V) -> T? {
         let attributePredicate = predicate(for: name, withValue: hasValue)
         return fetchFirst(predicate: attributePredicate)
     }
     
-    public func predicate(for attribute: String, withValue: AnyObject) -> NSPredicate {
+    public func predicate<V: Any>(for attribute: String, withValue: V) -> NSPredicate {
         let predicate: NSPredicate
         
         switch(withValue) {
@@ -212,7 +212,7 @@ public extension NSManagedObjectContext {
         return fetchedController
     }
     
-    public func has<T: NSManagedObject>(entity type: T.Type, where attribute: String, is value: AnyObject) -> Bool {
+    public func has<T: NSManagedObject, V: Any>(entity type: T.Type, where attribute: String, is value: V) -> Bool {
         return count(instancesOf: type, predicate: predicate(for: attribute, withValue: value)) == 1
     }
     
