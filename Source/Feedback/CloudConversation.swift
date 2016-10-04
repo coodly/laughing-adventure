@@ -15,13 +15,20 @@
  */
 
 import Foundation
-import CoreData
+import CloudKit
 
-public class Conversation: NSManagedObject {
+struct CloudConversation: RemoteRecord {
+    var parent: CKRecordID?
+    var recordData: Data?
+    var recordName: String?
+    static var recordType: String {
+        return "Conversation"
+    }
     
-}
-
-extension Conversation {
-    @NSManaged var recordName: String?
-    @NSManaged var createdAt: Date?
+    var createdAt: Date?
+    
+    mutating func loadFields(from record: CKRecord) -> Bool {
+        createdAt = record.creationDate
+        return true
+    }
 }

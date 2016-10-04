@@ -28,7 +28,13 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     private lazy var feedbackContainer: CKContainer = {
         return CKContainer(identifier: "iCloud.com.coodly.feedback")
     }()
+    private lazy var persistence: CorePersistence = {
+        let persistence = CorePersistence(modelName: "Feedback", identifier: "com.coodly.feedback", in: .cachesDirectory)
+        persistence.managedObjectModel = NSManagedObjectModel.createFeedbackV1()
+        return persistence
+    }()
     private var refreshControl: UIRefreshControl!
+    private var accountStatus: CKAccountStatus = .couldNotDetermine
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,7 +51,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     }
     
     public override func createFetchedController() -> NSFetchedResultsController<Conversation> {
-        return NSFetchedResultsController<Conversation>()
+        return persistence.mainContext.fetchedControllerForConversations()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -64,5 +70,40 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     
     @objc fileprivate func refresh() {
         Logging.log("Refresh conversations")
+        let refreshClosure: ((Bool) -> ()) = {
+            available in
+            
+            Logging.log("Refresh")
+            guard available else {
+                self.refreshControl.endRefreshing()
+                return
+            }
+            
+            let op = PullConversationsOperation()
+            op.persistence = self.persistence
+            op.container = self.feedbackContainer
+            op.completionHandler = {
+                success in
+                
+                self.refreshControl.endRefreshing()
+            }
+            op.start()
+        }
+        
+        if accountStatus == .couldNotDetermine {
+            checkAccountStatus(completion: refreshClosure)
+        } else {
+            refreshClosure(true)
+        }
+    }
+    
+    private func checkAccountStatus(completion: @escaping ((Bool) -> ())) {
+        Logging.log("Check account")
+        feedbackContainer.accountStatus() {
+            status, error in
+            
+            Logging.log("Account status: \(status.rawValue) - \(error)")
+            completion(status == .available)
+        }
     }
 }
