@@ -72,7 +72,9 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             
             Logging.log("Refresh")
             guard available else {
-                self.refreshControl.endRefreshing()
+                DispatchQueue.main.async {
+                    self.refreshControl.endRefreshing()
+                }
                 return
             }
             
@@ -81,7 +83,9 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             op.completionHandler = {
                 success in
                 
-                self.refreshControl.endRefreshing()
+                DispatchQueue.main.async {
+                    self.refreshControl.endRefreshing()
+                }
             }
             op.start()
         }

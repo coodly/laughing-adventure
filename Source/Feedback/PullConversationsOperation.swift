@@ -26,7 +26,7 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
     }
     
     override func performRequest() {
-        fetch()
+        fetchUserRecord()
     }
     
     override func handle(result: CloudResult<CloudConversation>, completion: @escaping () -> ()) {
@@ -53,4 +53,27 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
             persistence.performInBackground(task: save, completion: completion)
         }
     }
-}
+    
+    private func fetchUserRecord() {
+        Logging.log("Fetch user record")
+        feedbackContainer.fetchUserRecordID() {
+            recordId, error in
+            
+            Logging.log("Fetched: \(recordId) - error \(error)")
+            
+            if let error = error {
+                Logging.log("Fetch user record error \(error)")
+                self.finish(true)
+            } else {
+                self.fetchConversationsFor(recordId!)
+            }
+        }
+    }
+    
+    private func fetchConversationsFor(_ userRecordId: CKRecordID) {
+        let userPredicate = NSPredicate(format: "creatorUserRecordID = %@", userRecordId)
+        let appPredicate = NSPredicate(format: "appIdentifier = %@", Bundle.main.bundleIdentifier!)
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [userPredicate, appPredicate])
+        fetch(predicate: predicate, inDatabase: .public)
+    }
+ }
