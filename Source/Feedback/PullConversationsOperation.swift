@@ -15,9 +15,15 @@
  */
 
 import Foundation
+import CloudKit
 
-class PullConversationsOperation: CloudKitRequest<CloudConversation> {
+class PullConversationsOperation: CloudKitRequest<CloudConversation>, PersistenceConsumer, FeedbackContainerConsumer {
     var persistence: CorePersistence!
+    var feedbackContainer: CKContainer! {
+        didSet {
+            container = feedbackContainer
+        }
+    }
     
     override func performRequest() {
         fetch()

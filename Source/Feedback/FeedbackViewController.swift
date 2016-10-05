@@ -24,20 +24,17 @@ private extension Selector {
     static let refreshConversations = #selector(FeedbackViewController.refresh)
 }
 
-public class FeedbackViewController: FetchedTableViewController<Conversation, ConversationCell> {
-    private lazy var feedbackContainer: CKContainer = {
-        return CKContainer(identifier: "iCloud.com.coodly.feedback")
-    }()
-    private lazy var persistence: CorePersistence = {
-        let persistence = CorePersistence(modelName: "Feedback", identifier: "com.coodly.feedback", in: .cachesDirectory)
-        persistence.managedObjectModel = NSManagedObjectModel.createFeedbackV1()
-        return persistence
-    }()
+public class FeedbackViewController: FetchedTableViewController<Conversation, ConversationCell>, InjectionHandler, PersistenceConsumer, FeedbackContainerConsumer {
+    var persistence: CorePersistence!
+    var feedbackContainer: CKContainer!
+
     private var refreshControl: UIRefreshControl!
     private var accountStatus: CKAccountStatus = .couldNotDetermine
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        
+        inject(into: self)
         
         navigationItem.title = NSLocalizedString("coodly.feedback.controller.title", comment: "")
         
@@ -80,8 +77,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             }
             
             let op = PullConversationsOperation()
-            op.persistence = self.persistence
-            op.container = self.feedbackContainer
+            self.inject(into: op)
             op.completionHandler = {
                 success in
                 
