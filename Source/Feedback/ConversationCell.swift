@@ -16,7 +16,6 @@
 
 import UIKit
 
-@available(iOS 9.0, *)
 public class ConversationCell: UITableViewCell {
     private(set) var dateLabel: UILabel!
     private(set) var snippetLabel: UILabel!

@@ -18,8 +18,9 @@ import CoreData
 
 internal extension NSManagedObjectContext {
     func fetchedControllerForConversations() -> NSFetchedResultsController<Conversation> {
+        let notEmpty = NSPredicate(format: "empty = NO")
         let sort = NSSortDescriptor(key: "createdAt", ascending: true)
-        return fetchedController(sort: [sort])
+        return fetchedController(predicate: notEmpty, sort: [sort])
     }
     
     func namesForExistingConversations() -> [String] {

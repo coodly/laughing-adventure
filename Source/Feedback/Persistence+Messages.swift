@@ -17,15 +17,9 @@
 import Foundation
 import CoreData
 
-@objc(Conversation)
-public class Conversation: NSManagedObject {
-    public override func awakeFromInsert() {
-        createdAt = Date()
+internal extension NSManagedObjectContext {
+    func fetchedControllerForMessages(in conversation: Conversation) -> NSFetchedResultsController<Message> {
+        let sort = NSSortDescriptor(key: "postedAt", ascending: true)
+        return fetchedController(sort: [sort])
     }
-}
-
-extension Conversation {
-    @NSManaged var recordName: String?
-    @NSManaged var createdAt: Date?
-    @NSManaged var empty: Bool
 }

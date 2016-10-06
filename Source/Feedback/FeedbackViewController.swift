@@ -30,6 +30,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
 
     private var refreshControl: UIRefreshControl!
     private var accountStatus: CKAccountStatus = .couldNotDetermine
+    private var refreshed = false
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,6 +46,8 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: .refreshConversations, for: .valueChanged)
         tableView.addSubview(refreshControl)
+        
+        tableView.register(ConversationCell.self, forCellReuseIdentifier: ConversationCell.identifier())
     }
     
     public override func createFetchedController() -> NSFetchedResultsController<Conversation> {
@@ -54,7 +57,12 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        if refreshed {
+            return
+        }
+        
         refreshControl.beginRefreshingManually()
+        refreshed = true
     }
     
     @objc fileprivate func donePressed() {
@@ -62,7 +70,9 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     }
     
     @objc fileprivate func addPressed() {
-        
+        let conversationController = ConversationViewController()
+        inject(into: conversationController)
+        navigationController?.pushViewController(conversationController, animated: true)
     }
     
     @objc fileprivate func refresh() {
@@ -76,6 +86,10 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
                     self.refreshControl.endRefreshing()
                 }
                 return
+            }
+            
+            DispatchQueue.main.async {
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
             }
             
             let op = PullConversationsOperation()

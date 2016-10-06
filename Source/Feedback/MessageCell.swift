@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import Foundation
-import CoreData
+import UIKit
 
-@objc(Conversation)
-public class Conversation: NSManagedObject {
-    public override func awakeFromInsert() {
-        createdAt = Date()
-    }
-}
-
-extension Conversation {
-    @NSManaged var recordName: String?
-    @NSManaged var createdAt: Date?
-    @NSManaged var empty: Bool
+internal class MessageCell: UITableViewCell {
+    
 }

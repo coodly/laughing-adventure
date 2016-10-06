@@ -23,11 +23,16 @@ internal extension NSManagedObjectModel {
         //create entities
         let conversationDesc = NSEntityDescription()
         conversationDesc.name = "Conversation"
-        conversationDesc.managedObjectClassName = "Conversation"
+        conversationDesc.managedObjectClassName = Conversation.entityName()
         
         let conversationCreateTime = NSAttributeDescription()
         conversationCreateTime.name = "createdAt"
         conversationCreateTime.attributeType = .dateAttributeType
+        
+        let conversationEmpty = NSAttributeDescription()
+        conversationEmpty.name = "empty"
+        conversationEmpty.attributeType = .booleanAttributeType
+        conversationEmpty.defaultValue = true
         
         let recordName = NSAttributeDescription()
         recordName.name = "recordName"
@@ -35,9 +40,15 @@ internal extension NSManagedObjectModel {
         
         let messageDesc = NSEntityDescription()
         messageDesc.name = "Message"
-        messageDesc.managedObjectClassName = "Message"
+        messageDesc.managedObjectClassName = Message.entityName()
         
-        conversationDesc.properties = [conversationCreateTime, recordName]
+        let messageTime = NSAttributeDescription()
+        messageTime.name = "postedAt"
+        messageTime.attributeType = .dateAttributeType
+        
+        conversationDesc.properties = [conversationCreateTime, recordName, conversationEmpty]
+        
+        messageDesc.properties = [messageTime]
         
         let entities = [conversationDesc, messageDesc]
         

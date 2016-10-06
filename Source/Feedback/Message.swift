@@ -17,15 +17,7 @@
 import Foundation
 import CoreData
 
-@objc(Conversation)
-public class Conversation: NSManagedObject {
-    public override func awakeFromInsert() {
-        createdAt = Date()
-    }
-}
-
-extension Conversation {
-    @NSManaged var recordName: String?
-    @NSManaged var createdAt: Date?
-    @NSManaged var empty: Bool
+@objc(Message)
+internal class Message: NSManagedObject {
+    
 }
