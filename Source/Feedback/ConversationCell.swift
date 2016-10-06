@@ -16,6 +16,41 @@
 
 import UIKit
 
+@available(iOS 9.0, *)
 public class ConversationCell: UITableViewCell {
+    private(set) var dateLabel: UILabel!
+    private(set) var snippetLabel: UILabel!
     
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        frame = CGRect(x: 0, y: 0, width: 320, height: 44)
+        
+        dateLabel = UILabel()
+        dateLabel.text = "2016-09-12"
+        dateLabel.numberOfLines = 1
+        dateLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        dateLabel.setContentCompressionResistancePriority(1000, for: .vertical)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        snippetLabel = UILabel()
+        snippetLabel.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse enim augue, congue non ante aliquet, tempor feugiat nulla. Nulla auctor diam vel velit maximus tristique. Integer congue semper accumsan. Aliquam vel justo vitae mauris ullamcorper interdum sit amet varius urna. Curabitur in aliquet dolor."
+        snippetLabel.numberOfLines = 3
+        snippetLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        snippetLabel.setContentCompressionResistancePriority(1000, for: .vertical)
+        snippetLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(dateLabel)
+        contentView.addSubview(snippetLabel)
+        
+        let views: [String: AnyObject] = ["date": dateLabel, "snippet": snippetLabel]
+        
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(8)-[date]-(4)-[snippet]-(8)-|", options: [], metrics: nil, views: views))
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[date]-(16)-|", options: [], metrics: nil, views: views))
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[snippet]-(16)-|", options: [], metrics: nil, views: views))
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError()
+    }
 }
