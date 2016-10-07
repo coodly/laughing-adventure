@@ -40,6 +40,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     @objc fileprivate func addMessage() {
         let compose = ComposeViewController()
         let navigation = UINavigationController(rootViewController: compose)
+        navigation.modalPresentationStyle = .formSheet
         present(navigation, animated: true, completion: nil)
     }
 }

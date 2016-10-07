@@ -19,6 +19,7 @@ import UIKit
 private extension Selector {
     static let sendPressed = #selector(ComposeViewController.sendPressed)
     static let cancelPressed = #selector(ComposeViewController.cancelPressed)
+    static let keyboardChanged = #selector(ComposeViewController.keyboardChanged(notification:))
 }
 
 internal class ComposeViewController: UIViewController {
@@ -31,6 +32,7 @@ internal class ComposeViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("coodly.feedback.message.compose.controller.send.button", comment: ""), style: .plain, target: self, action: .sendPressed)
         
         let textView = UITextView(frame: view.bounds)
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
         view.addSubview(textView)
         
         let views: [String: AnyObject] = ["text": textView]
@@ -49,6 +51,8 @@ internal class ComposeViewController: UIViewController {
         }
         
         bottomSpacing.constant = 0
+        
+        NotificationCenter.default.addObserver(self, selector: .keyboardChanged, name: Notification.Name.UIKeyboardDidChangeFrame, object: nil)
     }
     
     @objc fileprivate func sendPressed() {
@@ -57,5 +61,18 @@ internal class ComposeViewController: UIViewController {
     
     @objc fileprivate func cancelPressed() {
         dismiss(animated: true, completion: nil)
+    }
+    
+    @objc fileprivate func keyboardChanged(notification: Notification) {
+        guard let info = notification.userInfo, let end = info[UIKeyboardFrameEndUserInfoKey] as? NSValue else {
+            return
+        }
+
+        let keyWindow = UIApplication.shared.keyWindow!
+        let meInScreen = keyWindow.convert(view.frame, from: view)
+        let frame = end.cgRectValue
+        let keyboardInScreen = keyWindow.convert(frame, from: keyWindow.rootViewController!.view)
+        let intersection = meInScreen.intersection(keyboardInScreen)
+        bottomSpacing.constant = intersection.height
     }
 }
