@@ -32,6 +32,13 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     private var accountStatus: CKAccountStatus = .couldNotDetermine
     private var refreshed = false
     
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -63,6 +70,16 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         
         refreshControl.beginRefreshingManually()
         refreshed = true
+    }
+    
+    public override func configure(cell: ConversationCell, at indexPath: IndexPath, with converation: Conversation, forMeasuring: Bool) {
+        if let time = converation.lastMessageTime {
+            cell.timeLabel.text = "\(dateFormatter.string(from: time)) >"
+        } else {
+            cell.timeLabel.text = ""
+        }
+        
+        cell.snippetLabel.text = converation.snippet
     }
     
     public override func tappedCell(at indexPath: IndexPath, object: Conversation) -> Bool {

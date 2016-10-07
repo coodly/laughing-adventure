@@ -15,19 +15,24 @@
  */
 
 import Foundation
-import CoreData
+import CloudKit
 
-@objc(Conversation)
-public class Conversation: NSManagedObject {
-    public override func awakeFromInsert() {
-        lastMessageTime = Date()
+internal struct CloudMessage: RemoteRecord {
+    var parent: CKRecordID?
+    var recordData: Data?
+    var recordName: String?
+    static var recordType: String {
+        return "Message"
     }
-}
-
-extension Conversation {
-    @NSManaged var recordName: String?
-    @NSManaged var lastMessageTime: Date?
-    @NSManaged var empty: Bool
-    @NSManaged var messages: Set<Message>?
-    @NSManaged var snippet: String?
+    
+    var body: String?
+    var postedAt: Date?
+    var conversation: CKReference?
+    
+    mutating func loadFields(from record: CKRecord) -> Bool {
+        body = record["body"] as? String
+        postedAt = record["postedAt"] as? Date
+        conversation = record["conversation"] as? CKReference
+        return true
+    }
 }

@@ -26,9 +26,9 @@ internal extension NSManagedObjectModel {
         conversationDesc.name = "Conversation"
         conversationDesc.managedObjectClassName = Conversation.entityName()
         
-        let conversationCreateTime = NSAttributeDescription()
-        conversationCreateTime.name = "createdAt"
-        conversationCreateTime.attributeType = .dateAttributeType
+        let conversationLastMessageTime = NSAttributeDescription()
+        conversationLastMessageTime.name = "lastMessageTime"
+        conversationLastMessageTime.attributeType = .dateAttributeType
         
         let conversationEmpty = NSAttributeDescription()
         conversationEmpty.name = "empty"
@@ -38,6 +38,10 @@ internal extension NSManagedObjectModel {
         let recordName = NSAttributeDescription()
         recordName.name = "recordName"
         recordName.attributeType = .stringAttributeType
+        
+        let conversationSnippet = NSAttributeDescription()
+        conversationSnippet.name = "snippet"
+        conversationSnippet.attributeType = .stringAttributeType
         
         // # Message #
         let messageDesc = NSEntityDescription()
@@ -68,7 +72,7 @@ internal extension NSManagedObjectModel {
         conversationHasManyMessages.inverseRelationship = messageBelongsToOneConversation
         messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
 
-        conversationDesc.properties = [conversationCreateTime, recordName, conversationEmpty, conversationHasManyMessages]
+        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet]
         messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation]
         
         let entities = [conversationDesc, messageDesc]

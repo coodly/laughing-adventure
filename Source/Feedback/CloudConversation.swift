@@ -25,10 +25,13 @@ struct CloudConversation: RemoteRecord {
         return "Conversation"
     }
     
-    var createdAt: Date?
+    let appIdentifier = Bundle.main.bundleIdentifier!
+    var lastMessageTime: Date?
+    var snippet: String?
     
     mutating func loadFields(from record: CKRecord) -> Bool {
-        createdAt = record.creationDate
+        lastMessageTime = record["lastMessageTime"] as? Date
+        snippet = record["snippet"] as? String
         return true
     }
 }

@@ -29,5 +29,15 @@ internal extension NSManagedObjectContext {
         saved.body = message
         saved.conversation = conversation
         saved.postedAt = Date()
+        conversation.lastMessageTime = Date()
+        conversation.snippet = message.snippet()
+    }
+}
+
+private extension String {
+    func snippet() -> String {
+        let snippetLength = min(100, characters.count)
+        let endIndex = index(startIndex, offsetBy: snippetLength)
+        return substring(to: endIndex)
     }
 }

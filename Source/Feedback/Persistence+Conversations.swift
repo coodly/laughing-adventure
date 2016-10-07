@@ -19,7 +19,7 @@ import CoreData
 internal extension NSManagedObjectContext {
     func fetchedControllerForConversations() -> NSFetchedResultsController<Conversation> {
         let notEmpty = NSPredicate(format: "empty = NO")
-        let sort = NSSortDescriptor(key: "createdAt", ascending: true)
+        let sort = NSSortDescriptor(key: "lastMessageTime", ascending: false)
         return fetchedController(predicate: notEmpty, sort: [sort])
     }
     
@@ -31,7 +31,7 @@ internal extension NSManagedObjectContext {
         let saved = existing(conversation) ?? insertEntity()
         
         saved.recordName = conversation.recordName
-        saved.createdAt = conversation.createdAt
+        saved.lastMessageTime = conversation.lastMessageTime
     }
     
     func removeConversations(withNames: [String]) {
