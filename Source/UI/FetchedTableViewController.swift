@@ -39,8 +39,6 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
-        
-        tableView.registerCell(forType: Cell.self)
     }
     
     open override func viewWillAppear(_ animated: Bool) {
@@ -48,7 +46,7 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
         
         smoothDeselectRows()
         
-        if let _ = fetchedController {
+        if fetchedController != nil {
             return
         }
         
@@ -113,8 +111,7 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
         }
     }
     
-    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch(type) {
         case NSFetchedResultsChangeType.update:
             tableView.reloadRows(at: [indexPath!], with: .automatic)
