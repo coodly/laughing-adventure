@@ -16,6 +16,14 @@
 
 import CoreData
 
+internal extension NSPredicate {
+    @nonobjc static let needingSync: NSPredicate = {
+        let syncNeeded = NSPredicate(format: "syncNeeded = YES")
+        let syncNotFailed = NSPredicate(format: "syncFailed = NO")
+        return NSCompoundPredicate(andPredicateWithSubpredicates: [syncNeeded, syncNotFailed])
+    }()
+}
+
 internal extension NSManagedObjectContext {
     func fetchedControllerForConversations() -> NSFetchedResultsController<Conversation> {
         let notEmpty = NSPredicate(format: "empty = NO")
@@ -33,6 +41,9 @@ internal extension NSManagedObjectContext {
         saved.recordName = conversation.recordName
         saved.recordData = conversation.recordData
         saved.lastMessageTime = conversation.lastMessageTime
+        saved.snippet = conversation.snippet
+        saved.syncNeeded = false
+        saved.empty = false
     }
     
     func removeConversations(withNames: [String]) {
@@ -49,10 +60,19 @@ internal extension NSManagedObjectContext {
     }
     
     func fetchedControllerForConversationsNeedingSync() -> NSFetchedResultsController<Conversation> {
-        let syncNeeded = NSPredicate(format: "syncNeeded = YES")
-        let syncNotFailed = NSPredicate(format: "syncFailed = NO")
-        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [syncNeeded, syncNotFailed])
         let sort = NSSortDescriptor(key: "lastMessageTime", ascending: false)
-        return fetchedController(predicate: predicate, sort: [sort])
+        return fetchedController(predicate: .needingSync, sort: [sort])
+    }
+    
+    func conversationsNeedingSync() -> [Conversation] {
+        return fetch(predicate: .needingSync, limit: nil)
+    }
+    
+    func markSyncFailureOn(conversations: [String]) {
+        let predicate = NSPredicate(format: "recordName IN %@", conversations)
+        let failed: [Conversation] = fetch(predicate: predicate, limit: nil)
+        for f in failed {
+            f.syncFailed = true
+        }
     }
 }

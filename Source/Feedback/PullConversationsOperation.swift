@@ -59,7 +59,7 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
         feedbackContainer.fetchUserRecordID() {
             recordId, error in
             
-            Logging.log("Fetched: \(recordId) - error \(error)")
+            Logging.log("Fetched: \(recordId?.recordName) - error \(error)")
             
             if let error = error {
                 Logging.log("Fetch user record error \(error)")
