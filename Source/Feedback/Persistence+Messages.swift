@@ -20,6 +20,14 @@ import CoreData
 internal extension NSManagedObjectContext {
     func fetchedControllerForMessages(in conversation: Conversation) -> NSFetchedResultsController<Message> {
         let sort = NSSortDescriptor(key: "postedAt", ascending: true)
-        return fetchedController(sort: [sort])
+        let inConversation = NSPredicate(format: "conversation = %@", conversation)
+        return fetchedController(predicate: inConversation, sort: [sort])
+    }
+    
+    func addMessage(_ message: String, for conversation: Conversation) {
+        let saved: Message = insertEntity()
+        saved.body = message
+        saved.conversation = conversation
+        saved.postedAt = Date()
     }
 }

@@ -21,3 +21,9 @@ import CoreData
 internal class Message: NSManagedObject {
     
 }
+
+extension Message {
+    @NSManaged var body: String?
+    @NSManaged var conversation: Conversation
+    @NSManaged var postedAt: Date
+}

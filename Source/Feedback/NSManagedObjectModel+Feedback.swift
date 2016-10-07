@@ -21,6 +21,7 @@ internal extension NSManagedObjectModel {
         let model = NSManagedObjectModel()
         
         //create entities
+        // # Conversation #
         let conversationDesc = NSEntityDescription()
         conversationDesc.name = "Conversation"
         conversationDesc.managedObjectClassName = Conversation.entityName()
@@ -38,6 +39,7 @@ internal extension NSManagedObjectModel {
         recordName.name = "recordName"
         recordName.attributeType = .stringAttributeType
         
+        // # Message #
         let messageDesc = NSEntityDescription()
         messageDesc.name = "Message"
         messageDesc.managedObjectClassName = Message.entityName()
@@ -46,9 +48,28 @@ internal extension NSManagedObjectModel {
         messageTime.name = "postedAt"
         messageTime.attributeType = .dateAttributeType
         
-        conversationDesc.properties = [conversationCreateTime, recordName, conversationEmpty]
+        let messageBody = NSAttributeDescription()
+        messageBody.name = "body"
+        messageBody.attributeType = .stringAttributeType
         
-        messageDesc.properties = [messageTime]
+        //relationships
+        let conversationHasManyMessages = NSRelationshipDescription()
+        conversationHasManyMessages.destinationEntity = messageDesc
+        conversationHasManyMessages.name = "messages"
+        conversationHasManyMessages.deleteRule = .cascadeDeleteRule
+        
+        let messageBelongsToOneConversation = NSRelationshipDescription()
+        messageBelongsToOneConversation.destinationEntity = conversationDesc
+        messageBelongsToOneConversation.name = "conversation"
+        messageBelongsToOneConversation.deleteRule = .nullifyDeleteRule
+        messageBelongsToOneConversation.minCount = 1
+        messageBelongsToOneConversation.maxCount = 1
+        
+        conversationHasManyMessages.inverseRelationship = messageBelongsToOneConversation
+        messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
+
+        conversationDesc.properties = [conversationCreateTime, recordName, conversationEmpty, conversationHasManyMessages]
+        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation]
         
         let entities = [conversationDesc, messageDesc]
         

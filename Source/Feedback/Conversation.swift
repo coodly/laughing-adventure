@@ -28,4 +28,5 @@ extension Conversation {
     @NSManaged var recordName: String?
     @NSManaged var createdAt: Date?
     @NSManaged var empty: Bool
+    @NSManaged var messages: Set<Message>?
 }

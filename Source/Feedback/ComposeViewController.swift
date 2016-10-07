@@ -22,8 +22,12 @@ private extension Selector {
     static let keyboardChanged = #selector(ComposeViewController.keyboardChanged(notification:))
 }
 
-internal class ComposeViewController: UIViewController {
+internal class ComposeViewController: UIViewController, PersistenceConsumer {
+    var persistence: CorePersistence!
+    var conversation: Conversation!
+    
     private var bottomSpacing: NSLayoutConstraint!
+    private var textView: UITextView!
     
     override func viewDidLoad() {
         
@@ -31,7 +35,7 @@ internal class ComposeViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: .cancelPressed)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: NSLocalizedString("coodly.feedback.message.compose.controller.send.button", comment: ""), style: .plain, target: self, action: .sendPressed)
         
-        let textView = UITextView(frame: view.bounds)
+        textView = UITextView(frame: view.bounds)
         textView.font = UIFont.preferredFont(forTextStyle: .body)
         view.addSubview(textView)
         
@@ -56,7 +60,15 @@ internal class ComposeViewController: UIViewController {
     }
     
     @objc fileprivate func sendPressed() {
+        guard let message = textView.text, message.hasValue() else {
+            return
+        }
         
+        conversation.empty = false
+        persistence.mainContext.addMessage(message, for: conversation)
+        persistence.save() {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
     
     @objc fileprivate func cancelPressed() {

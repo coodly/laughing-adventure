@@ -21,7 +21,7 @@ private extension Selector {
     static let addMessage = #selector(ConversationViewController.addMessage)
 }
 
-internal class ConversationViewController: FetchedTableViewController<Message, MessageCell>, PersistenceConsumer {
+internal class ConversationViewController: FetchedTableViewController<Message, MessageCell>, InjectionHandler, PersistenceConsumer {
     var persistence: CorePersistence!
     var conversation: Conversation?
     
@@ -29,16 +29,25 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         super.viewDidLoad()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: .addMessage)
+        
+        tableView.register(MessageCell.self, forCellReuseIdentifier: MessageCell.identifier())
     }
     
     override func createFetchedController() -> NSFetchedResultsController<Message> {
-        let shown = conversation ?? persistence.mainContext.insertEntity()
-        persistence.save()
-        return persistence.mainContext.fetchedControllerForMessages(in: shown)
+        if conversation == nil {
+            conversation = persistence.mainContext.insertEntity() as Conversation
+        }
+        return persistence.mainContext.fetchedControllerForMessages(in: conversation!)
+    }
+    
+    override func configure(cell: MessageCell, at indexPath: IndexPath, with message: Message, forMeasuring: Bool) {
+        cell.messageLabel.text = message.body
     }
     
     @objc fileprivate func addMessage() {
         let compose = ComposeViewController()
+        compose.conversation = conversation!
+        inject(into: compose)
         let navigation = UINavigationController(rootViewController: compose)
         navigation.modalPresentationStyle = .formSheet
         present(navigation, animated: true, completion: nil)

@@ -17,5 +17,26 @@
 import UIKit
 
 internal class MessageCell: UITableViewCell {
+    private(set) var messageLabel: UILabel!
     
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        messageLabel = UILabel()
+        messageLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        messageLabel.numberOfLines = 0
+        messageLabel.setContentCompressionResistancePriority(1000, for: .vertical)
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(messageLabel)
+        
+        let views: [String: AnyObject] = ["message": messageLabel]
+        
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(8)-[message]-(8)-|", options: [], metrics: nil, views: views))
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[message]-(16)-|", options: [], metrics: nil, views: views))
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

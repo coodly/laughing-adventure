@@ -65,12 +65,22 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         refreshed = true
     }
     
+    public override func tappedCell(at indexPath: IndexPath, object: Conversation) -> Bool {
+        pushConversationControllerWith(object)
+        return true
+    }
+    
     @objc fileprivate func donePressed() {
         dismiss(animated: true, completion: nil)
     }
     
     @objc fileprivate func addPressed() {
+        pushConversationControllerWith(nil)
+    }
+    
+    private func pushConversationControllerWith(_ conversation: Conversation?) {
         let conversationController = ConversationViewController()
+        conversationController.conversation = conversation
         inject(into: conversationController)
         navigationController?.pushViewController(conversationController, animated: true)
     }

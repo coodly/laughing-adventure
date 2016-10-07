@@ -32,7 +32,7 @@ private class Injector {
     fileprivate static let sharedInstance = Injector()
     
     private lazy var persistence: CorePersistence = {
-        let persistence = CorePersistence(modelName: "Feedback", identifier: "com.coodly.feedback", in: .cachesDirectory)
+        let persistence = CorePersistence(modelName: "Feedback", identifier: "com.coodly.feedback", in: .cachesDirectory, wipeOnConflict: true)
         persistence.managedObjectModel = NSManagedObjectModel.createFeedbackV1()
         return persistence
     }()
