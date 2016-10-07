@@ -19,7 +19,14 @@ import CoreData
 
 @objc(Message)
 internal class Message: NSManagedObject {
-    
+    func toCloud() -> CloudMessage {
+        var cloud = CloudMessage()
+        cloud.recordName = recordName
+        cloud.recordData = recordData
+        cloud.body = body
+        cloud.postedAt = postedAt
+        return cloud
+    }
 }
 
 extension Message {
@@ -28,4 +35,6 @@ extension Message {
     @NSManaged var postedAt: Date
     @NSManaged var recordData: Data?
     @NSManaged var recordName: String?
+    @NSManaged var syncNeeded: Bool
+    @NSManaged var syncFailed: Bool
 }

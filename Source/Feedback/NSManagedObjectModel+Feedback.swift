@@ -63,6 +63,16 @@ internal extension NSManagedObjectModel {
         commonRecordData.attributeType = .binaryDataAttributeType
         commonRecordData.allowsExternalBinaryDataStorage = true
         
+        let syncNeeded = NSAttributeDescription()
+        syncNeeded.name = "syncNeeded"
+        syncNeeded.attributeType = .booleanAttributeType
+        syncNeeded.defaultValue = false
+        
+        let syncFailed = NSAttributeDescription()
+        syncFailed.name = "syncFailed"
+        syncFailed.attributeType = .booleanAttributeType
+        syncFailed.defaultValue = false
+        
         //relationships
         let conversationHasManyMessages = NSRelationshipDescription()
         conversationHasManyMessages.destinationEntity = messageDesc
@@ -79,8 +89,8 @@ internal extension NSManagedObjectModel {
         conversationHasManyMessages.inverseRelationship = messageBelongsToOneConversation
         messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
 
-        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData]
-        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName]
+        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData, syncNeeded, syncFailed]
+        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName, syncNeeded, syncFailed]
         
         let entities = [conversationDesc, messageDesc]
         

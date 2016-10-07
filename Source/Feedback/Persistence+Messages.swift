@@ -29,8 +29,10 @@ internal extension NSManagedObjectContext {
         saved.body = message
         saved.conversation = conversation
         saved.postedAt = Date()
+        saved.syncNeeded = true
         conversation.lastMessageTime = Date()
         conversation.snippet = message.snippet()
+        conversation.syncNeeded = true
     }
 }
 

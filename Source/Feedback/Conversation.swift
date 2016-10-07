@@ -21,6 +21,7 @@ import CoreData
 public class Conversation: NSManagedObject {
     public override func awakeFromInsert() {
         lastMessageTime = Date()
+        recordName = UUID().uuidString
     }
     
     func toCloud() -> CloudConversation {
@@ -40,4 +41,6 @@ extension Conversation {
     @NSManaged var messages: Set<Message>?
     @NSManaged var snippet: String?
     @NSManaged var recordData: Data?
+    @NSManaged var syncNeeded: Bool
+    @NSManaged var syncFailed: Bool
 }

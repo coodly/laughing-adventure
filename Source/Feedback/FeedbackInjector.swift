@@ -39,6 +39,15 @@ private class Injector {
     private lazy var feedbackContainer: CKContainer = {
         return CKContainer(identifier: "iCloud.com.coodly.feedback")
     }()
+    private let messagesPush: MessagesPush
+
+    init() {
+        messagesPush = MessagesPush()
+        DispatchQueue.main.async {
+            self.inject(into: self.messagesPush)
+        }
+    }
+
     
     fileprivate func inject(into: AnyObject) {
         if var consumer = into as? PersistenceConsumer {

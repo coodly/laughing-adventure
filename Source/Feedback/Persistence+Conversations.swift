@@ -47,4 +47,12 @@ internal extension NSManagedObjectContext {
     private func existing(_ conversation: CloudConversation) -> Conversation? {
         return fetchEntity(where: "recordName", hasValue: conversation.recordName!)
     }
+    
+    func fetchedControllerForConversationsNeedingSync() -> NSFetchedResultsController<Conversation> {
+        let syncNeeded = NSPredicate(format: "syncNeeded = YES")
+        let syncNotFailed = NSPredicate(format: "syncFailed = NO")
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [syncNeeded, syncNotFailed])
+        let sort = NSSortDescriptor(key: "lastMessageTime", ascending: false)
+        return fetchedController(predicate: predicate, sort: [sort])
+    }
 }
