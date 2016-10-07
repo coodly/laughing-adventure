@@ -19,11 +19,15 @@ import CoreData
 
 private extension Selector {
     static let addMessage = #selector(ConversationViewController.addMessage)
+    static let refreshMessages = #selector(ConversationViewController.refreshMessages)
 }
 
 internal class ConversationViewController: FetchedTableViewController<Message, MessageCell>, InjectionHandler, PersistenceConsumer {
     var persistence: CorePersistence!
     var conversation: Conversation?
+    
+    private var refreshControl: UIRefreshControl!
+    private var refreshed = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +35,21 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: .addMessage)
         
         tableView.register(MessageCell.self, forCellReuseIdentifier: MessageCell.identifier())
+        
+        refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: .refreshMessages, for: .valueChanged)
+        tableView.addSubview(refreshControl)
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if refreshed {
+            return
+        }
+        
+        refreshControl.beginRefreshingManually()
+        refreshed = true
     }
     
     override func createFetchedController() -> NSFetchedResultsController<Message> {
@@ -51,5 +70,16 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         let navigation = UINavigationController(rootViewController: compose)
         navigation.modalPresentationStyle = .formSheet
         present(navigation, animated: true, completion: nil)
+    }
+    
+    @objc fileprivate func refreshMessages() {
+        guard let c = conversation, c.recordData != nil else {
+            refreshControl.endRefreshing()
+            return
+        }
+        
+        let request = PullMessagesOperation(for: c)
+        inject(into: request)
+        request.start()
     }
 }

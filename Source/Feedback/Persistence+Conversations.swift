@@ -31,6 +31,7 @@ internal extension NSManagedObjectContext {
         let saved = existing(conversation) ?? insertEntity()
         
         saved.recordName = conversation.recordName
+        saved.recordData = conversation.recordData
         saved.lastMessageTime = conversation.lastMessageTime
     }
     

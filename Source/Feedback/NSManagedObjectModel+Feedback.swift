@@ -20,6 +20,7 @@ internal extension NSManagedObjectModel {
     static func createFeedbackV1() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
         
+        
         //create entities
         // # Conversation #
         let conversationDesc = NSEntityDescription()
@@ -34,10 +35,6 @@ internal extension NSManagedObjectModel {
         conversationEmpty.name = "empty"
         conversationEmpty.attributeType = .booleanAttributeType
         conversationEmpty.defaultValue = true
-        
-        let recordName = NSAttributeDescription()
-        recordName.name = "recordName"
-        recordName.attributeType = .stringAttributeType
         
         let conversationSnippet = NSAttributeDescription()
         conversationSnippet.name = "snippet"
@@ -56,6 +53,16 @@ internal extension NSManagedObjectModel {
         messageBody.name = "body"
         messageBody.attributeType = .stringAttributeType
         
+        //# common properties
+        let recordName = NSAttributeDescription()
+        recordName.name = "recordName"
+        recordName.attributeType = .stringAttributeType
+
+        let commonRecordData = NSAttributeDescription()
+        commonRecordData.name = "recordData"
+        commonRecordData.attributeType = .binaryDataAttributeType
+        commonRecordData.allowsExternalBinaryDataStorage = true
+        
         //relationships
         let conversationHasManyMessages = NSRelationshipDescription()
         conversationHasManyMessages.destinationEntity = messageDesc
@@ -72,8 +79,8 @@ internal extension NSManagedObjectModel {
         conversationHasManyMessages.inverseRelationship = messageBelongsToOneConversation
         messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
 
-        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet]
-        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation]
+        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData]
+        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName]
         
         let entities = [conversationDesc, messageDesc]
         

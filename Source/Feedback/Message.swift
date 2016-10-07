@@ -26,4 +26,6 @@ extension Message {
     @NSManaged var body: String?
     @NSManaged var conversation: Conversation
     @NSManaged var postedAt: Date
+    @NSManaged var recordData: Data?
+    @NSManaged var recordName: String?
 }

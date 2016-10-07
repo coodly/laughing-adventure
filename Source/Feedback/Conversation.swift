@@ -22,6 +22,15 @@ public class Conversation: NSManagedObject {
     public override func awakeFromInsert() {
         lastMessageTime = Date()
     }
+    
+    func toCloud() -> CloudConversation {
+        var cloud = CloudConversation()
+        cloud.recordName = recordName
+        cloud.recordData = recordData
+        cloud.lastMessageTime = lastMessageTime
+        cloud.snippet = snippet
+        return cloud
+    }
 }
 
 extension Conversation {
@@ -30,4 +39,5 @@ extension Conversation {
     @NSManaged var empty: Bool
     @NSManaged var messages: Set<Message>?
     @NSManaged var snippet: String?
+    @NSManaged var recordData: Data?
 }
