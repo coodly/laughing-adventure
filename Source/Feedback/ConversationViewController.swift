@@ -17,6 +17,7 @@
 import UIKit
 import CoreData
 
+#if os(iOS)
 private extension Selector {
     static let addMessage = #selector(ConversationViewController.addMessage)
     static let refreshMessages = #selector(ConversationViewController.refreshMessages)
@@ -79,7 +80,15 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         }
         
         let request = PullMessagesOperation(for: c)
+        request.completionHandler = {
+            success, op in
+            
+            DispatchQueue.main.async {
+                self.refreshControl.endRefreshing()
+            }
+        }
         inject(into: request)
         request.start()
     }
 }
+#endif

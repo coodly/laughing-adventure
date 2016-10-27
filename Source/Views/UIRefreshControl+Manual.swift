@@ -16,6 +16,7 @@
 
 import UIKit
 
+#if os(iOS)
 public extension UIRefreshControl {
     func beginRefreshingManually() {
         if let scrollView = superview as? UIScrollView {
@@ -25,3 +26,4 @@ public extension UIRefreshControl {
         sendActions(for: .valueChanged)
     }
 }
+#endif

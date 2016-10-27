@@ -34,6 +34,14 @@ internal extension NSManagedObjectContext {
         conversation.snippet = message.snippet()
         conversation.syncNeeded = true
     }
+    
+    func messagesNeedingPush() -> [Message] {
+        let needingSync = NSPredicate(format: "syncNeeded = YES")
+        let syncNotFailed = NSPredicate(format: "syncFailed = NO")
+        let conversationSynced = NSPredicate(format: "conversation.syncNeeded = NO")
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [needingSync, syncNotFailed, conversationSynced])
+        return fetch(predicate: predicate, limit: nil)
+    }
 }
 
 private extension String {

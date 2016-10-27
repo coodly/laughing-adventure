@@ -24,4 +24,20 @@ internal class PushMessagesOperation: CloudKitRequest<CloudMessage>, Persistence
             container = feedbackContainer
         }
     }
+    
+    override func performRequest() {
+        persistence.performInBackground() {
+            context in
+            
+            let messages = context.messagesNeedingPush()
+            if messages.count == 0 {
+                Logging.log("No messages to push")
+                self.finish()
+                return
+            }
+            
+            Logging.log("Will push \(messages.count) messages")
+            self.finish()
+        }
+    }
 }

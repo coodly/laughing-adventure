@@ -39,6 +39,11 @@ class MessagesPush: NSObject, PersistenceConsumer, NSFetchedResultsControllerDel
         Logging.log("Changes in conversations")
         let pushConversation = PushConversationsOperation()
         inject(into: pushConversation)
-        queue.addOperation(pushConversation)
+        
+        let pushMessages = PushMessagesOperation()
+        inject(into: pushMessages)
+        pushMessages.addDependency(pushConversation)
+        
+        queue.addOperations([pushConversation, pushMessages], waitUntilFinished: false)
     }
 }

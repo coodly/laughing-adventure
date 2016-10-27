@@ -58,6 +58,7 @@ internal class PushConversationsOperation: CloudKitRequest<CloudConversation>, P
             switch result {
             case .failure:
                 context.markSyncFailureOn(conversations: self.names)
+                self.names = []
             case .success(let conversations, _):
                 for c in conversations {
                     context.update(c)

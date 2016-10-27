@@ -16,6 +16,7 @@
 
 import UIKit
 
+#if os(iOS)
 private extension Selector {
     static let sendPressed = #selector(ComposeViewController.sendPressed)
     static let cancelPressed = #selector(ComposeViewController.cancelPressed)
@@ -88,3 +89,4 @@ internal class ComposeViewController: UIViewController, PersistenceConsumer {
         bottomSpacing.constant = intersection.height
     }
 }
+#endif

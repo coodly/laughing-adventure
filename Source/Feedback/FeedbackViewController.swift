@@ -18,6 +18,7 @@ import UIKit
 import CloudKit
 import CoreData
 
+#if os(iOS)
 private extension Selector {
     static let donePressed = #selector(FeedbackViewController.donePressed)
     static let addPressed = #selector(FeedbackViewController.addPressed)
@@ -148,3 +149,4 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         }
     }
 }
+#endif
