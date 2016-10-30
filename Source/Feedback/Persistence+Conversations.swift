@@ -15,6 +15,7 @@
  */
 
 import CoreData
+import CloudKit
 
 internal extension NSPredicate {
     @nonobjc static let needingSync: NSPredicate = {
@@ -74,5 +75,9 @@ internal extension NSManagedObjectContext {
         for f in failed {
             f.syncFailed = true
         }
+    }
+    
+    func conversation(for reference: CKReference) -> Conversation? {
+        return fetchEntity(where: "recordName", hasValue: reference.recordID.recordName)
     }
 }

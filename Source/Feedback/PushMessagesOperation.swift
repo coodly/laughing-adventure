@@ -24,12 +24,14 @@ internal class PushMessagesOperation: CloudKitRequest<CloudMessage>, Persistence
             container = feedbackContainer
         }
     }
+    private var messages: [Message]?
     
     override func performRequest() {
         persistence.performInBackground() {
             context in
             
             let messages = context.messagesNeedingPush()
+            self.messages = messages
             if messages.count == 0 {
                 Logging.log("No messages to push")
                 self.finish()
@@ -37,7 +39,33 @@ internal class PushMessagesOperation: CloudKitRequest<CloudMessage>, Persistence
             }
             
             Logging.log("Will push \(messages.count) messages")
-            self.finish()
+            
+            var saved = [CloudMessage]()
+            for message in messages {
+                saved.append(message.toCloud())
+            }
+            
+            self.save(records: saved, inDatabase: .public)
         }
+    }
+    
+    override func handle(result: CloudResult<CloudMessage>, completion: @escaping () -> ()) {
+        let save: ContextClosure = {
+            context in
+            
+            let messages = context.inCurrentContext(entities: self.messages!)
+            switch result {
+            case .failure:
+                for m in messages {
+                    m.syncFailed = true
+                }
+            case .success(let saved, _):
+                for m in saved {
+                    context.update(message: m)
+                }
+            }
+        }
+        
+        persistence.performInBackground(task: save, completion: completion)
     }
 }

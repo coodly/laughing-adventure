@@ -42,6 +42,18 @@ internal extension NSManagedObjectContext {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [needingSync, syncNotFailed, conversationSynced])
         return fetch(predicate: predicate, limit: nil)
     }
+    
+    func update(message: CloudMessage) {
+        let saved: Message = fetchEntity(where: "recordName", hasValue: message.recordName!) ?? insertEntity()
+        
+        saved.recordName = message.recordName
+        saved.recordData = message.recordData
+        
+        saved.body = message.body
+        saved.postedAt = message.postedAt!
+        saved.syncNeeded = false
+        saved.conversation = conversation(for: message.conversation!)!
+    }
 }
 
 private extension String {

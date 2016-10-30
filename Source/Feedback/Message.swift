@@ -19,12 +19,17 @@ import CoreData
 
 @objc(Message)
 internal class Message: NSManagedObject {
+    override func awakeFromInsert() {
+        recordName = UUID().uuidString
+    }
+    
     func toCloud() -> CloudMessage {
         var cloud = CloudMessage()
         cloud.recordName = recordName
         cloud.recordData = recordData
         cloud.body = body
         cloud.postedAt = postedAt
+        cloud.conversation = conversation.toCloud().referenceRepresentation()
         return cloud
     }
 }

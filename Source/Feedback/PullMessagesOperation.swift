@@ -40,4 +40,21 @@ internal class PullMessagesOperation: CloudKitRequest<CloudMessage>, Persistence
             self.fetch(predicate: predicate, inDatabase: .public)
         }
     }
+    
+    override func handle(result: CloudResult<CloudMessage>, completion: @escaping () -> ()) {
+        let save: ContextClosure = {
+            context in
+            
+            switch result {
+            case .failure:
+                Logging.log("Pull masseges failed")
+            case .success(let messages, _):
+                for m in messages {
+                    context.update(message: m)
+                }
+            }
+        }
+        
+        persistence.performInBackground(task: save, completion: completion)
+    }
 }
