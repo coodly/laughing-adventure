@@ -39,6 +39,13 @@ private class Injector {
     private lazy var feedbackContainer: CKContainer = {
         return CKContainer(identifier: "iCloud.com.coodly.feedback")
     }()
+    private lazy var platform: String = {
+        let device = self.platformName() ?? "unknown"
+        let appVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let appBuild = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        let systemVersion = UIDevice.current.systemVersion
+        return "\(device)|\(systemVersion)|\(appVersion)(\(appBuild))"
+    }()
     private let messagesPush: MessagesPush
 
     init() {
@@ -57,6 +64,28 @@ private class Injector {
         if var consumer = into as? FeedbackContainerConsumer {
             consumer.feedbackContainer = feedbackContainer
         }
+        
+        if var consumer = into as? PlatformConsumer {
+            consumer.platform = platform
+        }
+    }
+    
+    //https://github.com/schickling/Device.swift/blob/master/Device/UIDeviceExtension.swift
+    private func platformName() -> String? {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        
+        let machine = systemInfo.machine
+        let mirror = Mirror(reflecting: machine)
+        var identifier = ""
+        
+        for child in mirror.children {
+            if let value = child.value as? Int8 , value != 0 {
+                identifier.append(String(UnicodeScalar(UInt8(value))))
+            }
+        }
+        
+        return identifier
     }
 }
 
@@ -66,4 +95,8 @@ internal protocol PersistenceConsumer {
 
 internal protocol FeedbackContainerConsumer {
     var feedbackContainer: CKContainer! { get set }
+}
+
+internal protocol PlatformConsumer {
+    var platform: String! { get set }
 }
