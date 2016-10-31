@@ -53,6 +53,7 @@ internal extension NSManagedObjectContext {
         saved.postedAt = message.postedAt!
         saved.syncNeeded = false
         saved.conversation = conversation(for: message.conversation!)!
+        saved.sentBy = message.sentBy
     }
 }
 

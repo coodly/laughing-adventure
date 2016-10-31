@@ -53,6 +53,11 @@ internal extension NSManagedObjectModel {
         messageBody.name = "body"
         messageBody.attributeType = .stringAttributeType
         
+        let messageSentBy = NSAttributeDescription()
+        messageSentBy.name = "sentBy"
+        messageSentBy.attributeType = .stringAttributeType
+        messageSentBy.isOptional = true
+        
         //# common properties
         let recordName = NSAttributeDescription()
         recordName.name = "recordName"
@@ -90,7 +95,7 @@ internal extension NSManagedObjectModel {
         messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
 
         conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData, syncNeeded, syncFailed]
-        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName, syncNeeded, syncFailed]
+        messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName, syncNeeded, syncFailed, messageSentBy]
         
         let entities = [conversationDesc, messageDesc]
         
