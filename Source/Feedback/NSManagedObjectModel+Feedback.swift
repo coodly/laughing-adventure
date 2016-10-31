@@ -58,6 +58,20 @@ internal extension NSManagedObjectModel {
         messageSentBy.attributeType = .stringAttributeType
         messageSentBy.isOptional = true
         
+        // # Setting #
+        let settingDesc = NSEntityDescription()
+        settingDesc.name = "Setting"
+        settingDesc.managedObjectClassName = Setting.entityName()
+        
+        let settingKey = NSAttributeDescription()
+        settingKey.name = "key"
+        settingKey.attributeType = .integer32AttributeType
+        
+        let settingValue = NSAttributeDescription()
+        settingValue.name = "value"
+        settingValue.attributeType = .stringAttributeType
+        settingValue.isOptional = true
+        
         //# common properties
         let recordName = NSAttributeDescription()
         recordName.name = "recordName"
@@ -96,8 +110,9 @@ internal extension NSManagedObjectModel {
 
         conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData, syncNeeded, syncFailed]
         messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName, syncNeeded, syncFailed, messageSentBy]
+        settingDesc.properties = [settingKey, settingValue]
         
-        let entities = [conversationDesc, messageDesc]
+        let entities = [conversationDesc, messageDesc, settingDesc]
         
         model.entities = entities
         

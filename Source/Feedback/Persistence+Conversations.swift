@@ -49,7 +49,7 @@ internal extension NSManagedObjectContext {
     
     func removeConversations(withNames: [String]) {
         let predicate = NSPredicate(format: "recordName IN %@", withNames)
-        let removed = fetch(predicate: predicate, limit: nil)
+        let removed: [Conversation] = fetch(predicate: predicate, limit: nil)
         Logging.log("Remove \(removed.count) conversations")
         for r in removed {
             delete(r)
