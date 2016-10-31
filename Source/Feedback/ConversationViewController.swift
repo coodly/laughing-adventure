@@ -30,6 +30,12 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     private var refreshControl: UIRefreshControl!
     private var refreshed = false
     
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("yyyyMMMddHHmm")
+        return formatter
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -61,6 +67,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     }
     
     override func configure(cell: MessageCell, at indexPath: IndexPath, with message: Message, forMeasuring: Bool) {
+        cell.timeLabel.text = dateFormatter.string(from: message.postedAt)
         cell.messageLabel.text = message.body
     }
     

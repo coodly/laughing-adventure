@@ -17,23 +17,41 @@
 import UIKit
 
 internal class MessageCell: UITableViewCell {
+    private(set) var timeLabel: UILabel!
     private(set) var messageLabel: UILabel!
+    private var stack: UIStackView!
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        timeLabel = UILabel()
+        timeLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+        timeLabel.numberOfLines = 1
+        timeLabel.setContentCompressionResistancePriority(1000, for: .vertical)
+        timeLabel.setContentHuggingPriority(1000, for: .vertical)
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
         messageLabel = UILabel()
         messageLabel.font = UIFont.preferredFont(forTextStyle: .body)
         messageLabel.numberOfLines = 0
-        messageLabel.setContentCompressionResistancePriority(1000, for: .vertical)
+        messageLabel.setContentCompressionResistancePriority(999, for: .vertical)
+        messageLabel.setContentHuggingPriority(1000, for: .vertical)
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        contentView.addSubview(messageLabel)
+        stack = UIStackView(arrangedSubviews: [timeLabel, messageLabel])
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
         
-        let views: [String: AnyObject] = ["message": messageLabel]
+        contentView.addSubview(stack)
         
-        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(8)-[message]-(8)-|", options: [], metrics: nil, views: views))
-        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[message]-(16)-|", options: [], metrics: nil, views: views))
+        let views: [String: AnyObject] = ["stack": stack, "time": timeLabel, "message": messageLabel]
+        
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(8)-[stack]-(8)-|", options: [], metrics: nil, views: views))
+        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[stack]-(16)-|", options: [], metrics: nil, views: views))
+        
+        stack.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "[time(>=0)]", options: [], metrics: nil, views: views))
+        stack.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "[message(>=0)]", options: [], metrics: nil, views: views))
     }
     
     required init?(coder aDecoder: NSCoder) {
