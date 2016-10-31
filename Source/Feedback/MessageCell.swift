@@ -44,9 +44,17 @@ internal class MessageCell: UITableViewCell {
             }
         }
     }
+    private var bubbleBackground: UIView!
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        selectionStyle = .none
+        
+        bubbleBackground = UIView()
+        bubbleBackground.layer.cornerRadius = 5
+        bubbleBackground.backgroundColor = UIColor(white: 0.95, alpha: 1)
+        bubbleBackground.translatesAutoresizingMaskIntoConstraints = false
         
         timeLabel = UILabel()
         timeLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
@@ -67,7 +75,13 @@ internal class MessageCell: UITableViewCell {
         stack.alignment = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         
+        contentView.addSubview(bubbleBackground)
         contentView.addSubview(stack)
+        
+        contentView.addConstraint(NSLayoutConstraint(item: bubbleBackground, attribute: .right, relatedBy: .equal, toItem: stack, attribute: .right, multiplier: 1, constant: 5))
+        contentView.addConstraint(NSLayoutConstraint(item: bubbleBackground, attribute: .top, relatedBy: .equal, toItem: stack, attribute: .top, multiplier: 1, constant: -5))
+        contentView.addConstraint(NSLayoutConstraint(item: bubbleBackground, attribute: .left, relatedBy: .equal, toItem: stack, attribute: .left, multiplier: 1, constant: -5))
+        contentView.addConstraint(NSLayoutConstraint(item: bubbleBackground, attribute: .bottom, relatedBy: .equal, toItem: stack, attribute: .bottom, multiplier: 1, constant: 5))
         
         let views: [String: AnyObject] = ["stack": stack, "time": timeLabel, "message": messageLabel]
         

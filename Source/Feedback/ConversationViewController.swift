@@ -48,6 +48,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         
         tableView.addSubview(refreshControl)
         tableView.tableFooterView = UIView()
+        tableView.separatorStyle = .none
     }
     
     public override func viewDidAppear(_ animated: Bool) {
