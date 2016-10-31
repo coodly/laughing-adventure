@@ -26,7 +26,7 @@ internal extension NSManagedObjectContext {
     
     func addMessage(_ message: String, for conversation: Conversation) {
         let saved: Message = insertEntity()
-        saved.body = message
+        saved.body = message.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         saved.conversation = conversation
         saved.postedAt = Date()
         saved.syncNeeded = true
