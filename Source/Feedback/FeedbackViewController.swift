@@ -32,6 +32,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     private var refreshControl: UIRefreshControl!
     private var accountStatus: CKAccountStatus = .couldNotDetermine
     private var refreshed = false
+    private var headerLabel: UILabel!
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -56,6 +57,25 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         tableView.addSubview(refreshControl)
         
         tableView.register(ConversationCell.self, forCellReuseIdentifier: ConversationCell.identifier())
+        
+        let header = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 100))
+        header.backgroundColor = UIColor(white: 0.95, alpha: 1)
+        let label = UILabel(frame: CGRect(x: 16, y: 16, width: header.frame.width - 32, height: header.frame.height - 32))
+        self.headerLabel = label
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.attributedText = NSAttributedString(string: NSLocalizedString("coodly.feedback.header.message", comment: ""), attributes: [NSUnderlineStyleAttributeName: NSUnderlineStyle.styleDouble.rawValue, NSFontAttributeName: UIFont.preferredFont(forTextStyle: .headline)])
+        label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        header.addSubview(label)
+        tableView.tableHeaderView = header
+    }
+    
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        let height = headerLabel.sizeThatFits(CGSize(width: headerLabel.frame.width, height: 1000)).height
+        tableView.tableHeaderView!.frame.size.height = height + 32
     }
     
     public override func createFetchedController() -> NSFetchedResultsController<Conversation> {
