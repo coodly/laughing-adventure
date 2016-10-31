@@ -112,6 +112,11 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             guard available else {
                 DispatchQueue.main.async {
                     self.refreshControl.endRefreshing()
+                    
+                    let message = FeedbackMessageView()
+                    message.messageLabel.text = NSLocalizedString("coodly.feedback.sign.in.message", comment: "")
+                    message.frame = self.view.bounds
+                    self.view.addSubview(message)
                 }
                 return
             }
