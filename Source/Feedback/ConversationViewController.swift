@@ -79,7 +79,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         }
         cell.timeLabel.text = timeValue
         cell.messageLabel.text = message.body
-        cell.alignment = message.sentBy == nil ? .left : .right
+        cell.alignment = message.sentBy == nil ? .right : .left
     }
     
     @objc fileprivate func addMessage() {
