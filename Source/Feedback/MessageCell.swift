@@ -16,10 +16,34 @@
 
 import UIKit
 
+private let NormalSpacing: CGFloat = 16
+private let AlignmentSpacing: CGFloat = 50
+
+enum MessageAlignment {
+    case left
+    case right
+}
+
 internal class MessageCell: UITableViewCell {
     private(set) var timeLabel: UILabel!
     private(set) var messageLabel: UILabel!
     private var stack: UIStackView!
+    private var leftSpacing: NSLayoutConstraint!
+    private var rightSpacing: NSLayoutConstraint!
+    var alignment: MessageAlignment = .left {
+        didSet {
+            switch alignment {
+            case .left:
+                leftSpacing.constant = NormalSpacing
+                rightSpacing.constant = AlignmentSpacing
+                timeLabel.textAlignment = .left
+            case .right:
+                leftSpacing.constant = AlignmentSpacing
+                rightSpacing.constant = NormalSpacing
+                timeLabel.textAlignment = .right
+            }
+        }
+    }
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -48,7 +72,11 @@ internal class MessageCell: UITableViewCell {
         let views: [String: AnyObject] = ["stack": stack, "time": timeLabel, "message": messageLabel]
         
         contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(8)-[stack]-(8)-|", options: [], metrics: nil, views: views))
-        contentView.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(16)-[stack]-(16)-|", options: [], metrics: nil, views: views))
+        let spacings = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(10)-[stack]-(20)-|", options: [], metrics: nil, views: views)
+        // hacky stuff :x
+        leftSpacing = spacings.filter({ $0.constant < 11 }).first!
+        rightSpacing = spacings.filter({ $0.constant > 19 }).first!
+        contentView.addConstraints(spacings)
         
         stack.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "[time(>=0)]", options: [], metrics: nil, views: views))
         stack.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "[message(>=0)]", options: [], metrics: nil, views: views))

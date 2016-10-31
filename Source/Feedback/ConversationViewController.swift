@@ -45,7 +45,9 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: .refreshMessages, for: .valueChanged)
+        
         tableView.addSubview(refreshControl)
+        tableView.tableFooterView = UIView()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -67,8 +69,16 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     }
     
     override func configure(cell: MessageCell, at indexPath: IndexPath, with message: Message, forMeasuring: Bool) {
-        cell.timeLabel.text = dateFormatter.string(from: message.postedAt)
+        let timeString = dateFormatter.string(from: message.postedAt)
+        let timeValue: String
+        if let sentBy = message.sentBy {
+            timeValue = "\(sentBy) - \(timeString)"
+        } else {
+            timeValue = timeString
+        }
+        cell.timeLabel.text = timeValue
         cell.messageLabel.text = message.body
+        cell.alignment = message.sentBy == nil ? .left : .right
     }
     
     @objc fileprivate func addMessage() {
