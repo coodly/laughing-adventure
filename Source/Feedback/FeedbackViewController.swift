@@ -23,6 +23,7 @@ private extension Selector {
     static let donePressed = #selector(FeedbackViewController.donePressed)
     static let addPressed = #selector(FeedbackViewController.addPressed)
     static let refreshConversations = #selector(FeedbackViewController.refresh)
+    static let presentNotice = #selector(FeedbackViewController.presentNotice)
 }
 
 public class FeedbackViewController: FetchedTableViewController<Conversation, ConversationCell>, InjectionHandler, PersistenceConsumer, FeedbackContainerConsumer {
@@ -69,6 +70,9 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         
         header.addSubview(label)
         tableView.tableHeaderView = header
+        
+        let tapHandler = UITapGestureRecognizer(target: self, action: .presentNotice)
+        header.addGestureRecognizer(tapHandler)
     }
     
     public override func viewDidLayoutSubviews() {
@@ -172,6 +176,12 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             Logging.log("Account status: \(status.rawValue) - \(error)")
             completion(status == .available)
         }
+    }
+    
+    @objc fileprivate func presentNotice() {
+        let controller = FeedbackNoticeViewController()
+        let navigation = UINavigationController(rootViewController: controller)
+        present(navigation, animated: true, completion: nil)
     }
 }
 #endif
