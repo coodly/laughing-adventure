@@ -104,7 +104,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
             cell.timeLabel.text = ""
         }
         
-        cell.snippetLabel.text = converation.snippet
+        cell.snippetLabel.text =  (converation.hasUpdate ? "● " : "") + (converation.snippet ?? "")
     }
     
     public override func tappedCell(at indexPath: IndexPath, object: Conversation) -> Bool {
