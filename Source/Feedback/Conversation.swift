@@ -43,4 +43,5 @@ extension Conversation {
     @NSManaged var recordData: Data?
     @NSManaged var syncNeeded: Bool
     @NSManaged var syncFailed: Bool
+    @NSManaged var hasUpdate: Bool
 }

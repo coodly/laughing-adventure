@@ -36,7 +36,7 @@ internal extension NSManagedObjectContext {
         return fetchAttribute(named: "recordName", on: Conversation.self)
     }
     
-    func update(_ conversation: CloudConversation) {
+    func update(_ conversation: CloudConversation, markUpdated: Bool) {
         let saved = existing(conversation) ?? insertEntity()
         
         saved.recordName = conversation.recordName
@@ -45,6 +45,7 @@ internal extension NSManagedObjectContext {
         saved.snippet = conversation.snippet
         saved.syncNeeded = false
         saved.empty = false
+        saved.hasUpdate = markUpdated
     }
     
     func removeConversations(withNames: [String]) {
@@ -79,5 +80,10 @@ internal extension NSManagedObjectContext {
     
     func conversation(for reference: CKReference) -> Conversation? {
         return fetchEntity(where: "recordName", hasValue: reference.recordID.recordName)
+    }
+    
+    func hasUnseenConversations() -> Bool {
+        let predicate = NSPredicate(format: "hasUpdate = YES")
+        return count(instancesOf: Conversation.self, predicate: predicate) > 0
     }
 }

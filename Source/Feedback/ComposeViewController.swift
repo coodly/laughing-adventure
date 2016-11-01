@@ -60,6 +60,12 @@ internal class ComposeViewController: UIViewController, PersistenceConsumer {
         NotificationCenter.default.addObserver(self, selector: .keyboardChanged, name: Notification.Name.UIKeyboardDidChangeFrame, object: nil)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        textView.becomeFirstResponder()
+    }
+    
     @objc fileprivate func sendPressed() {
         guard let message = textView.text, message.hasValue() else {
             return

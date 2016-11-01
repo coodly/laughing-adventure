@@ -40,6 +40,11 @@ internal extension NSManagedObjectModel {
         conversationSnippet.name = "snippet"
         conversationSnippet.attributeType = .stringAttributeType
         
+        let conversationUnseen = NSAttributeDescription()
+        conversationUnseen.name = "hasUpdate"
+        conversationUnseen.attributeType = .booleanAttributeType
+        conversationUnseen.defaultValue = false
+        
         // # Message #
         let messageDesc = NSEntityDescription()
         messageDesc.name = "Message"
@@ -108,7 +113,7 @@ internal extension NSManagedObjectModel {
         conversationHasManyMessages.inverseRelationship = messageBelongsToOneConversation
         messageBelongsToOneConversation.inverseRelationship = conversationHasManyMessages
 
-        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData, syncNeeded, syncFailed]
+        conversationDesc.properties = [conversationLastMessageTime, recordName, conversationEmpty, conversationHasManyMessages, conversationSnippet, commonRecordData, syncNeeded, syncFailed, conversationUnseen]
         messageDesc.properties = [messageTime, messageBody, messageBelongsToOneConversation, commonRecordData, recordName, syncNeeded, syncFailed, messageSentBy]
         settingDesc.properties = [settingKey, settingValue]
         

@@ -61,7 +61,7 @@ internal class PushConversationsOperation: CloudKitRequest<CloudConversation>, P
                 self.names = []
             case .success(let conversations, _):
                 for c in conversations {
-                    context.update(c)
+                    context.update(c, markUpdated: false)
                 }
             }
         }
