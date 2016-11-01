@@ -37,10 +37,9 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
             let save: ContextClosure = {
                 context in
                 
-                let hadPreviousConversations = context.count(instancesOf: Conversation.self) != 0
                 var lastModifyTime: Date? = nil
                 for c in conversations {
-                    context.update(c, markUpdated: hadPreviousConversations)
+                    context.update(c)
                     if lastModifyTime == nil {
                         lastModifyTime = c.modificationDate
                     } else if c.modificationDate! > lastModifyTime! {

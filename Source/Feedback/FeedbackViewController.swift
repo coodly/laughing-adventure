@@ -32,7 +32,6 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
 
     private var refreshControl: UIRefreshControl!
     private var accountStatus: CKAccountStatus = .couldNotDetermine
-    private var refreshed = false
     private var headerLabel: UILabel!
     
     private lazy var dateFormatter: DateFormatter = {
@@ -73,6 +72,8 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         
         let tapHandler = UITapGestureRecognizer(target: self, action: .presentNotice)
         header.addGestureRecognizer(tapHandler)
+        
+        tableView.tableFooterView = UIView()
     }
     
     public override func viewDidLayoutSubviews() {
@@ -84,17 +85,6 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     
     public override func createFetchedController() -> NSFetchedResultsController<Conversation> {
         return persistence.mainContext.fetchedControllerForConversations()
-    }
-    
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        if refreshed {
-            return
-        }
-        
-        refreshControl.beginRefreshingManually()
-        refreshed = true
     }
     
     public override func configure(cell: ConversationCell, at indexPath: IndexPath, with converation: Conversation, forMeasuring: Bool) {

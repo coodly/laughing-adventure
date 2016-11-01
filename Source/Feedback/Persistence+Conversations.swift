@@ -36,8 +36,15 @@ internal extension NSManagedObjectContext {
         return fetchAttribute(named: "recordName", on: Conversation.self)
     }
     
-    func update(_ conversation: CloudConversation, markUpdated: Bool) {
+    func update(_ conversation: CloudConversation) {
         let saved = existing(conversation) ?? insertEntity()
+        
+        let wasUpdated: Bool
+        if let existing = saved.lastMessageTime {
+            wasUpdated = conversation.lastMessageTime! > existing
+        } else {
+            wasUpdated = true
+        }
         
         saved.recordName = conversation.recordName
         saved.recordData = conversation.recordData
@@ -45,7 +52,7 @@ internal extension NSManagedObjectContext {
         saved.snippet = conversation.snippet
         saved.syncNeeded = false
         saved.empty = false
-        saved.hasUpdate = markUpdated
+        saved.hasUpdate = wasUpdated
     }
     
     func removeConversations(withNames: [String]) {
