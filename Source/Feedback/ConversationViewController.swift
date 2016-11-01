@@ -20,7 +20,6 @@ import CoreData
 #if os(iOS)
 private extension Selector {
     static let addMessage = #selector(ConversationViewController.addMessage)
-    static let refreshMessages = #selector(ConversationViewController.refreshMessages)
 }
 
 internal class ConversationViewController: FetchedTableViewController<Message, MessageCell>, InjectionHandler, PersistenceConsumer {
@@ -43,10 +42,6 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         
         tableView.register(MessageCell.self, forCellReuseIdentifier: MessageCell.identifier())
         
-        refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: .refreshMessages, for: .valueChanged)
-        
-        tableView.addSubview(refreshControl)
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
     }
@@ -54,11 +49,12 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if refreshed {
+        guard !refreshed && conversation!.hasUpdate else {
             return
         }
         
-        refreshControl.beginRefreshingManually()
+        tableView.tableFooterView = FooterLoadingView()
+        refreshMessages()
         refreshed = true
     }
     
@@ -91,7 +87,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         present(navigation, animated: true, completion: nil)
     }
     
-    @objc fileprivate func refreshMessages() {
+    private func refreshMessages() {
         guard let c = conversation, c.recordData != nil else {
             refreshControl.endRefreshing()
             return
@@ -102,7 +98,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
             success, op in
             
             DispatchQueue.main.async {
-                self.refreshControl.endRefreshing()
+                self.tableView.tableFooterView = UIView()
             }
         }
         inject(into: request)
