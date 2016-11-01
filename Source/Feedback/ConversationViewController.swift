@@ -28,6 +28,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     
     private var refreshControl: UIRefreshControl!
     private var refreshed = false
+    var goToCompose = false
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -60,8 +61,18 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        if goToCompose {
+            goToCompose = false
+            addMessage()
+            return
+        }
         
         let rows = tableView.numberOfRows(inSection: 0)
+        guard rows != 0 else {
+            return
+        }
+        
         tableView.scrollToRow(at: IndexPath(row: rows - 1, section: 0), at: .middle, animated: true)
     }
     

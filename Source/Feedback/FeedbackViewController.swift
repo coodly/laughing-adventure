@@ -123,6 +123,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     private func pushConversationControllerWith(_ conversation: Conversation?) {
         let conversationController = ConversationViewController()
         conversationController.conversation = conversation
+        conversationController.goToCompose = conversation == nil
         inject(into: conversationController)
         navigationController?.pushViewController(conversationController, animated: true)
     }
