@@ -46,8 +46,8 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         tableView.separatorStyle = .none
     }
     
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         guard !refreshed && conversation!.hasUpdate else {
             return
@@ -56,6 +56,13 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         tableView.tableFooterView = FooterLoadingView()
         refreshMessages()
         refreshed = true
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let rows = tableView.numberOfRows(inSection: 0)
+        tableView.scrollToRow(at: IndexPath(row: rows - 1, section: 0), at: .middle, animated: true)
     }
     
     override func createFetchedController() -> NSFetchedResultsController<Message> {
