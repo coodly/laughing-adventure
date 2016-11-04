@@ -16,22 +16,16 @@
 
 import Foundation
 
-class FeedbackRefresh: InjectionHandler, PersistenceConsumer {
-    var persistence: CorePersistence!
+public let CoodlyFeedbackNewMessagesNotifiction = Notification.Name(rawValue: "CoodlyFeedbackNewMessagesNotifiction")
+
+public class Feedback: InjectionHandler {
+    public static func enable() {
+        Injector.sharedInstance.addListener()
+    }
     
-    public func refresh(completion: @escaping ((Bool) -> ())) {
-        let op = PullConversationsOperation()
-        inject(into: op)
-        op.completionHandler = {
-            success in
-            
-            self.persistence.performInBackground() {
-                context in
-                
-                let hasUnseen = context.hasUnseenConversations()
-                completion(hasUnseen)
-            }
-        }
-        op.start()
+    public static func mainController() -> FeedbackViewController {
+        let controller = FeedbackViewController()
+        Feedback.inject(into: controller)
+        return controller
     }
 }

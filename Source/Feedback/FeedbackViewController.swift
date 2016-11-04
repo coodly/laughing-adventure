@@ -26,9 +26,10 @@ private extension Selector {
     static let presentNotice = #selector(FeedbackViewController.presentNotice)
 }
 
-public class FeedbackViewController: FetchedTableViewController<Conversation, ConversationCell>, InjectionHandler, PersistenceConsumer, FeedbackContainerConsumer {
+public class FeedbackViewController: FetchedTableViewController<Conversation, ConversationCell>, InjectionHandler, PersistenceConsumer, FeedbackContainerConsumer, CloudAvailabilityConsumer {
     var persistence: CorePersistence!
     var feedbackContainer: CKContainer!
+    var cloudAvailable: Bool!
 
     private var refreshControl: UIRefreshControl!
     private var accountStatus: CKAccountStatus = .couldNotDetermine
@@ -40,11 +41,17 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         formatter.timeStyle = .none
         return formatter
     }()
+
+    init() {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-        inject(into: self)
         
         navigationItem.title = NSLocalizedString("coodly.feedback.controller.title", comment: "")
         
@@ -81,6 +88,19 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         
         let height = headerLabel.sizeThatFits(CGSize(width: headerLabel.frame.width, height: 1000)).height
         tableView.tableHeaderView!.frame.size.height = height + 32
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if cloudAvailable! {
+            navigationItem.rightBarButtonItem?.isEnabled = true
+        } else {
+            let message = FeedbackMessageView()
+            message.messageLabel.text = NSLocalizedString("coodly.feedback.sign.in.message", comment: "")
+            message.frame = self.view.bounds
+            self.view.addSubview(message)
+        }
     }
     
     public override func createFetchedController() -> NSFetchedResultsController<Conversation> {
@@ -120,43 +140,17 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     
     @objc fileprivate func refresh() {
         Logging.log("Refresh conversations")
-        let refreshClosure: ((Bool) -> ()) = {
-            available in
-            
-            Logging.log("Refresh")
-            guard available else {
-                DispatchQueue.main.async {
-                    self.refreshControl.endRefreshing()
-                    
-                    let message = FeedbackMessageView()
-                    message.messageLabel.text = NSLocalizedString("coodly.feedback.sign.in.message", comment: "")
-                    message.frame = self.view.bounds
-                    self.view.addSubview(message)
-                }
-                return
-            }
+
+        let op = PullConversationsOperation()
+        inject(into: op)
+        op.completionHandler = {
+            success in
             
             DispatchQueue.main.async {
-                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                self.refreshControl.endRefreshing()
             }
-            
-            let op = PullConversationsOperation()
-            self.inject(into: op)
-            op.completionHandler = {
-                success in
-                
-                DispatchQueue.main.async {
-                    self.refreshControl.endRefreshing()
-                }
-            }
-            op.start()
         }
-        
-        if accountStatus == .couldNotDetermine {
-            checkAccountStatus(completion: refreshClosure)
-        } else {
-            refreshClosure(true)
-        }
+        op.start()
     }
     
     private func checkAccountStatus(completion: @escaping ((Bool) -> ())) {
