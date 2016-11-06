@@ -380,6 +380,9 @@ private class LegacyCoreStack: CoreStack {
         managedContext.parent = self.writingContext
         managedContext.mergePolicy = mergePolicy
         
+        Logging.log("Creating main context for \(self.identifier) - \(Thread.current.isMainThread)")
+        assert(Thread.current.isMainThread, "Main context should be crated on main thread")
+        
         if #available(iOS 10.0, *) {
             managedContext.automaticallyMergesChangesFromParent = true
         }
