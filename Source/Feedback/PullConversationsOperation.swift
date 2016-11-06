@@ -67,7 +67,9 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
                 Logging.log("Fetch user record error \(error)")
                 self.finish(true)
             } else {
-                self.fetchConversationsFor(recordId!)
+                DispatchQueue.main.async {
+                    self.fetchConversationsFor(recordId!)
+                }
             }
         }
     }
@@ -88,4 +90,4 @@ class PullConversationsOperation: CloudKitRequest<CloudConversation>, Persistenc
             self.fetch(predicate: predicate, sort: [sort], inDatabase: .public)
         }
     }
- }
+}

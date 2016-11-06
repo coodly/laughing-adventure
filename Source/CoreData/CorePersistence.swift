@@ -365,8 +365,9 @@ private class LegacyCoreStack: CoreStack {
     }
     
     lazy public var managedObjectContext: NSManagedObjectContext = {
-        var isPrivateInstance = false
-        
+        Logging.log("Creating main context for \(self.identifier) - \(Thread.current.isMainThread)")
+        assert(Thread.current.isMainThread, "Main context should be crated on main thread")
+
         let mergePolicy = NSMergePolicy(merge: self.mergePolicy)
         
         let saving = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
@@ -379,14 +380,6 @@ private class LegacyCoreStack: CoreStack {
         managedContext.name = MainContextName
         managedContext.parent = self.writingContext
         managedContext.mergePolicy = mergePolicy
-        
-        Logging.log("Creating main context for \(self.identifier) - \(Thread.current.isMainThread)")
-        assert(Thread.current.isMainThread, "Main context should be crated on main thread")
-        
-        if #available(iOS 10.0, *) {
-            managedContext.automaticallyMergesChangesFromParent = true
-        }
-
         
         return managedContext
     }()
