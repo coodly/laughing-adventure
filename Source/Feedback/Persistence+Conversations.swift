@@ -27,9 +27,8 @@ internal extension NSPredicate {
 
 internal extension NSManagedObjectContext {
     func fetchedControllerForConversations() -> NSFetchedResultsController<Conversation> {
-        let notEmpty = NSPredicate(format: "empty = NO")
         let sort = NSSortDescriptor(key: "lastMessageTime", ascending: false)
-        return fetchedController(predicate: notEmpty, sort: [sort])
+        return fetchedController(sort: [sort])
     }
     
     func namesForExistingConversations() -> [String] {
@@ -51,7 +50,6 @@ internal extension NSManagedObjectContext {
         saved.lastMessageTime = conversation.lastMessageTime
         saved.snippet = conversation.snippet
         saved.syncNeeded = false
-        saved.empty = false
         saved.hasUpdate = wasUpdated
     }
     
@@ -74,6 +72,8 @@ internal extension NSManagedObjectContext {
     }
     
     func conversationsNeedingSync() -> [Conversation] {
+        Logging.log("All conversations: \(count(instancesOf: Conversation.self))")
+        Logging.log("Needing sync: \(count(instancesOf: Conversation.self, predicate: .needingSync))")
         return fetch(predicate: .needingSync, limit: nil)
     }
     

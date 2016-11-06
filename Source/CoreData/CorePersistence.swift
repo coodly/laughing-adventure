@@ -380,6 +380,11 @@ private class LegacyCoreStack: CoreStack {
         managedContext.parent = self.writingContext
         managedContext.mergePolicy = mergePolicy
         
+        if #available(iOS 10.0, *) {
+            managedContext.automaticallyMergesChangesFromParent = true
+        }
+
+        
         return managedContext
     }()
     

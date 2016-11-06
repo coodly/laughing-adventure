@@ -25,10 +25,17 @@ private extension Selector {
 internal class ConversationViewController: FetchedTableViewController<Message, MessageCell>, InjectionHandler, PersistenceConsumer {
     var persistence: CorePersistence!
     var conversation: Conversation?
+    private lazy var presentedConversation: Conversation = {
+        if let c = self.conversation {
+            return c
+        }
+        
+        return self.persistence.mainContext.insertEntity() as Conversation
+    }()
     
-    private var refreshControl: UIRefreshControl!
     private var refreshed = false
     var goToCompose = false
+    private var showingCompose = false
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -50,7 +57,7 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        guard !refreshed && conversation!.hasUpdate else {
+        guard !refreshed && presentedConversation.shouldFetchMessages() else {
             return
         }
         
@@ -62,6 +69,8 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
+        showingCompose = false
+        
         if goToCompose {
             goToCompose = false
             addMessage()
@@ -76,11 +85,23 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
         tableView.scrollToRow(at: IndexPath(row: rows - 1, section: 0), at: .middle, animated: true)
     }
     
-    override func createFetchedController() -> NSFetchedResultsController<Message> {
-        if conversation == nil {
-            conversation = persistence.mainContext.insertEntity() as Conversation
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if showingCompose {
+            return
         }
-        return persistence.mainContext.fetchedControllerForMessages(in: conversation!)
+        
+        if presentedConversation.messages?.count != 0 {
+            return
+        }
+        
+        persistence.mainContext.delete(presentedConversation)
+        persistence.save()
+    }
+    
+    override func createFetchedController() -> NSFetchedResultsController<Message> {
+        return persistence.mainContext.fetchedControllerForMessages(in: presentedConversation)
     }
     
     override func configure(cell: MessageCell, at indexPath: IndexPath, with message: Message, forMeasuring: Bool) {
@@ -97,21 +118,25 @@ internal class ConversationViewController: FetchedTableViewController<Message, M
     }
     
     @objc fileprivate func addMessage() {
+        showingCompose = true
         let compose = ComposeViewController()
-        compose.conversation = conversation!
-        inject(into: compose)
+        compose.entryHandler = {
+            message in
+            
+            self.persistence.mainContext.addMessage(message, for: self.presentedConversation)
+            self.persistence.save()
+            
+            DispatchQueue.main.async {
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
         let navigation = UINavigationController(rootViewController: compose)
         navigation.modalPresentationStyle = .formSheet
         present(navigation, animated: true, completion: nil)
     }
     
     private func refreshMessages() {
-        guard let c = conversation, c.recordData != nil else {
-            refreshControl.endRefreshing()
-            return
-        }
-        
-        let request = PullMessagesOperation(for: c)
+        let request = PullMessagesOperation(for: presentedConversation)
         request.completionHandler = {
             success, op in
             

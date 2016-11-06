@@ -32,12 +32,19 @@ public class Conversation: NSManagedObject {
         cloud.snippet = snippet
         return cloud
     }
+    
+    func shouldFetchMessages() -> Bool {
+        if hasUpdate {
+            return true
+        }
+        
+        return recordData != nil && messages?.count == 0
+    }
 }
 
 extension Conversation {
     @NSManaged var recordName: String?
     @NSManaged var lastMessageTime: Date?
-    @NSManaged var empty: Bool
     @NSManaged var messages: Set<Message>?
     @NSManaged var snippet: String?
     @NSManaged var recordData: Data?

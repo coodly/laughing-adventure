@@ -23,9 +23,8 @@ private extension Selector {
     static let keyboardChanged = #selector(ComposeViewController.keyboardChanged(notification:))
 }
 
-internal class ComposeViewController: UIViewController, PersistenceConsumer {
-    var persistence: CorePersistence!
-    var conversation: Conversation!
+internal class ComposeViewController: UIViewController {
+    var entryHandler: ((String) -> ())!
     
     private var bottomSpacing: NSLayoutConstraint!
     private var textView: UITextView!
@@ -71,11 +70,7 @@ internal class ComposeViewController: UIViewController, PersistenceConsumer {
             return
         }
         
-        conversation.empty = false
-        persistence.mainContext.addMessage(message, for: conversation)
-        persistence.save() {
-            self.dismiss(animated: true, completion: nil)
-        }
+        entryHandler(message)
     }
     
     @objc fileprivate func cancelPressed() {

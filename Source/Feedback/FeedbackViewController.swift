@@ -118,7 +118,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     }
     
     public override func tappedCell(at indexPath: IndexPath, object: Conversation) -> Bool {
-        pushConversationControllerWith(object)
+        pushConversationController(with: object)
         return true
     }
     
@@ -127,10 +127,10 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     }
     
     @objc fileprivate func addPressed() {
-        pushConversationControllerWith(nil)
+        pushConversationController(with: nil)
     }
     
-    private func pushConversationControllerWith(_ conversation: Conversation?) {
+    private func pushConversationController(with conversation: Conversation?) {
         let conversationController = ConversationViewController()
         conversationController.conversation = conversation
         conversationController.goToCompose = conversation == nil
