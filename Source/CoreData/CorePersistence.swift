@@ -206,10 +206,11 @@ public extension NSManagedObjectContext {
         }
     }
     
-    public func fetchedController<T: NSFetchRequestResult>(predicate: NSPredicate? = nil, sort: [NSSortDescriptor], sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
+    public func fetchedController<T: NSFetchRequestResult>(predicate: NSPredicate? = nil, sort: [NSSortDescriptor], batchSize: Int = 0, sectionNameKeyPath: String? = nil) -> NSFetchedResultsController<T> {
         let fetchRequest: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName())
         fetchRequest.predicate = predicate
         fetchRequest.sortDescriptors = sort
+        fetchRequest.fetchBatchSize = batchSize
         let fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self, sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
         
         do {
