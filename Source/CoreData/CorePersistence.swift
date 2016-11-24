@@ -77,7 +77,10 @@ public class CorePersistence {
             stack.performUsingWorker() {
                 context in
                 
+                let start = CFAbsoluteTimeGetCurrent()
                 task(context)
+                let elapsed = CFAbsoluteTimeGetCurrent() - start
+                Logging.log("Task execution time \(elapsed) seconds")
                 self.save(context: context) {
                     var remaining = tasks
                     _ = remaining.removeFirst()
