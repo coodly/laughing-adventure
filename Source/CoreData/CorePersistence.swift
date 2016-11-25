@@ -20,7 +20,7 @@ import CoreData
 public typealias ContextClosure = (NSManagedObjectContext) -> ()
 
 public class CorePersistence {
-    private var stack: CoreStack!
+    fileprivate var stack: CoreStack!
     
     public var sqliteFilePath: URL? {
         return stack.databaseFilePath
@@ -115,12 +115,31 @@ public class CorePersistence {
     }
 }
 
+// MARK: -
+// MARK: Batch delete
+extension CorePersistence {
+    public func delete<T: NSManagedObject>(entities: T.Type, predicate: NSPredicate = .truePredicate) {
+        Logging.log("Batch delete on \(T.entityName())")
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: T.entityName())
+        fetchRequest.predicate = predicate
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        deleteRequest.resultType = .resultTypeCount
+        do {
+            let result = try stack.persistentStoreCoordinator.execute(deleteRequest, with: stack.mainContext) as? NSBatchDeleteResult
+            Logging.log("Deleted \(result?.result ?? 0) instances of \(T.entityName())")
+        } catch {
+            Logging.log("Batch delete error \(error)")
+        }
+    }
+}
+
 private protocol CoreStack {
     var mainContext: NSManagedObjectContext! { get }
     var managedObjectModel: NSManagedObjectModel! { get set }
     var databaseFilePath: URL? { get }
     func performUsingWorker(closure: ((NSManagedObjectContext) -> ()))
     var identifier: String { get }
+    var persistentStoreCoordinator: NSPersistentStoreCoordinator { get }
 }
 
 @available(iOS 10, *)
@@ -148,6 +167,9 @@ private class CoreDataStack: CoreStack {
     fileprivate var managedObjectModel: NSManagedObjectModel!
     fileprivate var identifier: String {
         return "TODO: jaanus"
+    }
+    fileprivate var persistentStoreCoordinator: NSPersistentStoreCoordinator {
+        fatalError()
     }
     
     private var workerCount = 0

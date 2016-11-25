@@ -16,7 +16,7 @@
 
 import CoreData
 
-private extension NSPredicate {
+public extension NSPredicate {
     static let truePredicate = NSPredicate(format: "TRUEPREDICATE")
 }
 
