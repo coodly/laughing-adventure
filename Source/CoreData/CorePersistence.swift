@@ -72,7 +72,7 @@ public class CorePersistence {
     }
 
     public func performInBackground(tasks: [ContextClosure], completion: (() -> ())? = nil) {
-        Logging.log("Perform \(tasks.count) tasks")
+        Logging.log("Perform \(tasks.count) tasks on \(stack.identifier)")
         if let task = tasks.first {
             stack.performUsingWorker() {
                 context in
@@ -273,6 +273,7 @@ private protocol CoreStack {
     var managedObjectModel: NSManagedObjectModel! { get set }
     var databaseFilePath: URL? { get }
     func performUsingWorker(closure: ((NSManagedObjectContext) -> ()))
+    var identifier: String { get }
 }
 
 @available(iOS 10, *)
@@ -298,6 +299,9 @@ private class CoreDataStack: CoreStack {
         return container.viewContext
     }
     fileprivate var managedObjectModel: NSManagedObjectModel!
+    fileprivate var identifier: String {
+        return "TODO: jaanus"
+    }
     
     private var workerCount = 0
     
@@ -346,7 +350,7 @@ private class LegacyCoreStack: CoreStack {
     private var wipeDatabaseOnConflict = false
     private var pathToSQLiteFile: URL?
     private let mergePolicy: NSMergePolicyType
-    private let identifier: String
+    fileprivate let identifier: String
     
     private static var spawnedBackgroundCount = 0
     
