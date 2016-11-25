@@ -166,6 +166,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
     @objc fileprivate func presentNotice() {
         let controller = FeedbackNoticeViewController()
         let navigation = UINavigationController(rootViewController: controller)
+        navigation.modalPresentationStyle = .formSheet
         present(navigation, animated: true, completion: nil)
     }
 }
