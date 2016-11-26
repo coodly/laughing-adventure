@@ -74,7 +74,7 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(for: indexPath) as Cell
         let object = fetchedController!.object(at: indexPath)
-        configure(cell: cell, at: indexPath, with: object, forMeasuring:false)
+        configure(cell: cell, at: indexPath, with: object)
         return cell
     }
     
@@ -145,7 +145,7 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
         return false
     }
     
-    open func configure(cell: Cell, at indexPath: IndexPath, with object: Entity, forMeasuring: Bool) {
+    open func configure(cell: Cell, at indexPath: IndexPath, with object: Entity) {
         Logging.log("configure(cell: at IndexPath:\(indexPath))")
     }
     

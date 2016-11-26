@@ -107,7 +107,7 @@ public class FeedbackViewController: FetchedTableViewController<Conversation, Co
         return persistence.mainContext.fetchedControllerForConversations()
     }
     
-    public override func configure(cell: ConversationCell, at indexPath: IndexPath, with converation: Conversation, forMeasuring: Bool) {
+    public override func configure(cell: ConversationCell, at indexPath: IndexPath, with converation: Conversation) {
         if let time = converation.lastMessageTime {
             cell.timeLabel.text = "\(dateFormatter.string(from: time)) >"
         } else {
