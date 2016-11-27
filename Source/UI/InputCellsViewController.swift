@@ -221,11 +221,15 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        guard let _ = sections[section].header else {
-            return 0
+        if let _ = sections[section].title {
+            return UITableViewAutomaticDimension
         }
         
-        return UITableViewAutomaticDimension
+        if let _ = sections[section].header {
+            return UITableViewAutomaticDimension
+        }
+        
+        return 0
     }
 }
 
