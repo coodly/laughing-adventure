@@ -26,6 +26,7 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
 
     @IBOutlet public var tableView: UITableView!
     private var fetchedController: NSFetchedResultsController<Entity>?
+    public var swipeToDeleteEnabled = false
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -182,5 +183,13 @@ open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableView
         }
         tableView.reloadData()
         contentChanged()
+    }
+
+    open func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return swipeToDeleteEnabled
+    }
+    
+    open func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
     }
 }
