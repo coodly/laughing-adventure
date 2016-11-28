@@ -22,6 +22,8 @@ private extension Selector {
 }
 
 open class FetchedTableViewController<Entity: NSManagedObject, Cell: UITableViewCell>: UIViewController, FullScreenTableCreate, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, SmoothTableRowDeselection {
+    public var tableTop: NSLayoutConstraint?
+
     @IBOutlet public var tableView: UITableView!
     private var fetchedController: NSFetchedResultsController<Entity>?
     

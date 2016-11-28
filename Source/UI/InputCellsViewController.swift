@@ -45,6 +45,8 @@ public class InputCellsSection {
 }
 
 open class InputCellsViewController: UIViewController, FullScreenTableCreate, SmoothTableRowDeselection {
+    public var tableTop: NSLayoutConstraint?
+
     @IBOutlet public var tableView: UITableView!
     fileprivate var sections: [InputCellsSection] = []
     fileprivate var activeCellInputValidation: InputValidation?
