@@ -37,12 +37,16 @@ public class CorePersistence {
             self.stack.managedObjectModel = newValue
         }
         get {
-            return self.stack.managedObjectModel
+            return self.stack.managedObjectModel!
         }
     }
     
     public init(modelName: String, storeType: String = NSSQLiteStoreType, identifier: String = Bundle.main.bundleIdentifier!, in directory: FileManager.SearchPathDirectory = .documentDirectory, wipeOnConflict: Bool = false) {
-        stack = LegacyCoreStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
+        if #available(iOS 10, tvOS 10, *) {
+            stack = CoreDataStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
+        } else {
+            stack = LegacyCoreStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
+        }
     }
     
     public func loadPersistentStores(completion: @escaping (() -> ())) {
@@ -139,59 +143,53 @@ extension CorePersistence {
 
 private protocol CoreStack {
     var mainContext: NSManagedObjectContext! { get }
-    var managedObjectModel: NSManagedObjectModel! { get set }
+    var managedObjectModel: NSManagedObjectModel? { get set }
     var databaseFilePath: URL? { get }
-    func performUsingWorker(closure: ((NSManagedObjectContext) -> ()))
+    func performUsingWorker(closure: @escaping ((NSManagedObjectContext) -> ()))
     var identifier: String { get }
     var persistentStoreCoordinator: NSPersistentStoreCoordinator { get }
     func loadPersistentStores(completion: @escaping (() -> ()))
 }
 
-@available(iOS 10, *)
-@available(tvOS 10.0, *)
+@available(iOS 10, tvOS 10.0, *)
 private class CoreDataStack: CoreStack {
-    fileprivate var databaseFilePath: URL?
     private let modelName: String!
     private lazy var container: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: self.modelName)
-        container.loadPersistentStores {
-            storeDescription, error in
-            
-            print(">>>>>>>>> Store: \(storeDescription)")
-            
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-
+        let container: NSPersistentContainer
+        if let model = self.managedObjectModel {
+            container = NSPersistentContainer(name: self.modelName, managedObjectModel: model)
+        } else {
+            container = NSPersistentContainer(name: self.modelName)
         }
+        
+        let config = NSPersistentStoreDescription()
+        config.url = self.databaseFilePath
+        config.type = self.storeType
+        container.persistentStoreDescriptions = [config]
+        
         return container
     }()
     fileprivate var mainContext: NSManagedObjectContext! {
         return container.viewContext
     }
-    fileprivate var managedObjectModel: NSManagedObjectModel!
-    fileprivate var identifier: String {
-        return "TODO: jaanus"
-    }
+    fileprivate var managedObjectModel: NSManagedObjectModel?
+    fileprivate let identifier: String
     fileprivate var persistentStoreCoordinator: NSPersistentStoreCoordinator {
-        fatalError()
+        return container.persistentStoreCoordinator
     }
     
     private var workerCount = 0
+    private let storeType: String
+    private let directory: FileManager.SearchPathDirectory
     
-    init(modelName: String) {
+    init(modelName: String, type: String = NSSQLiteStoreType, identifier: String, in directory: FileManager.SearchPathDirectory = .documentDirectory, mergePolicy: NSMergePolicyType = .mergeByPropertyObjectTrumpMergePolicyType, wipeOnConflict: Bool) {
         self.modelName = modelName
+        self.identifier = identifier
+        self.storeType = type
+        self.directory = directory
     }
     
-    fileprivate func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
-        
-    }
-    
-    fileprivate func loadPersistentStores(completion: @escaping (() -> ())) {
-        fatalError()
-    }
-
-    private func performBackgroundTask(closure: @escaping ((NSManagedObjectContext) -> ())) {
+    fileprivate func performUsingWorker(closure: @escaping ((NSManagedObjectContext) -> ())) {
         Logging.log("Main: \(container.viewContext) - \(container.viewContext.parent) - \(container.viewContext.persistentStoreCoordinator)")
         container.performBackgroundTask() {
             context in
@@ -206,6 +204,45 @@ private class CoreDataStack: CoreStack {
             closure(context)
         }
     }
+    
+    fileprivate func loadPersistentStores(completion: @escaping (() -> ())) {
+        assert(container.managedObjectModel != nil)
+        container.loadPersistentStores {
+            storeDescription, error in
+            
+            self.container.viewContext.automaticallyMergesChangesFromParent = true
+            try! self.container.viewContext.setQueryGenerationFrom(.current)
+            
+            print(">>>>>>>>> Store: \(storeDescription)")
+            
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+
+            DispatchQueue.main.async(execute: completion)
+        }
+    }
+    
+    fileprivate var databaseFilePath: URL? {
+        if storeType == NSSQLiteStoreType {
+            return workingFilesDirectory.appendingPathComponent("\(self.modelName!).sqlite")
+        } else {
+            return nil
+        }
+    }
+    
+    public lazy var workingFilesDirectory: URL = {
+        let urls = FileManager.default.urls(for: self.directory, in: .userDomainMask)
+        let last = urls.last!
+        let dbIdentifier = self.identifier + ".db"
+        let dbFolder = last.appendingPathComponent(dbIdentifier)
+        do {
+            try FileManager.default.createDirectory(at: dbFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print("Create db folder error \(error)")
+        }
+        return dbFolder
+    }()
 }
 
 private let SavingContextName = "Saving"
@@ -226,7 +263,6 @@ private class LegacyCoreStack: CoreStack {
     private let directory: FileManager.SearchPathDirectory
     private var writingContext: NSManagedObjectContext?
     private var wipeDatabaseOnConflict = false
-    private var pathToSQLiteFile: URL?
     private let mergePolicy: NSMergePolicyType
     fileprivate let identifier: String
     
@@ -241,7 +277,7 @@ private class LegacyCoreStack: CoreStack {
         self.identifier = identifier
     }
     
-    fileprivate func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
+    fileprivate func performUsingWorker(closure: @escaping ((NSManagedObjectContext) -> ())) {
         let managedContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         LegacyCoreStack.spawnedBackgroundCount += 1
         managedContext.name = "Worker \(LegacyCoreStack.spawnedBackgroundCount)"
@@ -304,13 +340,13 @@ private class LegacyCoreStack: CoreStack {
         return dbFolder
     }()
     
-    lazy var managedObjectModel: NSManagedObjectModel! = {
+    lazy var managedObjectModel: NSManagedObjectModel? = {
         let modelURL = Bundle.main.url(forResource: self.modelName, withExtension: "momd")!
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
-        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel!)
         return coordinator
     }()
     
@@ -338,10 +374,7 @@ private class LegacyCoreStack: CoreStack {
     }
     
     fileprivate var databaseFilePath: URL? {
-        if let existing = pathToSQLiteFile {
-            return existing
-        } else if self.storeType == NSSQLiteStoreType {
-            //TODO jaanus: check this ! here
+        if storeType == NSSQLiteStoreType {
             return workingFilesDirectory.appendingPathComponent("\(self.modelName).sqlite")
         } else {
             return nil

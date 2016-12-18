@@ -64,6 +64,10 @@ internal class Injector {
         persistence.loadPersistentStores() {
             self.inject(into: self.messagesPush)
             self.checkCloudAvailability()
+            
+            Logging.log("Add app life listener")
+            NotificationCenter.default.addObserver(self, selector: .checkForMessages, name: .UIApplicationDidBecomeActive, object: nil)
+            NotificationCenter.default.addObserver(self, selector: .checkCloudAvailability, name: .CKAccountChanged, object: nil)
         }
     }
 
@@ -102,12 +106,6 @@ internal class Injector {
         }
         
         return identifier
-    }
-    
-    func addListener() {
-        Logging.log("Add app life listener")
-        NotificationCenter.default.addObserver(self, selector: .checkForMessages, name: .UIApplicationDidBecomeActive, object: nil)
-        NotificationCenter.default.addObserver(self, selector: .checkCloudAvailability, name: .CKAccountChanged, object: nil)
     }
     
     @objc fileprivate func checkCloudAvailability() {
