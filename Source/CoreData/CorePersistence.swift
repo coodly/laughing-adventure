@@ -45,6 +45,10 @@ public class CorePersistence {
         stack = LegacyCoreStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
     }
     
+    public func loadPersistentStores(completion: @escaping (() -> ())) {
+        stack.loadPersistentStores(completion: completion)
+    }
+    
     public func perform(wait: Bool = true, block: @escaping ContextClosure) {
         let context = stack.mainContext!
         
@@ -140,6 +144,7 @@ private protocol CoreStack {
     func performUsingWorker(closure: ((NSManagedObjectContext) -> ()))
     var identifier: String { get }
     var persistentStoreCoordinator: NSPersistentStoreCoordinator { get }
+    func loadPersistentStores(completion: @escaping (() -> ()))
 }
 
 @available(iOS 10, *)
@@ -180,6 +185,10 @@ private class CoreDataStack: CoreStack {
     
     fileprivate func performUsingWorker(closure: ((NSManagedObjectContext) -> ())) {
         
+    }
+    
+    fileprivate func loadPersistentStores(completion: @escaping (() -> ())) {
+        fatalError()
     }
 
     private func performBackgroundTask(closure: @escaping ((NSManagedObjectContext) -> ())) {
@@ -242,6 +251,25 @@ private class LegacyCoreStack: CoreStack {
         closure(managedContext)
     }
     
+    fileprivate func loadPersistentStores(completion: @escaping (() -> ())) {
+        DispatchQueue.global(qos: .background).async {
+            let url = self.databaseFilePath
+            
+            Logging.log("Using DB file at \(url)")
+            
+            let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
+            let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
+            
+            if !self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
+                Logging.log("Will delete DB")
+                try! FileManager.default.removeItem(at: url!)
+                _ = self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: true)
+            }
+            
+            DispatchQueue.main.async(execute: completion)
+        }
+    }
+    
     lazy public var managedObjectContext: NSManagedObjectContext = {
         Logging.log("Creating main context for \(self.identifier) - \(Thread.current.isMainThread)")
         assert(Thread.current.isMainThread, "Main context should be crated on main thread")
@@ -283,19 +311,6 @@ private class LegacyCoreStack: CoreStack {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.databaseFilePath
-        
-        Logging.log("Using DB file at \(url)")
-        
-        let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
-        let config = StackConfig(storeType: self.storeType, storeURL: url, options: options)
-        
-        if !self.addPersistentStore(coordinator, config: config, abortOnFailure: !self.wipeDatabaseOnConflict) && self.wipeDatabaseOnConflict {
-            Logging.log("Will delete DB")
-            try! FileManager.default.removeItem(at: url!)
-            _ = self.addPersistentStore(coordinator, config: config, abortOnFailure: true)
-        }
-        
         return coordinator
     }()
     

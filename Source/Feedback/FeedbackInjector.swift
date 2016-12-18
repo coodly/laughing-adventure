@@ -61,7 +61,7 @@ internal class Injector {
 
     init() {
         messagesPush = MessagesPush()
-        DispatchQueue.main.async {
+        persistence.loadPersistentStores() {
             self.inject(into: self.messagesPush)
             self.checkCloudAvailability()
         }
