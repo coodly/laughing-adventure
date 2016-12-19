@@ -42,11 +42,13 @@ public class CorePersistence {
     }
     
     public init(modelName: String, storeType: String = NSSQLiteStoreType, identifier: String = Bundle.main.bundleIdentifier!, in directory: FileManager.SearchPathDirectory = .documentDirectory, wipeOnConflict: Bool = false) {
-        if #available(iOS 10, tvOS 10, *) {
+        stack = LegacyDataStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
+
+        /*if #available(iOS 10, tvOS 10, *) {
             stack = CoreDataStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
         } else {
             stack = LegacyDataStack(modelName: modelName, type: storeType, identifier: identifier, in: directory, wipeOnConflict: wipeOnConflict)
-        }
+        }*/
     }
     
     public func loadPersistentStores(completion: @escaping (() -> ())) {
@@ -240,7 +242,7 @@ private class CoreDataStack: CoreStack {
             try! self.container.viewContext.setQueryGenerationFrom(.current)
             self.container.viewContext.mergePolicy = NSMergePolicy(merge: self.mergePolicy)
             
-            print(">>>>>>>>> Store: \(storeDescription)")
+            Logging.log("Store: \(storeDescription)")
             
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
