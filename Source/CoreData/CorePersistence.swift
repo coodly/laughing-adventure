@@ -271,21 +271,27 @@ private class LegacyDataStack: CoreStack {
     private var writingContext: NSManagedObjectContext?
 
     fileprivate override func loadPersistentStores(completion: @escaping (() -> ())) {
-        DispatchQueue.global(qos: .background).async {
-            let url = self.databaseFilePath
-            
-            Logging.log("Using DB file at \(url)")
-            
-            let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
-            let config = StackConfig(storeType: self.type, storeURL: url, options: options)
-            
-            if !self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: !self.wipeOnConflict) && self.wipeOnConflict {
-                Logging.log("Will delete DB")
-                try! FileManager.default.removeItem(at: url!)
-                _ = self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: true)
+        DispatchQueue.main.async {
+            // touch/create context on main thread
+            let _ = self.managedObjectContext
+
+            // Load store on background thread
+            DispatchQueue.global(qos: .background).async {
+                let url = self.databaseFilePath
+                
+                Logging.log("Using DB file at \(url)")
+                
+                let options = [NSMigratePersistentStoresAutomaticallyOption as NSObject: true as AnyObject, NSInferMappingModelAutomaticallyOption as NSObject: true as AnyObject]
+                let config = StackConfig(storeType: self.type, storeURL: url, options: options)
+                
+                if !self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: !self.wipeOnConflict) && self.wipeOnConflict {
+                    Logging.log("Will delete DB")
+                    try! FileManager.default.removeItem(at: url!)
+                    _ = self.addPersistentStore(self.persistentStoreCoordinator, config: config, abortOnFailure: true)
+                }
+                
+                DispatchQueue.main.async(execute: completion)
             }
-            
-            DispatchQueue.main.async(execute: completion)
         }
     }
     
