@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'LaughingAdventure'
-  s.version = '0.5.0'
+  s.version = '0.6.0'
   s.license = 'Apache 2'
   s.summary = 'Common Swift code used in Coodly'
   s.homepage = 'https://github.com/coodly/laughing-adventure'
