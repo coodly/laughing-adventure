@@ -27,7 +27,8 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
         }
     }
     private var changeActions = [ChangeAction]()
-    
+    public var cellConfiguration: ((Cell, Model, IndexPath) -> ())?
+
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedController?.sections?.count ?? 0
     }
@@ -44,6 +45,7 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(for: indexPath) as Cell
         let object = fetchedController!.object(at: indexPath)
+        cellConfiguration?(cell, object, indexPath)
         return cell
     }
     
