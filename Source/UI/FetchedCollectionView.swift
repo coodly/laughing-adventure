@@ -18,16 +18,18 @@ import Foundation
 import UIKit
 import CoreData
 
-open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewCell>: UICollectionView, UICollectionViewDataSource, NSFetchedResultsControllerDelegate {
+open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewCell>: UICollectionView, UICollectionViewDataSource, NSFetchedResultsControllerDelegate, UICollectionViewDelegate {
     public var fetchedController: NSFetchedResultsController<Model>? {
         didSet {
             registerCell(forType: Cell.self)
             dataSource = self
+            delegate = self
             fetchedController?.delegate = self
         }
     }
     private var changeActions = [ChangeAction]()
     public var cellConfiguration: ((Cell, Model, IndexPath) -> ())?
+    public var contentChangeHandler: ((FetchedCollectionView<Model, Cell>) -> ())?
 
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedController?.sections?.count ?? 0
@@ -100,14 +102,25 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
         let completion: (Bool) -> () = {
             finished in
             
-            self.contentChanged()
+            self.contentChangeHandler?(self)
         }
         
         performBatchUpdates(updateClosure, completion: completion)
     }
     
-    open func contentChanged() {
-        Logging.log("\(#function)")
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if decelerate {
+            return
+        }
+    
+        contentChangeHandler?(self)
     }
-
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        contentChangeHandler?(self)
+    }
+    
+    public func object(at indexPath: IndexPath) -> Model {
+        return fetchedController!.object(at: indexPath)
+    }
 }
