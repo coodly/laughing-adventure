@@ -20,7 +20,8 @@ import UIKit
 public enum Measure: Equatable {
     case exactly(CGFloat)
     case full
-    case compressed        
+    case compressed
+    case undefined
 }
 
 public func ==(lhs: Measure, rhs: Measure) -> Bool  {
@@ -29,12 +30,16 @@ public func ==(lhs: Measure, rhs: Measure) -> Bool  {
         return true
     case (.compressed, .compressed):
         return true
+    case (.undefined, .undefined):
+        return true
     default:
         return false
     }
 }
 
 public struct Size {
+    public static let cellDefined = Size(width: .undefined, height: .undefined)
+    
     public let width: Measure
     public let height: Measure
     
@@ -110,6 +115,11 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         var section = sections[indexPath.section]
         let measuringCell = section.measuringCell
         let size = section.itemSize
+        
+        if size.width == .undefined && size.height == .undefined {
+            return measuringCell.frame.size
+        }
+        
         configure(cell: measuringCell, in: section.id, at: indexPath, forMeasuring: true)
         if size.width == .full && size.height == .compressed {
             measuringCell.frame.size.width = collectionView.frame.width
