@@ -30,6 +30,7 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
     private var changeActions = [ChangeAction]()
     public var cellConfiguration: ((Cell, Model, IndexPath) -> ())?
     public var contentChangeHandler: ((FetchedCollectionView<Model, Cell>) -> ())?
+    public var selectionHandler: ((Model, IndexPath) -> ())?
 
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedController?.sections?.count ?? 0
@@ -122,5 +123,12 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
     
     public func object(at indexPath: IndexPath) -> Model {
         return fetchedController!.object(at: indexPath)
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        let object = fetchedController!.object(at: indexPath)
+        selectionHandler?(object, indexPath)
     }
 }
