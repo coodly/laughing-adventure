@@ -22,9 +22,9 @@ open class FetchedCollectionView<Model: NSManagedObject, Cell: UICollectionViewC
     public var fetchedController: NSFetchedResultsController<Model>? {
         didSet {
             registerCell(forType: Cell.self)
+            fetchedController?.delegate = self
             dataSource = self
             delegate = self
-            fetchedController?.delegate = self
         }
     }
     private var changeActions = [ChangeAction]()
