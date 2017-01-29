@@ -45,15 +45,17 @@ public struct Size {
 }
 
 public struct CollectionSection {
-    let identifier = UUID().uuidString
+    let cellIdentifier = UUID().uuidString
     let cellNib: UINib
     let itemsCount: Int
     let itemSize: Size
+    let id: UUID
     internal lazy var measuringCell: UICollectionViewCell = {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
     
-    public init(cellNib: UINib, numberOfItems: Int, itemSize: Size) {
+    public init(id: UUID = UUID(), cellNib: UINib, numberOfItems: Int, itemSize: Size) {
+        self.id = id
         self.cellNib = cellNib
         self.itemsCount = numberOfItems
         self.itemSize = itemSize
@@ -99,8 +101,8 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let section = sections[indexPath.section]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: section.identifier, for: indexPath)
-        configure(cell: cell, at: indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: section.cellIdentifier, for: indexPath)
+        configure(cell: cell, in: section.id, at: indexPath)
         return cell
     }
     
@@ -108,7 +110,7 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         var section = sections[indexPath.section]
         let measuringCell = section.measuringCell
         let size = section.itemSize
-        configure(cell: measuringCell, at: indexPath, forMeasuring: true)
+        configure(cell: measuringCell, in: section.id, at: indexPath, forMeasuring: true)
         if size.width == .full && size.height == .compressed {
             measuringCell.frame.size.width = collectionView.frame.width
             measuringCell.setNeedsLayout()
@@ -122,14 +124,14 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         let collection = collectionView!
         let updates = {
             let insertAt = self.sections.count
-            collection.register(section.cellNib, forCellWithReuseIdentifier: section.identifier)
+            collection.register(section.cellNib, forCellWithReuseIdentifier: section.cellIdentifier)
             self.sections.append(section)
             collection.insertSections(IndexSet(integer: insertAt))
         }
         collection.performBatchUpdates(updates)
     }
     
-    open func configure(cell: UICollectionViewCell, at indexPath: IndexPath, forMeasuring: Bool = false) {
+    open func configure(cell: UICollectionViewCell, in section: UUID, at indexPath: IndexPath, forMeasuring: Bool = false) {
         
     }
 }
