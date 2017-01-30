@@ -95,6 +95,12 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         }
     }
     
+    override open func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return sections.count
     }
