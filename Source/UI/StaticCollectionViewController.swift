@@ -147,6 +147,18 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         collection.performBatchUpdates(updates)
     }
     
+    public func reload(_ sectionId: UUID) {
+        guard let index = sections.index(where: { $0.id == sectionId }) else {
+            return
+        }
+        
+        let collection = collectionView!
+        let updates = {
+            collection.reloadSections(IndexSet(integer: index))
+        }
+        collection.performBatchUpdates(updates)
+    }
+    
     open func configure(cell: UICollectionViewCell, in section: UUID, at indexPath: IndexPath, forMeasuring: Bool = false) {
         
     }
