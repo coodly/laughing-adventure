@@ -26,4 +26,16 @@ public extension UIView {
         let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[view]|", options: [], metrics: nil, views: views)
         addConstraints(vertical + horizontal)
     }
+
+    public func add(toTop view: UIView, height: CGFloat? = nil) {
+        addSubview(view)
+        let views: [String: AnyObject] = ["view": view]
+        
+        let usedHeight = height ?? view.frame.height
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        let vertical = NSLayoutConstraint.constraints(withVisualFormat: "V:|[view(\(usedHeight))]", options: [], metrics: nil, views: views)
+        let horizontal = NSLayoutConstraint.constraints(withVisualFormat: "H:|[view]|", options: [], metrics: nil, views: views)
+        addConstraints(vertical + horizontal)
+    }
 }
