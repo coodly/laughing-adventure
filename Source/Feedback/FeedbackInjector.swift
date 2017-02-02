@@ -57,7 +57,15 @@ internal class Injector {
         return "\(device)|\(systemVersion)|\(appVersion)(\(appBuild))"
     }()
     private let messagesPush: MessagesPush
-    private var cloudAvailable = false
+    private var cloudAvailable = false {
+        didSet {
+            guard cloudAvailable else {
+                return
+            }
+            
+            checkForMessages()
+        }
+    }
 
     init() {
         messagesPush = MessagesPush()
