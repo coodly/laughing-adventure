@@ -29,4 +29,8 @@ extension UIView {
     public class func identifier() -> String {
         return className()
     }
+    
+    public static func loadInstance<T>() -> T {
+        return viewNib().instantiate(withOwner: nil, options: nil).first as! T
+    }
 }
