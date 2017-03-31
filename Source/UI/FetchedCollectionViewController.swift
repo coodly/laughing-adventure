@@ -238,4 +238,33 @@ open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UIColle
     public func object(at indexPath: IndexPath) -> Model {
         return fetchedController!.object(at: indexPath)
     }
+    
+    public func updateFetch(predicate: NSPredicate? = nil, sort: [NSSortDescriptor]? = nil) {
+        guard let controller = fetchedController else {
+            return
+        }
+        
+        var modified = false
+        if let predicate = predicate {
+            controller.fetchRequest.predicate = predicate
+            modified = true
+        }
+        
+        if let sort = sort {
+            controller.fetchRequest.sortDescriptors = sort
+            modified = true
+        }
+        
+        guard modified else {
+            return
+        }
+        
+        do {
+            try controller.performFetch()
+        } catch {
+            fatalError("Fetch failed: \(error)")
+        }
+        collectionView.reloadData()
+        contentChanged()
+    }
 }
