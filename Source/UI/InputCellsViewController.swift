@@ -263,8 +263,13 @@ extension InputCellsViewController: UITextFieldDelegate {
             activeCellInputValidation = nextCell.inputValidation
         } else {
             textField.resignFirstResponder()
+            entryComplete()
         }
         
         return true
+    }
+    
+    open func entryComplete() {
+        Logging.log("Entry complete")
     }
 }
