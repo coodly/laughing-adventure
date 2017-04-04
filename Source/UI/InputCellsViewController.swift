@@ -18,6 +18,8 @@ import UIKit
 
 private extension Selector {
     static let contentSizeChanged = #selector(InputCellsViewController.contentSizeChanged)
+    static let willAppear = #selector(InputCellsViewController.keyboardWillAppear(notification:))
+    static let willDisappear = #selector(InputCellsViewController.keyboardWillDisappear(notification:))
 }
 
 public class InputCellsSection {
@@ -61,6 +63,8 @@ open class InputCellsViewController: UIViewController, FullScreenTableCreate, Sm
     open override func viewDidLoad() {
         checkTableView(preferredStyle)
         
+        NotificationCenter.default.addObserver(self, selector: .willAppear, name: Notification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: .willDisappear, name: Notification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
         tableView.estimatedRowHeight = 44
@@ -96,11 +100,14 @@ open class InputCellsViewController: UIViewController, FullScreenTableCreate, Sm
     public func addSection(_ section: InputCellsSection) {
         sections.append(section)
         for cell in section.cells {
-            guard let textCell = cell as? TextEntryCell else {
-                continue
+            if let textCell = cell as? TextEntryCell {
+                textCell.entryField.delegate = self
+            } else if let multi = cell as? MultiEntryCell {
+                for field in multi.entryFields {
+                    field.delegate = self
+                }
             }
             
-            textCell.entryField.delegate = self
         }
     }
     
@@ -116,7 +123,7 @@ open class InputCellsViewController: UIViewController, FullScreenTableCreate, Sm
         return nil
     }
     
-    fileprivate func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> TextEntryCell? {
+    fileprivate func nextEntryCellAfterIndexPath(_ indexPath: IndexPath) -> UITableViewCell? {
         let section = indexPath.section
         var row = indexPath.row + 1
         
@@ -128,8 +135,9 @@ open class InputCellsViewController: UIViewController, FullScreenTableCreate, Sm
             let rowRange = row..<sec.cells.count
             
             for row in rowRange {
-                if let cell = sec.cells[row] as? TextEntryCell {
-                    return cell
+                let checked = sec.cells[row]
+                if checked is TextEntryCell || checked is MultiEntryCell {
+                    return checked
                 }
             }
             
@@ -258,12 +266,36 @@ extension InputCellsViewController: UITextFieldDelegate {
     }
     
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, let indexPath = indexPathForCell(cell), let nextCell = nextEntryCellAfterIndexPath(indexPath) {
-            nextCell.entryField.becomeFirstResponder()
-            activeCellInputValidation = nextCell.inputValidation
+        var resign = false
+        defer {
+            if resign {
+                textField.resignFirstResponder()
+                entryComplete()
+            }
+        }
+        
+        if let cell = textField.findContainingCell() as? MultiEntryCell, let nextField = cell.nextEntry(after: textField) {
+            nextField.becomeFirstResponder()
+            return true
+        }
+        
+        guard let cell = textField.findContainingCell(), cell is TextEntryCell || cell is MultiEntryCell else {
+            resign = true
+            return true
+        }
+        
+        guard let indexPath = indexPathForCell(cell), let nextCell = nextEntryCellAfterIndexPath(indexPath) else {
+            resign = true
+            return true
+        }
+        
+        if let multiCell = nextCell as? MultiEntryCell, let field = multiCell.firstField() {
+            field.becomeFirstResponder()
+        } else if let entry = nextCell as? TextEntryCell {
+            entry.entryField.becomeFirstResponder()
+            activeCellInputValidation = entry.inputValidation
         } else {
-            textField.resignFirstResponder()
-            entryComplete()
+            resign = true
         }
         
         return true
@@ -273,3 +305,21 @@ extension InputCellsViewController: UITextFieldDelegate {
         Logging.log("Entry complete")
     }
 }
+
+extension InputCellsViewController {
+    @objc fileprivate func keyboardWillAppear(notification: Notification) {
+        guard let info = notification.userInfo, let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue else {
+            return
+        }
+        let duration = notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as? NSNumber ?? NSNumber(value: 0.3)
+        
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height, right: 0)
+    }
+    
+    @objc fileprivate func keyboardWillDisappear(notification: Notification) {
+        let duration = notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as? NSNumber ?? NSNumber(value: 0.3)
+        
+        tableView.contentInset = UIEdgeInsets.zero
+    }
+}
+
