@@ -43,6 +43,12 @@ open class MultiEntryCell: UITableViewCell {
             return nil
         }
         
-        return sorted[index + 1]
+        let field = sorted[index + 1]
+        
+        if field.isUserInteractionEnabled  {
+            return field
+        }
+        
+        return nextEntry(after: field)
     }
 }
