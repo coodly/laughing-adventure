@@ -246,9 +246,7 @@ extension InputCellsViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - Text field delegate
 extension InputCellsViewController: UITextFieldDelegate {
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        if let cell = textField.findContainingCell() as? TextEntryCell, let validation = cell.inputValidation {
-            activeCellInputValidation = validation
-        }
+        activeCellInputValidation = (textField.findContainingCell() as? EntryValidated)?.validator(for: textField)
         
         return true
     }
@@ -261,10 +259,6 @@ extension InputCellsViewController: UITextFieldDelegate {
         return validation.textField(textField, shouldChangeCharactersInRange: range, replacementString: string)
     }
     
-    public func textFieldDidEndEditing(_ textField: UITextField) {
-        activeCellInputValidation = nil
-    }
-    
     public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         var resign = false
         defer {
@@ -275,6 +269,7 @@ extension InputCellsViewController: UITextFieldDelegate {
         }
         
         if let cell = textField.findContainingCell() as? MultiEntryCell, let nextField = cell.nextEntry(after: textField) {
+            activeCellInputValidation = cell.validator(for: nextField)
             nextField.becomeFirstResponder()
             return true
         }
@@ -290,10 +285,11 @@ extension InputCellsViewController: UITextFieldDelegate {
         }
         
         if let multiCell = nextCell as? MultiEntryCell, let field = multiCell.firstField() {
+            activeCellInputValidation = multiCell.validator(for: field)
             field.becomeFirstResponder()
         } else if let entry = nextCell as? TextEntryCell {
             entry.entryField.becomeFirstResponder()
-            activeCellInputValidation = entry.inputValidation
+            activeCellInputValidation = entry.validator(for: entry.entryField)
         } else {
             resign = true
         }

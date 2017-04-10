@@ -16,7 +16,9 @@
 
 import UIKit
 
-open class MultiEntryCell: UITableViewCell {
+open class MultiEntryCell: UITableViewCell, EntryValidated {
+    public var validators = [UITextField: InputValidation]()
+
     @IBOutlet public var entryFields: [UITextField]!
     private lazy var sorted: [UITextField] = {
         return self.entryFields.sorted(by: {
