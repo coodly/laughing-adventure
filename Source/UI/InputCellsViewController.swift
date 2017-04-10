@@ -18,8 +18,11 @@ import UIKit
 
 private extension Selector {
     static let contentSizeChanged = #selector(InputCellsViewController.contentSizeChanged)
+    
+    #if os(iOS)
     static let willAppear = #selector(InputCellsViewController.keyboardWillAppear(notification:))
     static let willDisappear = #selector(InputCellsViewController.keyboardWillDisappear(notification:))
+    #endif
 }
 
 public class InputCellsSection {
@@ -63,8 +66,10 @@ open class InputCellsViewController: UIViewController, FullScreenTableCreate, Sm
     open override func viewDidLoad() {
         checkTableView(preferredStyle)
         
+        #if os(iOS)
         NotificationCenter.default.addObserver(self, selector: .willAppear, name: Notification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: .willDisappear, name: Notification.Name.UIKeyboardWillHide, object: nil)
+        #endif
         NotificationCenter.default.addObserver(self, selector: .contentSizeChanged, name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
         
         tableView.estimatedRowHeight = 44
@@ -302,6 +307,7 @@ extension InputCellsViewController: UITextFieldDelegate {
     }
 }
 
+#if os(iOS)
 extension InputCellsViewController {
     @objc fileprivate func keyboardWillAppear(notification: Notification) {
         guard let info = notification.userInfo, let keyboardSize = (info[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue else {
@@ -318,4 +324,4 @@ extension InputCellsViewController {
         tableView.contentInset = UIEdgeInsets.zero
     }
 }
-
+#endif
