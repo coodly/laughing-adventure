@@ -135,6 +135,12 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
         }
         return measuringCell.frame.size
     }
+    
+    open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        tapped(cell: collectionView.cellForItem(at: indexPath), at: indexPath)
+    }
 
     public func append(section: CollectionSection) {
         let collection = collectionView!
@@ -161,5 +167,9 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
     
     open func configure(cell: UICollectionViewCell, in section: UUID, at indexPath: IndexPath, forMeasuring: Bool = false) {
         
+    }
+    
+    open func tapped(cell: UICollectionViewCell?, at indexPath: IndexPath) {
+        Logging.log("tapped(at:\(indexPath))")
     }
 }
