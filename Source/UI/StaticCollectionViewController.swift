@@ -16,6 +16,7 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 public enum Measure: Equatable {
     case exactly(CGFloat)
@@ -49,12 +50,19 @@ public struct Size {
     }
 }
 
-public struct CollectionSection {
-    let cellIdentifier = UUID().uuidString
-    let cellNib: UINib
-    let itemsCount: Int
+public protocol CollectionSection {
+    var cellIdentifier: String { get }
+    var itemsCount: Int { get }
+    var cellNib: UINib { get }
+    var id: UUID { get }
+}
+
+public struct StaticCollectionSection: CollectionSection {
+    public let cellIdentifier = UUID().uuidString
+    public let cellNib: UINib
+    public let itemsCount: Int
     let itemSize: Size
-    let id: UUID
+    public let id: UUID
     internal lazy var measuringCell: UICollectionViewCell = {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
@@ -64,6 +72,38 @@ public struct CollectionSection {
         self.cellNib = cellNib
         self.itemsCount = numberOfItems
         self.itemSize = itemSize
+    }
+}
+
+open class FetchedCollectionSection: CollectionSection {
+    public let cellIdentifier = UUID().uuidString
+    private let controller: NSFetchedResultsController<NSManagedObject>
+    public var itemsCount: Int {
+        return controller.fetchedObjects?.count ?? 0
+    }
+    public let cellNib: UINib
+    public let id: UUID
+    fileprivate var cellConfigure: ((UICollectionViewCell, IndexPath) -> ())!
+    internal lazy var measuringCell: UICollectionViewCell = {
+        return self.cellNib.loadInstance() as! UICollectionViewCell
+    }()
+
+
+    public init<Model: NSManagedObject, Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, fetchedController: NSFetchedResultsController<Model>, configure: @escaping ((Cell, Model) -> ())) {
+        self.id = id
+        self.cellNib = cell.viewNib()
+        controller = fetchedController as! NSFetchedResultsController<NSManagedObject>
+
+        cellConfigure = {
+            cell, indexPath in
+            
+            let model = fetchedController.object(at: indexPath)
+            configure(cell as! Cell, model)
+        }
+    }
+    
+    open func size(in view: UICollectionView) -> CGSize {
+        return measuringCell.frame.size
     }
 }
 
@@ -113,28 +153,40 @@ open class StaticCollectionViewController: UIViewController, UICollectionViewDel
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let section = sections[indexPath.section]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: section.cellIdentifier, for: indexPath)
-        configure(cell: cell, in: section.id, at: indexPath)
+        if section is StaticCollectionSection {
+            configure(cell: cell, in: section.id, at: indexPath)
+        } else if let fetched = section as? FetchedCollectionSection {
+            let path = IndexPath(row: indexPath.row, section: 0)
+            fetched.cellConfigure(cell, path)
+        }
         return cell
     }
     
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        var section = sections[indexPath.section]
-        let measuringCell = section.measuringCell
-        let size = section.itemSize
+        let section = sections[indexPath.section]
         
-        if size.width == .undefined && size.height == .undefined {
+        if var staticSection = section as? StaticCollectionSection {
+            let measuringCell = staticSection.measuringCell
+            let size = staticSection.itemSize
+            
+            if size.width == .undefined && size.height == .undefined {
+                return measuringCell.frame.size
+            }
+            
+            configure(cell: measuringCell, in: section.id, at: indexPath, forMeasuring: true)
+            if size.width == .full && size.height == .compressed {
+                measuringCell.frame.size.width = collectionView.frame.width
+                measuringCell.setNeedsLayout()
+                measuringCell.layoutIfNeeded()
+                measuringCell.frame.size.height = measuringCell.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height
+            }
             return measuringCell.frame.size
+        } else if let fetched = section as? FetchedCollectionSection {
+            return fetched.size(in: collectionView)
         }
         
-        configure(cell: measuringCell, in: section.id, at: indexPath, forMeasuring: true)
-        if size.width == .full && size.height == .compressed {
-            measuringCell.frame.size.width = collectionView.frame.width
-            measuringCell.setNeedsLayout()
-            measuringCell.layoutIfNeeded()
-            measuringCell.frame.size.height = measuringCell.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height
-        }
-        return measuringCell.frame.size
-    }
+        fatalError("Size not calculated")
+    }        
     
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)

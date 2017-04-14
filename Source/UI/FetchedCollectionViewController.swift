@@ -202,7 +202,7 @@ open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UIColle
         Logging.log("configureCell(atIndexPath:\(indexPath))")
     }
     
-    open func tappedCell(at indexPath: IndexPath, object object: Model) {
+    open func tappedCell(at indexPath: IndexPath, object entity: Model) {
         Logging.log("tappedCell(indexPath:\(indexPath))")
     }
     
