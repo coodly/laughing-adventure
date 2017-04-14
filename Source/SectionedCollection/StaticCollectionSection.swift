@@ -46,7 +46,8 @@ public struct Size {
     }
 }
 
-public struct StaticCollectionSection: CollectionSection {
+public struct StaticCollectionSection: CollectionSection, SectionConfigured {
+    public var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())!
     public let cellIdentifier = UUID().uuidString
     public let cellNib: UINib
     public let itemsCount: Int
@@ -56,10 +57,16 @@ public struct StaticCollectionSection: CollectionSection {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
     
-    public init(id: UUID = UUID(), cellNib: UINib, numberOfItems: Int, itemSize: Size) {
+    public init<Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, numberOfItems: Int, itemSize: Size, configure: @escaping ((Cell, IndexPath, Bool) -> ())) {
         self.id = id
-        self.cellNib = cellNib
+        self.cellNib = cell.viewNib()
         self.itemsCount = numberOfItems
         self.itemSize = itemSize
+        
+        cellConfigure = {
+            cell, indexPath, measuring in
+            
+            configure(cell as! Cell, indexPath, measuring)
+        }
     }
 }

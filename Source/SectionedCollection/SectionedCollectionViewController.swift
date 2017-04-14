@@ -64,11 +64,9 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let section = sections[indexPath.section]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: section.cellIdentifier, for: indexPath)
-        if section is StaticCollectionSection {
-            configure(cell: cell, in: section.id, at: indexPath)
-        } else if let fetched = section as? FetchedCollectionSection {
-            let path = IndexPath(row: indexPath.row, section: 0)
-            fetched.cellConfigure(cell, path)
+        let path = IndexPath(row: indexPath.row, section: 0)
+        if let configured = section as? SectionConfigured {
+            configured.cellConfigure(cell, path, false)
         }
         return cell
     }
@@ -83,8 +81,11 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
             if size.width == .undefined && size.height == .undefined {
                 return measuringCell.frame.size
             }
-            
-            configure(cell: measuringCell, in: section.id, at: indexPath, forMeasuring: true)
+
+            if let configured = section as? SectionConfigured {
+                configured.cellConfigure(measuringCell, indexPath, true)
+            }
+
             if size.width == .full && size.height == .compressed {
                 measuringCell.frame.size.width = collectionView.frame.width
                 measuringCell.setNeedsLayout()

@@ -16,7 +16,8 @@
 
 import CoreData
 
-open class FetchedCollectionSection: CollectionSection {
+open class FetchedCollectionSection: CollectionSection, SectionConfigured {
+    public var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())!
     public let cellIdentifier = UUID().uuidString
     private let controller: NSFetchedResultsController<NSManagedObject>
     public var itemsCount: Int {
@@ -24,22 +25,21 @@ open class FetchedCollectionSection: CollectionSection {
     }
     public let cellNib: UINib
     public let id: UUID
-    internal var cellConfigure: ((UICollectionViewCell, IndexPath) -> ())!
     internal lazy var measuringCell: UICollectionViewCell = {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
     
     
-    public init<Model: NSManagedObject, Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, fetchedController: NSFetchedResultsController<Model>, configure: @escaping ((Cell, Model) -> ())) {
+    public init<Model: NSManagedObject, Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, fetchedController: NSFetchedResultsController<Model>, configure: @escaping ((Cell, Model, Bool) -> ())) {
         self.id = id
         self.cellNib = cell.viewNib()
         controller = fetchedController as! NSFetchedResultsController<NSManagedObject>
         
         cellConfigure = {
-            cell, indexPath in
+            cell, indexPath, measuring in
             
             let model = fetchedController.object(at: indexPath)
-            configure(cell as! Cell, model)
+            configure(cell as! Cell, model, measuring)
         }
     }
     

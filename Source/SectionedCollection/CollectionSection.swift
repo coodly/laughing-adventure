@@ -20,3 +20,7 @@ public protocol CollectionSection {
     var cellNib: UINib { get }
     var id: UUID { get }
 }
+
+internal protocol SectionConfigured {
+    var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())! { get }
+}
