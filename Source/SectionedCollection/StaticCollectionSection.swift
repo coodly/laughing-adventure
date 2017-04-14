@@ -46,7 +46,7 @@ public struct Size {
     }
 }
 
-public struct StaticCollectionSection: CollectionSection, SectionConfigured {
+public class StaticCollectionSection: CollectionSection, SectionConfigured {
     public var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())!
     public let cellIdentifier = UUID().uuidString
     public let cellNib: UINib
