@@ -21,7 +21,9 @@ import CoreData
 open class SectionedCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     @IBOutlet public var collectionView: UICollectionView!
     
-    private var sections = [CollectionSection]()
+    fileprivate var sections = [CollectionSection]()
+    fileprivate var changeActions = [ChangeAction]()
+
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,6 +91,11 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
             let insertAt = self.sections.count
             collection.register(section.cellNib, forCellWithReuseIdentifier: section.cellIdentifier)
             self.sections.append(section)
+            
+            if let fetched = section as? FetchedCollectionSection {
+                fetched.updatesDelegate = self
+            }
+            
             collection.insertSections(IndexSet(integer: insertAt))
         }
         collection.performBatchUpdates(updates)
@@ -112,5 +119,74 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
     
     open func tapped(cell: UICollectionViewCell?, at indexPath: IndexPath) {
         Logging.log("tapped(at:\(indexPath))")
+    }
+}
+
+extension SectionedCollectionViewController: FetchedUpdatesDelegate {
+    func beginUpdates() {
+        changeActions.removeAll()
+    }
+    
+    func section(_ section: FetchedCollectionSection, changeAt indexPath: IndexPath?, for changeType: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        guard let sectionIndex = sections.index(where: { $0.id == section.id }) else {
+            return
+        }
+        
+        let original: IndexPath?
+        let target: IndexPath?
+        if let index = indexPath {
+            original = IndexPath(row: index.row, section: sectionIndex)
+        } else {
+            original = nil
+        }
+        if let index = newIndexPath {
+            target = IndexPath(row: index.row, section: sectionIndex)
+        } else {
+            target = nil
+        }
+        
+        changeActions.append(ChangeAction(sectionIndex: nil, indexPath: original, newIndexPath: target, changeType: changeType))
+    }
+    
+    func endUpdates() {
+        // TODO jaanus: copy/paste |-(
+        let updateClosure = {
+            // update sections
+            let sectionActions = self.changeActions.filter({ $0.sectionIndex != nil })
+            Logging.log("\(sectionActions.count) section actions")
+            
+            let sectionInserts = sectionActions.filter({ $0.changeType == .insert }).map({ $0.sectionIndex! })
+            self.collectionView.insertSections(IndexSet(sectionInserts))
+            
+            let sectionDeletes = sectionActions.filter({ $0.changeType == .insert }).map({ $0.sectionIndex! })
+            self.collectionView.deleteSections(IndexSet(sectionDeletes))
+            
+            assert(sectionActions.filter({ $0.changeType != .insert && $0.changeType != .delete}).count == 0)
+            
+            let cellActions = self.changeActions.filter({ $0.sectionIndex == nil })
+            Logging.log("\(cellActions.count) cell actions")
+            
+            let cellUpdates = cellActions.filter({ $0.changeType == .update })
+            self.collectionView.reloadItems(at: cellUpdates.map({ $0.indexPath! }))
+            
+            let cellInserts = cellActions.filter({ $0.changeType == .insert }).map({ $0.newIndexPath! })
+            self.collectionView.insertItems(at: cellInserts)
+            
+            let cellDeletes = cellActions.filter({ $0.changeType == .delete}).map({ $0.indexPath! })
+            self.collectionView.deleteItems(at: cellDeletes)
+            
+            let moveActions = cellActions.filter({ $0.changeType == .move})
+            for action in moveActions {
+                self.collectionView.moveItem(at: action.indexPath!, to: action.newIndexPath!)
+            }
+        }
+        
+        let completion: (Bool) -> () = {
+            finished in
+            
+            
+        }
+        
+        collectionView.performBatchUpdates(updateClosure, completion: completion)
     }
 }

@@ -16,7 +16,7 @@
 
 import CoreData
 
-open class FetchedCollectionSection: CollectionSection, SectionConfigured {
+open class FetchedCollectionSection: NSObject, CollectionSection, SectionConfigured {
     public var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())!
     public let cellIdentifier = UUID().uuidString
     private let controller: NSFetchedResultsController<NSManagedObject>
@@ -28,12 +28,16 @@ open class FetchedCollectionSection: CollectionSection, SectionConfigured {
     internal lazy var measuringCell: UICollectionViewCell = {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
-    
+    internal weak var updatesDelegate: FetchedUpdatesDelegate?
     
     public init<Model: NSManagedObject, Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, fetchedController: NSFetchedResultsController<Model>, configure: @escaping ((Cell, Model, Bool) -> ())) {
         self.id = id
         self.cellNib = cell.viewNib()
         controller = fetchedController as! NSFetchedResultsController<NSManagedObject>
+        
+        super.init()
+        
+        controller.delegate = self
         
         cellConfigure = {
             cell, indexPath, measuring in
@@ -45,5 +49,19 @@ open class FetchedCollectionSection: CollectionSection, SectionConfigured {
     
     open func size(in collectionView: UICollectionView, at indexPath: IndexPath) -> CGSize {
         return measuringCell.frame.size
+    }
+}
+
+extension FetchedCollectionSection: NSFetchedResultsControllerDelegate {
+    public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        updatesDelegate?.beginUpdates()
+    }
+    
+    public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        updatesDelegate?.endUpdates()
+    }
+
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        updatesDelegate?.section(self, changeAt: indexPath, for: type, newIndexPath: newIndexPath)
     }
 }
