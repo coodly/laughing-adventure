@@ -43,7 +43,7 @@ open class FetchedCollectionSection: CollectionSection, SectionConfigured {
         }
     }
     
-    open func size(in view: UICollectionView) -> CGSize {
+    open func size(in collectionView: UICollectionView, at indexPath: IndexPath) -> CGSize {
         return measuringCell.frame.size
     }
 }

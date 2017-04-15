@@ -46,18 +46,18 @@ public struct Size {
     }
 }
 
-public class StaticCollectionSection: CollectionSection, SectionConfigured {
+open class StaticCollectionSection: CollectionSection, SectionConfigured {
     public var cellConfigure: ((UICollectionViewCell, IndexPath, Bool) -> ())!
     public let cellIdentifier = UUID().uuidString
     public let cellNib: UINib
     public let itemsCount: Int
     let itemSize: Size
     public let id: UUID
-    internal lazy var measuringCell: UICollectionViewCell = {
+    private lazy var measuringCell: UICollectionViewCell = {
         return self.cellNib.loadInstance() as! UICollectionViewCell
     }()
     
-    public init<Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, numberOfItems: Int, itemSize: Size, configure: @escaping ((Cell, IndexPath, Bool) -> ())) {
+    public init<Cell: UICollectionViewCell>(id: UUID = UUID(), cell: Cell.Type, numberOfItems: Int = 1, itemSize: Size, configure: @escaping ((Cell, IndexPath, Bool) -> ())) {
         self.id = id
         self.cellNib = cell.viewNib()
         self.itemsCount = numberOfItems
@@ -68,5 +68,23 @@ public class StaticCollectionSection: CollectionSection, SectionConfigured {
             
             configure(cell as! Cell, indexPath, measuring)
         }
+    }
+    
+    open func size(in collectionView: UICollectionView, at indexPath: IndexPath) -> CGSize {
+        let size = itemSize
+        
+        if size.width == .undefined && size.height == .undefined {
+            return measuringCell.frame.size
+        }
+        
+        cellConfigure(measuringCell, indexPath, true)
+        
+        if size.width == .full && size.height == .compressed {
+            measuringCell.frame.size.width = collectionView.frame.width
+            measuringCell.setNeedsLayout()
+            measuringCell.layoutIfNeeded()
+            measuringCell.frame.size.height = measuringCell.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height
+        }
+        return measuringCell.frame.size
     }
 }

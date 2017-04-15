@@ -73,32 +73,9 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
     
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let section = sections[indexPath.section]
-        
-        if var staticSection = section as? StaticCollectionSection {
-            let measuringCell = staticSection.measuringCell
-            let size = staticSection.itemSize
-            
-            if size.width == .undefined && size.height == .undefined {
-                return measuringCell.frame.size
-            }
-
-            if let configured = section as? SectionConfigured {
-                configured.cellConfigure(measuringCell, indexPath, true)
-            }
-
-            if size.width == .full && size.height == .compressed {
-                measuringCell.frame.size.width = collectionView.frame.width
-                measuringCell.setNeedsLayout()
-                measuringCell.layoutIfNeeded()
-                measuringCell.frame.size.height = measuringCell.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height
-            }
-            return measuringCell.frame.size
-        } else if let fetched = section as? FetchedCollectionSection {
-            return fetched.size(in: collectionView)
-        }
-        
-        fatalError("Size not calculated")
-    }        
+        let indexPathInSection = IndexPath(row: indexPath.row, section: 0)
+        return section.size(in: collectionView, at: indexPathInSection)
+    }
     
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)

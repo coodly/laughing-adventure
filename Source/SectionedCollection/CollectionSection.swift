@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import UIKit
+
 public protocol CollectionSection {
     var cellIdentifier: String { get }
     var itemsCount: Int { get }
     var cellNib: UINib { get }
     var id: UUID { get }
+    
+    func size(in collectionView: UICollectionView, at indexPath: IndexPath) -> CGSize
 }
 
 internal protocol SectionConfigured {
