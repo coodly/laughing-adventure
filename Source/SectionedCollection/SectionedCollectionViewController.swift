@@ -82,7 +82,9 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
     open func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         
-        tapped(cell: collectionView.cellForItem(at: indexPath), at: indexPath)
+        let section = sections[indexPath.section]
+        let indexPathInSection = IndexPath(row: indexPath.row, section: 0)
+        tappedCell(in: section, at: indexPathInSection)
     }
 
     public func append(section: CollectionSection) {
@@ -112,13 +114,9 @@ open class SectionedCollectionViewController: UIViewController, UICollectionView
         }
         collection.performBatchUpdates(updates)
     }
-    
-    open func configure(cell: UICollectionViewCell, in section: UUID, at indexPath: IndexPath, forMeasuring: Bool = false) {
-        
-    }
-    
-    open func tapped(cell: UICollectionViewCell?, at indexPath: IndexPath) {
-        Logging.log("tapped(at:\(indexPath))")
+
+    open func tappedCell(in section: CollectionSection, at indexPath: IndexPath) {
+        Logging.log("tappedCell(at:\(indexPath))")
     }
 }
 

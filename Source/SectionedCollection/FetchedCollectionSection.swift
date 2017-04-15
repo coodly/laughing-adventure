@@ -50,6 +50,10 @@ open class FetchedCollectionSection: NSObject, CollectionSection, SectionConfigu
     open func size(in collectionView: UICollectionView, at indexPath: IndexPath) -> CGSize {
         return measuringCell.frame.size
     }
+    
+    public func object(at indexPath: IndexPath) -> NSManagedObject {
+        return controller.object(at: indexPath)
+    }
 }
 
 extension FetchedCollectionSection: NSFetchedResultsControllerDelegate {
