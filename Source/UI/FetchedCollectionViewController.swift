@@ -179,7 +179,11 @@ open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UIColle
         
         collectionView.performBatchUpdates(updateClosure, completion: completion)
     }
-        
+    
+    open func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        fatalError()
+    }
+    
     func contentSizeChanged() {
         DispatchQueue.main.async { () -> Void in
             self.collectionView.reloadData()
