@@ -15,6 +15,7 @@
  */
 
 import Foundation
+import CorePersistence
 
 class FeedbackRefresh: InjectionHandler, PersistenceConsumer {
     var persistence: CorePersistence!

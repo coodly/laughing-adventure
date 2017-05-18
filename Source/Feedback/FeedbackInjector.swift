@@ -17,6 +17,7 @@
 import Foundation
 import CoreData
 import CloudKit
+import CorePersistence
 
 private extension Selector {
     static let checkForMessages = #selector(Injector.checkForMessages)

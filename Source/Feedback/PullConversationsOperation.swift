@@ -16,6 +16,7 @@
 
 import Foundation
 import CloudKit
+import CorePersistence
 
 class PullConversationsOperation: CloudKitRequest<CloudConversation>, PersistenceConsumer, FeedbackContainerConsumer {
     var persistence: CorePersistence!

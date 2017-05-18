@@ -16,6 +16,7 @@
 
 import UIKit
 import CoreData
+import CorePersistence
 
 #if os(iOS)
 private extension Selector {

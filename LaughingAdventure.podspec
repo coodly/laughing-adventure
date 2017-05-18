@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Core' do |core|
     core.source_files = 'Source/*/*.swift'
+    core.dependency 'CorePersistence', '0.1.0'
   end
   
   s.subspec 'Logging' do |log|
@@ -31,14 +32,16 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Feedback' do |feedback|
-    feedback.source_files = "Source/Feedback"
+    feedback.source_files = 'Source/Feedback'
+    feedback.dependency 'CorePersistence', '0.1.0'
+    feedback.frameworks = 'CoreData'
   end
 
-  s.subspec 'CoreData' do |model|
-    model.dependency "LaughingAdventure/Logging"
-    model.source_files = 'Source/CoreData'
-    model.frameworks = 'CoreData'
-  end
+  #s.subspec 'CoreData' do |model|
+  #  model.dependency "LaughingAdventure/Logging"
+  #  model.source_files = 'Source/CoreData'
+  #  model.frameworks = 'CoreData'
+  #end
 
   s.subspec 'Cloud' do |cloud|
     cloud.dependency "LaughingAdventure/Logging"
