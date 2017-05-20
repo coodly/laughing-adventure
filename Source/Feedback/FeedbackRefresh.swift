@@ -15,7 +15,7 @@
  */
 
 import Foundation
-import CorePersistence
+import CoreDataPersistence
 
 class FeedbackRefresh: InjectionHandler, PersistenceConsumer {
     var persistence: CorePersistence!

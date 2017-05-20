@@ -16,7 +16,7 @@
 
 import Foundation
 import CoreData
-import CorePersistence
+import CoreDataPersistence
 
 class MessagesPush: NSObject, PersistenceConsumer, NSFetchedResultsControllerDelegate, InjectionHandler {
     private lazy var queue: OperationQueue = {

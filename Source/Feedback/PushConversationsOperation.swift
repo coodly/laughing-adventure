@@ -16,7 +16,7 @@
 
 import Foundation
 import CloudKit
-import CorePersistence
+import CoreDataPersistence
 
 internal class PushConversationsOperation: CloudKitRequest<CloudConversation>, PersistenceConsumer, FeedbackContainerConsumer {
     var persistence: CorePersistence!
