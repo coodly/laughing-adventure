@@ -121,7 +121,7 @@ internal class Injector {
         feedbackContainer.accountStatus() {
             status, error in
             
-            Logging.log("Account status: \(status.rawValue) - \(error)")
+            Logging.log("Account status: \(status.rawValue) - \(String(describing: error))")
             Logging.log("Available: \(status == .available)")
             self.cloudAvailable = status == .available
         }

@@ -70,7 +70,7 @@ open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UIColle
 
         let cellNib = Cell.viewNib()
         collectionView.register(cellNib, forCellWithReuseIdentifier: FetchedCollectionCellIdentifier)
-        measuringCell = cellNib.loadInstance() as! Cell
+        measuringCell = Cell.loadInstance() as Cell
     }
     
     open override func viewWillAppear(_ animated: Bool) {
