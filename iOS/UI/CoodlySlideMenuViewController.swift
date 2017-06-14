@@ -14,8 +14,6 @@
 * limitations under the License.
 */
 
-#if os(iOS)
-
 import UIKit
 
 private extension Selector {
@@ -24,7 +22,7 @@ private extension Selector {
 
 open class CoodlySlideMenuViewController: SlideMenuController {
     private var containedNavigation: UINavigationController!
-    private var menuController: MenuViewController!
+    private var menuController: MenuContainerAware?
     private var shown = false
     
     public var initialViewController: UIViewController!
@@ -42,9 +40,9 @@ open class CoodlySlideMenuViewController: SlideMenuController {
         shown = true
 
         containedNavigation = mainViewController as! UINavigationController
-        menuController = leftViewController as! MenuViewController
+        menuController = leftViewController as? MenuContainerAware
 
-        menuController.container = self
+        menuController?.container = self
 
         present(root: initialViewController)
     }
@@ -88,4 +86,3 @@ open class CoodlySlideMenuViewController: SlideMenuController {
     }
 }
 
-#endif
