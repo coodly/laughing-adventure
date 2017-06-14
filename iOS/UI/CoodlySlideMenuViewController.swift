@@ -27,7 +27,18 @@ open class CoodlySlideMenuViewController: SlideMenuController {
     
     public var initialViewController: UIViewController!
     public var menuButton: UIBarButtonItem!
+    
+    public init(mainViewController: UIViewController, leftMenuViewController: UIViewController) {
+        super.init(nibName: nil, bundle: nil)
+        self.mainViewController = mainViewController
+        self.leftViewController = leftMenuViewController
+        initView()
+    }
 
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
