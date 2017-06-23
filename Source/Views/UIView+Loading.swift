@@ -30,7 +30,7 @@ extension UIView {
         return className()
     }
     
-    public static func loadInstance<T>() -> T {
-        return viewNib().instantiate(withOwner: nil, options: nil).first as! T
+    public static func loadInstance<T>(_ bundle: Bundle? = nil) -> T {
+        return viewNib(bundle).instantiate(withOwner: nil, options: nil).first as! T
     }
 }
