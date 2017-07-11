@@ -111,12 +111,7 @@ public class Storefront: NSObject, SKProductsRequestDelegate, SKPaymentTransacti
             case .failed: // Transaction was cancelled or failed before being added to the server queue.
                 Logging.log("Failed: \(transaction.error.debugDescription)")
                 finishTransaction = true
-                #if swift(>=3.2)
-                    let cancelledCode = SKErrorCode.paymentCancelled.rawValue
-                #else
-                    let cancelledCode = SKError.paymentCancelled.rawValue
-                #endif
-                
+                let cancelledCode = SKError.paymentCancelled.rawValue                
                 if let error = transaction.error as NSError?, error.code == cancelledCode {
                     notifyMonitor?.purchaseResult(.cancelled, for: productIdentifier)
                 } else {
