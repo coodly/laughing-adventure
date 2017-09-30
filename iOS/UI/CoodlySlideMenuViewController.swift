@@ -80,7 +80,7 @@ open class CoodlySlideMenuViewController: SlideMenuController {
         containedNavigation.setViewControllers([controller], animated: containedNavigation.viewControllers.count > 0)
     }
 
-    func openMenu() {
+    @objc fileprivate func openMenu() {
         addLeftGestures()
         openLeft()
     }

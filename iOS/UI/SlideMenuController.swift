@@ -4,7 +4,7 @@
 //  Created by Yuji Hato on 12/3/14.
 //
 //  From https://github.com/dekatotoro/SlideMenuControllerSwift
-//  Version 3.0.1
+//  Version 3.0.2
 //
 
 import Foundation
@@ -221,7 +221,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         return self.mainViewController?.preferredStatusBarStyle ?? .default
     }
     
-    open override func openLeft() {
+    open func openLeft() {
         guard let _ = leftViewController else { // If leftViewController is nil, then return
             return
         }
@@ -236,7 +236,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         track(.leftTapOpen)
     }
     
-    open override func openRight() {
+    open func openRight() {
         guard let _ = rightViewController else { // If rightViewController is nil, then return
             return
         }
@@ -250,7 +250,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         track(.rightTapOpen)
     }
     
-    open override func closeLeft() {
+    open func closeLeft() {
         guard let _ = leftViewController else { // If leftViewController is nil, then return
             return
         }
@@ -262,7 +262,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         setCloseWindowLevel()
     }
     
-    open override func closeRight() {
+    open func closeRight() {
         guard let _ = rightViewController else { // If rightViewController is nil, then return
             return
         }
@@ -362,7 +362,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         static var lastState : UIGestureRecognizerState = .ended
     }
     
-    func handleLeftPanGesture(_ panGesture: UIPanGestureRecognizer) {
+    @objc func handleLeftPanGesture(_ panGesture: UIPanGestureRecognizer) {
         
         if !isTagetViewController() {
             return
@@ -442,7 +442,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         static var lastState : UIGestureRecognizerState = .ended
     }
     
-    func handleRightPanGesture(_ panGesture: UIPanGestureRecognizer) {
+    @objc func handleRightPanGesture(_ panGesture: UIPanGestureRecognizer) {
         
         if !isTagetViewController() {
             return
@@ -550,7 +550,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
     open func openRightWithVelocity(_ velocity: CGFloat) {
         let xOrigin: CGFloat = rightContainerView.frame.origin.x
         
-        //	CGFloat finalXOrigin = SlideMenuOptions.rightViewOverlapWidth
+        //    CGFloat finalXOrigin = SlideMenuOptions.rightViewOverlapWidth
         let finalXOrigin: CGFloat = view.bounds.width - rightContainerView.frame.size.width
         
         var frame = rightContainerView.frame
@@ -642,7 +642,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     
-    open override func toggleLeft() {
+    @objc open func toggleLeft() {
         if isLeftOpen() {
             closeLeft()
             setCloseWindowLevel()
@@ -662,7 +662,7 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
         return leftContainerView.frame.origin.x <= leftMinOrigin()
     }
     
-    open override func toggleRight() {
+    @objc open func toggleRight() {
         if isRightOpen() {
             closeRight()
             setCloseWindowLevel()
@@ -1030,62 +1030,3 @@ open class SlideMenuController: UIViewController, UIGestureRecognizerDelegate {
     }
     
 }
-
-
-extension UIViewController {
-    
-    public func slideMenuController() -> SlideMenuController? {
-        var viewController: UIViewController? = self
-        while viewController != nil {
-            if viewController is SlideMenuController {
-                return viewController as? SlideMenuController
-            }
-            viewController = viewController?.parent
-        }
-        return nil
-    }
-    
-    public func addLeftBarButtonWithImage(_ buttonImage: UIImage) {
-        let leftButton: UIBarButtonItem = UIBarButtonItem(image: buttonImage, style: UIBarButtonItemStyle.plain, target: self, action: #selector(self.toggleLeft))
-        navigationItem.leftBarButtonItem = leftButton
-    }
-    
-    public func addRightBarButtonWithImage(_ buttonImage: UIImage) {
-        let rightButton: UIBarButtonItem = UIBarButtonItem(image: buttonImage, style: UIBarButtonItemStyle.plain, target: self, action: #selector(self.toggleRight))
-        navigationItem.rightBarButtonItem = rightButton
-    }
-    
-    public func toggleLeft() {
-        slideMenuController()?.toggleLeft()
-    }
-    
-    public func toggleRight() {
-        slideMenuController()?.toggleRight()
-    }
-    
-    public func openLeft() {
-        slideMenuController()?.openLeft()
-    }
-    
-    public func openRight() {
-        slideMenuController()?.openRight()    }
-    
-    public func closeLeft() {
-        slideMenuController()?.closeLeft()
-    }
-    
-    public func closeRight() {
-        slideMenuController()?.closeRight()
-    }
-    
-    // Please specify if you want menu gesuture give priority to than targetScrollView
-    public func addPriorityToMenuGesuture(_ targetScrollView: UIScrollView) {
-        guard let slideController = slideMenuController(), let recognizers = slideController.view.gestureRecognizers else {
-            return
-        }
-        for recognizer in recognizers where recognizer is UIPanGestureRecognizer {
-            targetScrollView.panGestureRecognizer.require(toFail: recognizer)
-        }
-    }
-}
-

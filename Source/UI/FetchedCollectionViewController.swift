@@ -184,7 +184,7 @@ open class FetchedCollectionViewController<Model: NSManagedObject, Cell: UIColle
         fatalError()
     }
     
-    func contentSizeChanged() {
+    @objc func contentSizeChanged() {
         DispatchQueue.main.async { () -> Void in
             self.collectionView.reloadData()
         }

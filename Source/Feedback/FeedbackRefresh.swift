@@ -24,7 +24,7 @@ class FeedbackRefresh: InjectionHandler, PersistenceConsumer {
         let op = PullConversationsOperation()
         inject(into: op)
         op.completionHandler = {
-            success in
+            success, _ in
             
             DispatchQueue.main.async {
                 self.persistence.performInBackground() {
