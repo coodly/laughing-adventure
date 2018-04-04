@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Feedback' do |feedback|
     feedback.source_files = 'Source/Feedback'
-    feedback.dependency 'CoreDataPersistence', '0.1.1'
+    feedback.dependency 'CoreDataPersistence', '0.1.5'
     feedback.frameworks = 'CoreData'
   end
 
