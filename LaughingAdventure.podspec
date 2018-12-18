@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'LaughingAdventure'
-  s.version = '0.9.1'
+  s.version = '0.9.2'
   s.license = 'Apache 2'
   s.summary = 'Common Swift code used in Coodly'
   s.homepage = 'https://github.com/coodly/laughing-adventure'
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.subspec 'Core' do |core|
     core.source_files = 'Source/*/*.swift'
     core.ios.source_files = 'iOS/*/*.swift'
-    core.dependency 'CoreDataPersistence', '0.1.5'
+    core.dependency 'CoreDataPersistence', '0.1.8'
   end
   
   s.subspec 'Logging' do |log|
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Feedback' do |feedback|
     feedback.source_files = 'Source/Feedback'
-    feedback.dependency 'CoreDataPersistence', '0.1.5'
+    feedback.dependency 'CoreDataPersistence', '0.1.8'
     feedback.frameworks = 'CoreData'
   end
 
